@@ -1,0 +1,96 @@
+{extend name="layout/base" /}
+
+{block name="extra_head"}
+<link rel="stylesheet" href="/static/css/pages/index.css?v={$assets.css_ver}">
+{/block}
+
+{block name="content"}
+<div class="index-body">
+
+    {include file="components/_search_bar" /}
+
+    {include file="components/_classify_grid" /}
+
+    {if !empty($banner)}
+    <div class="hot-box">
+        <div class="hot-swiper">
+            {foreach $banner as $idx=>$bn}
+            <a class="hot-item" href="{$bn.path|default='#'}" {if !empty($bn.colors)}style="background-color:{$bn.colors}"{/if}>
+                {if !empty($bn.cover.url)}
+                <img src="{$bn.cover.url}" alt="{$bn.title|default=''}" loading="{:$idx === 0 ? 'eager' : 'lazy'}">
+                {/if}
+            </a>
+            {/foreach}
+        </div>
+    </div>
+    {/if}
+
+    <!-- 吸顶 tabs (URL-based) -->
+    <div class="list-box sticky-tabs">
+        <div class="u-tabs">
+            {foreach $tabLabels as $i=>$label}
+            <a class="u-tabs__item {if $tab == $i}u-tabs__item--active{/if}"
+               href="?tab={$i}{if $filterParams.area}&area={$filterParams.area}{/if}{if $filterParams.level}&level={$filterParams.level}{/if}{if $filterParams.category}&category={$filterParams.category}{/if}">{$label}</a>
+            {/foreach}
+        </div>
+        {if $tab <= 2}
+            {include file="components/_filter_box" /}
+        {/if}
+        {if $tab == 3}
+        <div class="hospital-level-scroll">
+            <a class="item-tag {if !$filterParams.category}item-tag-active{/if}" href="?tab=3">{$tt['index.tabs.all']|default='全部'}</a>
+            {foreach $integralCls as $cls}
+            <a class="item-tag {if $filterParams.category == $cls.classify_id}item-tag-active{/if}"
+               href="?tab=3&category={$cls.classify_id}">{$cls.name}</a>
+            {/foreach}
+        </div>
+        {/if}
+    </div>
+
+    <!-- 列表区 -->
+    <div class="view-list">
+        {if empty($list)}
+        <div class="empty">{$tt['point.Empty']|default='暂无数据'}</div>
+        {/if}
+
+        {if $tab == 0}
+        <div class="list-jg">
+            {foreach $list as $h}
+                {include file="components/_card_hospital" /}
+            {/foreach}
+        </div>
+        {/if}
+
+        {if $tab == 1}
+        <div class="list-xm">
+            {foreach $list as $p}
+                {include file="components/_card_project" /}
+            {/foreach}
+        </div>
+        {/if}
+
+        {if $tab == 2}
+        <div class="list-ys">
+            {foreach $list as $d}
+                {include file="components/_card_doctor" /}
+            {/foreach}
+        </div>
+        {/if}
+
+        {if $tab == 3}
+        <div class="jf_duihuan">
+            <div class="sp_content">
+                {foreach $list as $sp}
+                    {include file="components/_card_point" /}
+                {/foreach}
+            </div>
+        </div>
+        {/if}
+
+        {include file="components/_pagination" /}
+    </div>
+
+    {include file="components/_tabbar" /}
+
+</div>
+{/block}

@@ -1,0 +1,37 @@
+{extend name="layout/base" /}
+
+{block name="extra_head"}
+<link rel="stylesheet" href="/static/css/pages/index.css?v={$assets.css_ver}">
+{/block}
+
+{block name="content"}
+<div class="index-body">
+    <div class="page-head">
+        <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="page-title">{$tt['index.tabs.point']|default='积分商城'}</h1>
+    </div>
+
+    {if !empty($integralCls)}
+    <div class="list-box sticky-tabs">
+        <div class="hospital-level-scroll">
+            <a class="item-tag {if !$filterParams.category}item-tag-active{/if}" href="?">{$tt['index.tabs.all']|default='全部'}</a>
+            {foreach $integralCls as $cls}
+            <a class="item-tag {if $filterParams.category == $cls.classify_id}item-tag-active{/if}" href="?category={$cls.classify_id}">{$cls.name}</a>
+            {/foreach}
+        </div>
+    </div>
+    {/if}
+
+    <div class="view-list">
+        {if empty($list)}<div class="empty">{$tt['point.Empty']|default='暂无积分商品'}</div>{/if}
+        <div class="jf_duihuan">
+            <div class="sp_content">
+                {foreach $list as $sp}{include file="components/_card_point" /}{/foreach}
+            </div>
+        </div>
+        {include file="components/_pagination" /}
+    </div>
+
+    {include file="components/_tabbar" /}
+</div>
+{/block}

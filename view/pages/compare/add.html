@@ -1,0 +1,107 @@
+{extend name="layout/base" /}
+{block name="extra_head"}
+<style>
+.cmp-add{background:#f7f7f9;min-height:100vh;padding:0 0 96px}
+.cmp-add .head{padding:12px 16px;background:#fff}
+.cmp-add .tabs{display:flex;gap:8px;padding:10px 16px;background:#fff;border-top:1px solid #f0f0f3}
+.cmp-add .tabs a{padding:6px 14px;border-radius:999px;font-size:12px;color:#555;text-decoration:none;background:#f3f3f7}
+.cmp-add .tabs a.active{background:#fc6290;color:#fff}
+.cmp-add form{display:flex;gap:8px;padding:10px 16px;background:#fff}
+.cmp-add form input{flex:1;height:36px;padding:0 12px;border-radius:999px;border:0;background:#f3f3f7;font-size:12px}
+.cmp-add form button{padding:0 18px;height:36px;border-radius:999px;border:0;background:#fc6290;color:#fff;font-size:12px}
+.cmp-add .list{padding:12px}
+.cmp-add .row{display:flex;gap:12px;background:#fff;border-radius:10px;padding:12px;margin-bottom:10px;align-items:center}
+.cmp-add .row img{width:64px;height:64px;border-radius:6px;object-fit:cover;background:#f1f1f3}
+.cmp-add .row .meta{flex:1;font-size:12px;color:#333;min-width:0}
+.cmp-add .row .name{font-size:14px;font-weight:600;color:#222;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmp-add .row .sub{color:#888;margin-top:2px}
+.cmp-add .row button{padding:6px 14px;border-radius:999px;border:1px solid #fc6290;background:#fff;color:#fc6290;font-size:12px;cursor:pointer}
+.cmp-add .row button.added{background:#fc6290;color:#fff}
+.cmp-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:640px;background:#fff;border-top:1px solid #f0f0f3;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;z-index:99}
+.cmp-bar .cnt{font-size:12px;color:#555}
+.cmp-bar a{padding:8px 22px;border-radius:999px;background:#fc6290;color:#fff;text-decoration:none;font-size:12px}
+.cmp-bar a.disabled{background:#ccc;pointer-events:none}
+.empty{padding:60px 0;text-align:center;color:#999}
+</style>
+{/block}
+{block name="content"}
+<section class="cmp-add">
+    <div class="head"><div class="page-head"><a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a><h1 class="page-title">{$tt['compare.add']|default='添加对比'}</h1></div></div>
+    <div class="tabs">
+        <a href="?type=1" class="{if $type == 1}active{/if}">{$tt['index.common.hospital']|default='机构'}</a>
+        <a href="?type=2" class="{if $type == 2}active{/if}">{$tt['index.common.doctor']|default='医生'}</a>
+        <a href="?type=3" class="{if $type == 3}active{/if}">{$tt['index.common.project']|default='项目'}</a>
+    </div>
+    <form method="get" action="">
+        <input type="hidden" name="type" value="{$type}">
+        {if $base > 0}<input type="hidden" name="base" value="{$base}">{/if}
+        <input type="search" name="q" value="{$q}" placeholder="{$tt['compare.search.placeholder']|default='搜索'} {$typeName}">
+        <button type="submit">{$tt['index.common.search']|default='搜索'}</button>
+    </form>
+    <div class="list" id="cmpList" data-type="{$type}">
+        {if empty($list)}
+        <div class="empty">{$tt['point.Empty']|default='暂无数据,换个关键词试试'}</div>
+        {else/}
+        {foreach $list as $row}
+        {$rid = $row.id|default=0}
+        {$cover = ''}
+        {if !empty($row.cover) && is_array($row.cover)}{$cover = $row.cover[0]['url']|default=''}{/if}
+        {if empty($cover) && !empty($row.cover_detail)}{$cover = is_string($row.cover_detail) ? $row.cover_detail : ''}{/if}
+        <div class="row" data-id="{$rid}" data-name="{$row.name|default=''}" data-cover="{$cover}">
+            {if !empty($cover)}<img src="{$cover}" alt="" loading="lazy">{else/}<div style="width:64px;height:64px;background:#f1f1f3;border-radius:6px"></div>{/if}
+            <div class="meta">
+                <div class="name">{$row.name|default=''}</div>
+                {if !empty($row.hospital_name) || !empty($row.hospital)}<div class="sub">{$row.hospital_name|default=$row.hospital.name|default=''}</div>{/if}
+                {if !empty($row.korean_won)}<div class="sub">₩{$row.korean_won}</div>{/if}
+            </div>
+            <button type="button" class="js-add" data-id="{$rid}">+ {$tt['compare.add']|default='加入对比'}</button>
+        </div>
+        {/foreach}
+        {/if}
+    </div>
+    {include file="components/_pagination" /}
+    <div class="cmp-bar">
+        <div class="cnt">{$tt['compare.selected']|default='已选'} <b id="cmpCnt">0</b> {$tt['compare.items']|default='项'}</div>
+        <a id="cmpGo" class="disabled" href="#">{$tt['compare.start']|default='开始对比'}</a>
+    </div>
+</section>
+<script>
+(function(){
+    var type = {$type};
+    var key = 'cmp_pool_'+type;
+    function getPool(){ try{ return JSON.parse(localStorage.getItem(key))||[]; }catch(e){return [];} }
+    function setPool(p){ localStorage.setItem(key, JSON.stringify(p.slice(0,4))); render(); }
+    function render(){
+        var p = getPool();
+        var ids = p.map(function(x){return x.id;});
+        document.getElementById('cmpCnt').innerText = p.length;
+        var go = document.getElementById('cmpGo');
+        if(p.length >= 2){ go.classList.remove('disabled'); go.href = '/'+document.documentElement.lang.toLowerCase().replace('-','-')+'/compare?type='+type+'&ids='+ids.join(','); }
+        else { go.classList.add('disabled'); go.href = '#'; }
+        document.querySelectorAll('.js-add').forEach(function(btn){
+            var id = parseInt(btn.dataset.id,10);
+            if(ids.indexOf(id) >= 0){ btn.classList.add('added'); btn.innerText = '✓ {$tt["compare.added"]|default="已加入"}'; }
+            else { btn.classList.remove('added'); btn.innerText = '+ {$tt["compare.add"]|default="加入对比"}'; }
+        });
+    }
+    // 用 lang_seg 拼链接(语言路径段)
+    var langSeg = '{$lang_seg}';
+    document.getElementById('cmpGo').addEventListener('click', function(e){
+        var p = getPool();
+        if(p.length < 2){ e.preventDefault(); return; }
+        this.href = '/'+langSeg+'/compare?type='+type+'&ids='+p.map(function(x){return x.id;}).join(',');
+    });
+    document.querySelectorAll('.js-add').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            var row = btn.closest('.row');
+            var id = parseInt(row.dataset.id,10);
+            var p = getPool();
+            var i = p.findIndex(function(x){return x.id===id;});
+            if(i>=0){ p.splice(i,1); } else if (p.length < 4){ p.push({id:id, name:row.dataset.name, cover:row.dataset.cover}); }
+            setPool(p);
+        });
+    });
+    render();
+})();
+</script>
+{/block}

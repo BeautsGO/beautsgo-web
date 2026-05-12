@@ -1,0 +1,24 @@
+{extend name="layout/base" /}
+
+{block name="extra_head"}
+<link rel="stylesheet" href="/static/css/pages/case.css?v={$assets.css_ver}">
+{/block}
+
+{block name="content"}
+<div class="case-detail">
+    <div class="page-head">
+        <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="page-title">{$hospital.name|default=''} 价目表</h1>
+    </div>
+
+    <div class="case-detail__images">
+        {if empty($covers)}
+        <div class="empty">{$tt['point.Empty']|default='暂无价目表'}</div>
+        {/if}
+        {foreach $covers as $c}
+        {if !empty($c.url)}<img src="{$c.url}" alt="{$hospital.name} 价目表" loading="lazy">{/if}
+        {/foreach}
+    </div>
+    {include file="components/_tabbar" /}
+</div>
+{/block}

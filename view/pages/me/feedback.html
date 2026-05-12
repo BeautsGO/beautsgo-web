@@ -1,0 +1,37 @@
+{extend name="layout/base" /}
+{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+{block name="content"}
+<div class="user-page">
+    <div class="page-head">
+        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
+        <h1 class="page-title">意见反馈</h1>
+    </div>
+    {if $saved}<div class="msg-ok">反馈已提交,感谢您的支持</div>{/if}
+    {if !empty($error)}<div class="msg-err">{$error}</div>{/if}
+    <form method="post" action="/{$lang_seg}/me/feedback">
+        <div class="u-form-card">
+            <div class="u-form-row">
+                <div class="u-form-row__label">类型</div>
+                <div class="u-form-row__field">
+                    <select name="type">
+                        <option value="1">功能建议</option>
+                        <option value="2">问题反馈</option>
+                        <option value="3">投诉</option>
+                        <option value="4">其他</option>
+                    </select>
+                </div>
+            </div>
+            <div class="u-form-row">
+                <div class="u-form-row__label">联系电话</div>
+                <div class="u-form-row__field"><input type="tel" name="phone" placeholder="便于我们联系您"></div>
+            </div>
+            <div class="u-form-row">
+                <div class="u-form-row__label">反馈内容</div>
+                <div class="u-form-row__field"><textarea name="content" rows="5" placeholder="请详细描述您的意见或问题"></textarea></div>
+            </div>
+        </div>
+        <button class="u-btn-primary" type="submit">提交反馈</button>
+    </form>
+    {include file="components/_tabbar" /}
+</div>
+{/block}

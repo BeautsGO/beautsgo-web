@@ -1,0 +1,46 @@
+{extend name="layout/base" /}
+
+{block name="extra_head"}
+<style>
+.static-page { background:#fff; min-height:100vh; padding-bottom:70px; }
+.static-page .page-head { background:#fff; height:44px; display:flex; align-items:center; padding:0 15px; border-bottom:1px solid #f1f1f1; position:sticky; top:0; z-index:20; }
+.static-page .back-btn { width:30px; height:30px; display:flex; align-items:center; justify-content:center; color:#1B1B1B; font-size:22.5px; text-decoration:none; }
+.static-page .page-title { flex:1; margin:0; text-align:center; font-size:16px; font-weight:600; color:#1B1B1B; margin-right:30px; }
+.static-page__body { padding:15px 16px; font-size:13px; line-height:1.7; color:#333; }
+.static-page__body h2 { font-size:15px; margin:12px 0 6px; color:#1B1B1B; }
+.static-page__body p { margin:0 0 8px; }
+.static-page__body ul { padding-left:20px; margin:0 0 8px; }
+</style>
+{/block}
+
+{block name="content"}
+<div class="static-page">
+    <div class="page-head">
+        <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="page-title">{$heading}</h1>
+    </div>
+    <article class="static-page__body">
+        <p>BeautsGO 已通过国际质量管理体系认证 ISO 9001。下列是平台对合作医院的资质审核要求与机构入驻规则。</p>
+
+        <h2>入驻资质</h2>
+        <ul>
+            <li>韩国卫生福祉部颁发的医疗机构开设许可证(MFDS Permit)</li>
+            <li>开业执照(Business License)及税务登记</li>
+            <li>主刀医生具备韩国整形外科学会(KSPRS)或皮肤科学会(KSDV)正式会员资格</li>
+            <li>所用主流设备品牌均提供 FDA / KFDA 认证编号</li>
+            <li>合作期内每年至少一次资质复查</li>
+        </ul>
+
+        <h2>价格与活动规则</h2>
+        <ul>
+            <li>价目公示采用韩元(KRW)统一标价</li>
+            <li>"中韩同价"指机构对中文用户报价与本地韩文用户报价相同</li>
+            <li>活动期内的折扣文案、有效时间在医院详情活动 tab 公示</li>
+        </ul>
+
+        <h2>申诉渠道</h2>
+        <p>如对机构资质、价格、服务存在异议,可在医院详情页"用户反馈"或客服 IM 中提交,平台 7 个工作日内核实并公示处理结果。</p>
+    </article>
+    {include file="components/_tabbar" /}
+</div>
+{/block}

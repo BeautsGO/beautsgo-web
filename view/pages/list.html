@@ -1,0 +1,78 @@
+{extend name="layout/base" /}
+
+{block name="extra_head"}
+<link rel="stylesheet" href="/static/css/pages/index.css?v={$assets.css_ver}">
+{/block}
+
+{block name="content"}
+<div class="index-body">
+
+    {include file="components/_search_bar" /}
+
+    <!-- 搜索关键词回显 -->
+    {if $isSearch && !empty($keyword)}
+    <div class="search-keyword-info">
+        <span>{$tt['search.resultsFor']|default='搜索'}</span>
+        <strong>"{$keyword}"</strong>
+        <span>{$tt['search.foundCount']|default='共'} {$total} {$tt['search.itemsUnit']|default='条结果'}</span>
+    </div>
+    {/if}
+
+    <!-- 吸顶 tabs -->
+    <div class="list-box sticky-tabs">
+        <div class="u-tabs">
+            {if $isSearch}
+                {foreach $tabLabels as $i=>$label}
+                <a class="u-tabs__item {if $tab == $i}u-tabs__item--active{/if}"
+                   href="?q={$keyword|raw}&tab={$i}">{$label}</a>
+                {/foreach}
+            {else}
+                <a class="u-tabs__item {if $tab == 0}u-tabs__item--active{/if}" href="/{$lang_seg}/hospital">{$tabLabels[0]}</a>
+                <a class="u-tabs__item {if $tab == 1}u-tabs__item--active{/if}" href="/{$lang_seg}/project">{$tabLabels[1]}</a>
+                <a class="u-tabs__item {if $tab == 2}u-tabs__item--active{/if}" href="/{$lang_seg}/doctor">{$tabLabels[2]}</a>
+            {/if}
+        </div>
+        {if $tab <= 2}
+            {include file="components/_filter_box" /}
+        {/if}
+    </div>
+
+    <!-- 列表区 -->
+    <div class="view-list">
+        {if empty($list)}
+        <div class="empty">{$tt['point.Empty']|default='暂无数据'}</div>
+        {/if}
+
+        {if $tab == 0}
+        <div class="list-jg">
+            {foreach $list as $h}{include file="components/_card_hospital" /}{/foreach}
+        </div>
+        {/if}
+
+        {if $tab == 1}
+        <div class="list-xm">
+            {foreach $list as $p}{include file="components/_card_project" /}{/foreach}
+        </div>
+        {/if}
+
+        {if $tab == 2}
+        <div class="list-ys">
+            {foreach $list as $d}{include file="components/_card_doctor" /}{/foreach}
+        </div>
+        {/if}
+
+        {if $tab == 3}
+        <div class="jf_duihuan">
+            <div class="sp_content">
+                {foreach $list as $sp}{include file="components/_card_point" /}{/foreach}
+            </div>
+        </div>
+        {/if}
+
+        {include file="components/_pagination" /}
+    </div>
+
+    {include file="components/_tabbar" /}
+
+</div>
+{/block}

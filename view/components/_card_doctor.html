@@ -1,0 +1,30 @@
+<a class="list-item" href="/{$lang_seg}/doctor/{$d.slug|default=$d.id}">
+    <div class="list-item-left">
+        {if !empty($d.cover_url)}
+        <img class="doctor-avatar" src="{$d.cover_url}" alt="{$d.name}" loading="lazy">
+        {/if}
+    </div>
+    <div class="list-item-right">
+        <div class="doctor-info">
+            <span class="doctor-title">{$d.name}</span>
+            {if !empty($d.hospital_level_name)}<i class="info-line"></i><span class="info-txt">{$d.hospital_level_name}</span>{/if}
+            {if !empty($d.hospital_name)}<i class="info-line"></i><span class="info-txt">{$d.hospital_name}</span>{/if}
+        </div>
+        {if !empty($d.tag)}
+        <div class="doctor-tag-list">
+            {foreach $d.tag as $t}<span class="doctor-tag">{$t}</span>{/foreach}
+        </div>
+        {/if}
+        {if !empty($d.project)}
+        <div class="hospital-pro-scroll">
+            {foreach $d.project as $p}
+            <div class="hospital-pro-item">
+                {if !empty($p.cover_url)}<img src="{$p.cover_url}" alt="{$p.name|default=''}" loading="lazy">{/if}
+                <div class="hospital-pro-name">{$p.name|default=''}</div>
+                <div class="hospital-pro-price">₩ {$p.korean_won|default=''}{if !empty($p.unit)}/{$p.unit}{/if}</div>
+            </div>
+            {/foreach}
+        </div>
+        {/if}
+    </div>
+</a>

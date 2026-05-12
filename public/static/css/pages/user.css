@@ -1,0 +1,67 @@
+@charset "UTF-8";
+/* ============================================================
+ * 用户态页面通用样式(消息/浏览/反馈/写评价/签到/任务/客服)
+ * 单位 cqw,与 me 页同框
+ * ============================================================ */
+
+.user-page { background:#f6f6f6; min-height:100vh; padding-bottom:70px; }
+.user-page .page-head { background:#fff; height:44px; display:flex; align-items:center; padding:0 15px; border-bottom:1px solid #f1f1f1; position:sticky; top:0; z-index:20; }
+.user-page .back-btn { width:30px; height:30px; display:flex; align-items:center; justify-content:center; color:#1B1B1B; font-size:22px; text-decoration:none; }
+.user-page .page-title { flex:1; margin:0; text-align:center; font-size:16px; font-weight:600; color:#1B1B1B; margin-right:30px; }
+.user-page .empty { text-align:center; padding:40px 0; color:#999; font-size:13px; }
+.user-page .msg-ok { padding:8px 16px; color:#4CD964; font-size:12px; background:#e8f9eb; }
+.user-page .msg-err { padding:8px 16px; color:#EF5189; font-size:12px; background:#fff5fa; }
+
+/* 通用列表 item */
+.u-list { background:#fff; }
+.u-list-item { display:flex; gap:10px; padding:12px 16px; border-bottom:1px solid #f5f5f5; text-decoration:none; color:inherit; }
+.u-list-item__cover { flex:0 0 60px; height:60px; border-radius:6px; background:#f5f5f5; overflow:hidden; }
+.u-list-item__cover img { width:100%; height:100%; object-fit:cover; }
+.u-list-item__body { flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
+.u-list-item__title { font-size:14px; font-weight:600; color:#1B1B1B; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; }
+.u-list-item__meta { font-size:12px; color:#999; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+.u-list-item__time { font-size:11px; color:#bbb; }
+
+/* tab */
+.u-tabs-bar { display:flex; background:#fff; padding:10px 0 0; border-bottom:1px solid #f5f5f5; overflow-x:auto; scrollbar-width:none; }
+.u-tabs-bar::-webkit-scrollbar { display:none; }
+.u-tabs-bar a { flex:0 0 auto; min-width:75px; text-align:center; padding:12px 15px 10px; color:#666; text-decoration:none; font-size:14px; position:relative; white-space:nowrap; }
+.u-tabs-bar a.active { color:#1B1B1B; font-weight:600; }
+.u-tabs-bar a.active::after { content:''; position:absolute; left:50%; bottom:0; width:30px; height:3px; background:#9791F6; border-radius:1.5px; transform:translateX(-50%); }
+
+/* 表单卡片 */
+.u-form-card { background:#fff; margin:12px 16px; border-radius:12px; overflow:hidden; }
+.u-form-row { display:flex; align-items:flex-start; padding:15px 16px; border-bottom:1px solid #f5f5f5; }
+.u-form-row:last-child { border-bottom:0; }
+.u-form-row__label { width:80px; font-size:14px; color:#1B1B1B; padding-top:8px; }
+.u-form-row__field { flex:1; }
+.u-form-row__field input,
+.u-form-row__field textarea,
+.u-form-row__field select { width:100%; padding:8px; border:1px solid #eee; border-radius:6px; background:#f8f8f8; font-size:14px; outline:none; resize:vertical; box-sizing:border-box; }
+.u-form-row__field input:focus,
+.u-form-row__field textarea:focus,
+.u-form-row__field select:focus { border-color:#FD83AB; background:#fff; }
+.u-btn-primary { display:block; width:calc(100% - 32px); margin:20px 16px; height:47px; background:#FE739D; color:#fff; border:0; border-radius:24px; font-size:16px; font-weight:600; cursor:pointer; }
+
+/* 星级评分 */
+.u-rate { display:flex; gap:8px; padding:8px 0; }
+.u-rate label { font-size:24px; color:#ddd; cursor:pointer; }
+.u-rate input { display:none; }
+.u-rate input:checked ~ label,
+.u-rate label:hover,
+.u-rate label:hover ~ label { color:#FFB800; }
+/* 实际 CSS 实现倒序高亮:用 flex-direction:row-reverse 配合 ~ */
+.u-rate { flex-direction:row-reverse; justify-content:flex-end; }
+
+/* 客服对话气泡 */
+.chat-page { background:#f6f6f6; min-height:100vh; padding-bottom:93.7px; }
+.chat-history { padding:15px 16px; display:flex; flex-direction:column; gap:12px; }
+.chat-bubble { max-width:75%; padding:10px 12px; border-radius:8px; font-size:14px; line-height:1.5; word-break:break-word; }
+.chat-bubble--me { align-self:flex-end; background:#FE739D; color:#fff; border-bottom-right-radius:2px; }
+.chat-bubble--kf { align-self:flex-start; background:#fff; color:#1B1B1B; border-bottom-left-radius:2px; }
+.chat-time { font-size:10px; color:#bbb; align-self:center; margin-top:3px; }
+
+.chat-input-bar { position:fixed; bottom:0; left:50%; transform:translateX(-50%); max-width:640px; width:100%; background:#fff; border-top:1px solid #f1f1f1; padding:8px 10px; padding-bottom:calc(8px + env(safe-area-inset-bottom)); display:flex; gap:8px; box-sizing:border-box; z-index:80; }
+.chat-input-bar input { flex:1; height:40px; padding:0 12px; border:1px solid #eee; border-radius:20px; background:#f8f8f8; font-size:14px; outline:none; }
+.chat-input-bar input:focus { border-color:#FD83AB; background:#fff; }
+.chat-input-bar button { padding:0 20px; height:40px; background:#FE739D; color:#fff; border:0; border-radius:20px; font-size:14px; }

@@ -1,0 +1,253 @@
+@charset "UTF-8";
+/* ============================================================
+ * 项目详情页样式 —— 1:1 移植 beauts_app/pages/project/detail.vue scoped scss
+ * 单位:cqw;1rpx = 0.5px
+ * 复用 app.css 已有的:.detail-nav / .text img / .toggle-lang / .feedback-list-component / .app-popup-*
+ * ============================================================ */
+
+.body { background: #f6f6f6; padding-bottom: 95px; min-height: 100vh; }
+
+/* ===== 顶部轮播 ===== */
+.swiper-body {
+    position: relative;
+    width: 100%; height: 100%;
+    background: #f5f5f5; overflow: hidden;
+}
+.swiper-body .swiper { width: 100%; height: 100%; }
+.swiper-body .swiper-item { width: 100%; height: 100%; }
+.swiper-body .swiper-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.swiper-body .swiper-play {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px; height: 60px; z-index: 5;
+}
+.swiper-body .swiper-play img { width: 100%; height: 100%; }
+.swiper-body .current {
+    position: absolute; right: 12px; bottom: 12px;
+    color: #fff; font-size:13px;
+    background: rgba(0,0,0,0.4); padding: 2px 8px;
+    border-radius: 15px;
+}
+
+/* ===== 价格 + 项目名 ===== */
+.project-price-box {
+    background: #fff;
+    margin: 0;
+    padding: 12px 10px;
+}
+.project-price-box + .project-price-box { margin-top: 10px; }
+.project-price-box .price-title .title {
+    font-size:18px; font-weight: 600; color: #1B1B1B;
+    line-height: 1.4; margin-bottom: 8px;
+}
+.project-price-box .bottom-box {
+    display: flex; align-items: baseline; justify-content: space-between;
+}
+.project-price-box .price-top {
+    display: flex; align-items: baseline; gap: 2px;
+}
+.project-price-box .price-cur { color: #EF5189; font-size:15px; font-weight: 600; }
+.project-price-box .price-val { color: #EF5189; font-size:24px; font-weight: 700; }
+.project-price-box .price-unit { color: #999; font-size:11px; }
+.project-price-box .sale-num { color: #999; font-size:11px; }
+
+/* ===== 医生卡 (.title-user) ===== */
+.title-user {
+    display: flex; align-items: center; gap: 10px;
+}
+.title-user .user-left {
+    flex: 0 0 48.5px; height: 48.5px;
+    display: block;
+}
+.title-user .user-left img {
+    width: 100%; height: 100%; border-radius: 50%;
+    object-fit: cover; background: #f5f5f5;
+}
+.title-user .user-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.title-user .user-top {
+    display: flex; align-items: baseline; gap: 6px;
+}
+.title-user .user-name {
+    font-size:15px; font-weight: 600; color: #1B1B1B;
+    text-decoration: none;
+}
+.title-user .user-job {
+    font-size:11px; color: #999;
+}
+.title-user .user-down {
+    display: flex; flex-wrap: wrap; align-items: center;
+    gap: 5px; font-size:11px; color: #666;
+}
+.title-user .user-tag {
+    background: #fff5fa; color: #EB689E;
+    padding: 2px 6px;
+    border-radius: 3px; font-size:10px;
+}
+
+/* ===== 项目机构 (.mechanism) ===== */
+.mechanism {
+    background: #fff; border-radius: 10px;
+    padding: 12px; margin: 10px 10px 0;
+}
+.mechanism .mechanism-title { font-size:14px; color: #333; }
+.mechanism .mechanism-detail {
+    display: flex; align-items: center; justify-content: space-between;
+    margin: 12px 0 0; gap: 10px;
+    text-decoration: none; color: inherit;
+}
+.mechanism .mechanism-cover {
+    flex: 0 0 70px; height: 70px;
+    border-radius: 6px; overflow: hidden; background: #f5f5f5;
+}
+.mechanism .mechanism-cover img { width: 100%; height: 100%; object-fit: cover; }
+.mechanism .mechanism-detail-left { flex: 1; min-width: 0; }
+.mechanism .mechanism-detail-top {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 6.5px; gap: 6px;
+}
+.mechanism .mechanism-name {
+    font-size:18px; font-weight: 600; color: #1b1b1b;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
+}
+.mechanism .clinic-fee {
+    color: #fc6290; font-size:12px; font-weight: bold;
+    white-space: nowrap;
+}
+.mechanism .mechanism-detail-down {
+    font-size:12px; color: #aaa; line-height: 1.4;
+    overflow: hidden; text-overflow: ellipsis;
+    display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
+}
+.mechanism .mechanism-response { color: #aaa; font-size:12px; margin-top: 5px; }
+.mechanism .mechanism-detail-right { width: 25.5px; height: 26px; flex-shrink: 0; }
+.mechanism .mechanism-detail-right img { width: 100%; height: 100%; }
+
+/* ===== Head 标题(共用) ===== */
+.head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px 10px 10px;
+}
+.head .head-left {
+    display: flex; align-items: center;
+    font-size:14px; font-weight: 500; color: #1b1b1b;
+}
+.head .head-left > div:first-child {
+    width: 2px; height: 13px;
+    background: #333; border-radius: 10px; margin-right: 6px;
+}
+.head .head-right {
+    display: flex; align-items: center;
+    font-size:10px; color: #A1A1A1;
+}
+.head .head-right img { width: 5px; height: 9px; margin-left: 6px; }
+
+/* ===== 精选案例(共用结构,样式独立) ===== */
+.case { background: #fff; border-radius: 10px; padding: 8px; margin: 0 10px; }
+.case .case-list { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-around; }
+.case .case-item {
+    width: calc(50% - 10px); height: 210px;
+    border-radius: 10px; overflow: hidden;
+}
+.case .cae-box { width: 100%; height: 100%; display: flex; flex-direction: column; }
+.case .case-top { display: flex; flex: 1; }
+.case .case-img {
+    background-position: center; background-size: cover;
+    width: 100%; height: 100%; background-color: #f5f5f5;
+}
+.case .case-bottom { background: #fff; padding: 5px 10px; }
+.case .case-title {
+    font-size:12px; color: #333;
+    overflow: hidden; text-overflow: ellipsis;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    margin-bottom: 11px; line-height: 1.4;
+}
+.case .case-user { display: flex; align-items: center; }
+.case .case-user img {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 1px solid #ccc; margin-right: 7px; object-fit: cover;
+}
+.case .case-user span { font-size:12px; color: #afafaf; }
+
+/* ===== 项目介绍富文本 (.text) ===== */
+.text {
+    font-size:14px; color: #333;
+    background: #fff; border-radius: 10px;
+    margin: 0 10px; padding: 12px 10px;
+    line-height: 1.6;
+    word-break: break-word; overflow-wrap: break-word;
+}
+
+/* ===== 推荐项目瀑布(.list) ===== */
+.list {
+    display: flex; flex-wrap: wrap;
+    gap: 10px;
+    padding: 0 10px;
+}
+.list .list-odd-detail {
+    flex: 0 0 calc(50% - 5px);
+    background: #fff; border-radius: 8px;
+    overflow: hidden;
+    text-decoration: none; color: inherit;
+}
+.list .list-odd-img {
+    width: 100%; height: 160px;
+    background: #f5f5f5;
+}
+.list .list-odd-img img { width: 100%; height: 100%; object-fit: cover; }
+.list .list-odd-title {
+    font-size:13px; color: #1B1B1B; font-weight: 500;
+    padding: 8px 8px 3px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.list .list-odd-price {
+    padding: 0 8px 8px;
+    color: #EF5189; font-size:15px; font-weight: 700;
+}
+.list .list-odd-price-currency { font-size:11px; }
+.list .list-odd-price-unit { font-size:10px; color: #606060; font-weight: normal; margin-left: 2px; }
+.list .one-ellipsis {
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ===== 底部按钮 .btns(与 doctor-detail 同结构) ===== */
+.btns {
+    position: fixed; bottom: 0;
+    left: 50%; right: auto;
+    transform: translateX(-50%);
+    max-width: 640px; width: 100%; z-index: 55;
+    background: #fff; box-sizing: border-box;
+    padding: 0 10px;
+    height: calc(50px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+    display: flex; align-items: center;
+    border-top: 1px solid #f1f1f1;
+}
+.btns .btns-detail {
+    width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px;
+}
+.btns .btns-detail .btns-img {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-decoration: none; color: inherit;
+}
+.btns .btns-detail .btns-img img { width: 25px; height: 25px; }
+.btns .btns-detail .btns-img span,
+.btns .btns-detail .btns-img .h5-app-text {
+    font-size:10px; color: #666; margin-top: 2.5px;
+}
+.btns .btns-detail .btns-right {
+    width: 190px; height: 40px;
+    background: #FF9AC3; border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size:15px; color: #fff; position: relative;
+}
+.btns .btns-detail .btns-right .orderpoint {
+    position: absolute; top: -15px; right: 50%;
+    transform: translateX(50%);
+    background: #FE739D; color: #fff;
+    font-size:9px; padding: 2px 8px;
+    border-radius: 15px; white-space: nowrap;
+}
+.btns .btns-detail .btns-consult { background: #4CD964; }

@@ -1,0 +1,73 @@
+{extend name="layout/base" /}
+
+{block name="extra_head"}
+<style>
+.profile-page { background:#f6f6f6; min-height:100vh; padding-bottom:70px; }
+.page-head { background:#fff; height:44px; display:flex; align-items:center; padding:0 15px; border-bottom:1px solid #f1f1f1; position:sticky; top:0; z-index:20; }
+.page-head .back-btn { width:30px; height:30px; display:flex; align-items:center; justify-content:center; color:#1B1B1B; font-size:22.5px; text-decoration:none; }
+.page-head .page-title { flex:1; margin:0; text-align:center; font-size:16px; font-weight:600; color:#1B1B1B; margin-right:30px; }
+.profile-card { background:#fff; margin:12px 16px; border-radius:12px; overflow:hidden; }
+.profile-row { display:flex; align-items:center; padding:16px 16px; border-bottom:1px solid #f5f5f5; }
+.profile-row:last-child { border-bottom:0; }
+.profile-row__label { width:90px; font-size:14px; color:#1B1B1B; }
+.profile-row__field { flex:1; }
+.profile-row__field input,
+.profile-row__field select { width:100%; height:34px; padding:0 10px; border:1px solid #eee; border-radius:6px; background:#f8f8f8; font-size:14px; outline:none; }
+.profile-row__field input:focus,
+.profile-row__field select:focus { border-color:#FD83AB; background:#fff; }
+.profile-row__avatar { width:55px; height:55px; border-radius:50%; object-fit:cover; }
+.btn-save { display:block; width:calc(100% - 32px); margin:20px 16px; height:47px; background:#FE739D; color:#fff; border:0; border-radius:24px; font-size:16px; font-weight:600; }
+.profile-msg { padding:8px 16px; font-size:12px; }
+.profile-msg.ok { color:#4CD964; }
+.profile-msg.err { color:#EF5189; }
+</style>
+{/block}
+
+{block name="content"}
+<div class="profile-page">
+    <div class="page-head">
+        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
+        <h1 class="page-title">个人资料</h1>
+    </div>
+
+    {if $saved}<div class="profile-msg ok">资料已保存</div>{/if}
+    {if !empty($error)}<div class="profile-msg err">{$error}</div>{/if}
+
+    <form method="post" action="/{$lang_seg}/me/profile">
+        <div class="profile-card">
+            <div class="profile-row">
+                <div class="profile-row__label">头像</div>
+                <div class="profile-row__field">
+                    <img class="profile-row__avatar" src="{$user.avatar|default='/static/icon/default-avatar.png'}" alt="avatar">
+                </div>
+            </div>
+            <div class="profile-row">
+                <div class="profile-row__label">昵称</div>
+                <div class="profile-row__field">
+                    <input type="text" name="nickname" value="{$user.nickname|default=''}" maxlength="20" placeholder="请输入昵称">
+                </div>
+            </div>
+            <div class="profile-row">
+                <div class="profile-row__label">性别</div>
+                <div class="profile-row__field">
+                    <select name="sex">
+                        <option value="0" {if empty($user.sex) || $user.sex == 0}selected{/if}>保密</option>
+                        <option value="1" {if !empty($user.sex) && $user.sex == 1}selected{/if}>男</option>
+                        <option value="2" {if !empty($user.sex) && $user.sex == 2}selected{/if}>女</option>
+                    </select>
+                </div>
+            </div>
+            <div class="profile-row">
+                <div class="profile-row__label">邮箱</div>
+                <div class="profile-row__field">
+                    <input type="email" value="{$user.phone|default=''}" disabled style="background:#f5f5f5;color:#999;">
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-save" type="submit">保存</button>
+    </form>
+
+    {include file="components/_tabbar" /}
+</div>
+{/block}

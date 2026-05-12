@@ -1,0 +1,25 @@
+/.idea
+/.vscode
+*.log
+/runtime/
+/vendor/
+/.env
+.DS_Store
+Thumbs.db
+node_modules/
+composer.phar
+
+# 重构期备份目录(开发临时产物,不入库)
+*.bak
+*.bak.*
+/public/static/css/*.bak*
+/public/static/css/pages.bak*
+
+# 数据库 dump / 迁移产物(用户要求:数据库相关不上传)
+*.sql
+*.sqlite
+*.sqlite3
+*.db
+/database/dumps/
+/1.png
+/2.png

@@ -1,0 +1,11 @@
+{extend name="layout/base" /}
+
+{block name="content"}
+<section class="error-page" style="text-align:center; padding: 80px 20px;">
+    <h1 style="font-size: 72px; margin: 0; color: #2563eb;">404</h1>
+    <p style="font-size: 18px; color: #666;">{$msg|default='页面不存在'}</p>
+    <p style="margin-top: 24px;">
+        <a href="/" style="color: #2563eb; text-decoration: none;">返回首页</a>
+    </p>
+</section>
+{/block}

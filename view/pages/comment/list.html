@@ -1,0 +1,51 @@
+{extend name="layout/base" /}
+
+{block name="content"}
+<div class="comment-page">
+    <div class="page-head">
+        <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="page-title">{$subjectName|default='用户评价'}</h1>
+    </div>
+
+    <div class="feedback-list-component">
+        <div class="user-feedback">
+            <div class="feedback-list">
+                {if empty($comments)}
+                <div class="empty">{$tt['point.Empty']|default='暂无评价'}</div>
+                {/if}
+                {foreach $comments as $cm}
+                <div class="feedback-item">
+                    <div class="feedback-header">
+                        <div>
+                            <img class="avatar" src="{$cm.avatar}" alt="user">
+                            <div class="user-info"><div class="username"><span>{$cm.nickname}</span></div></div>
+                        </div>
+                    </div>
+                    {if $cm.rating > 0}
+                    <div class="star-rating">
+                        <div class="stars">{foreach name=":range(1,5)" item="n"}<span class="star{if $n <= $cm['rating']} active{/if}">★</span>{/foreach}</div>
+                        <span class="rating-num">{$cm.rating}.0</span>
+                    </div>
+                    {/if}
+                    <div class="feedback-content">{$cm.content}</div>
+                    {if !empty($cm.mediaList)}
+                    <div class="feedback-images">
+                        {foreach $cm.mediaList as $m}
+                        <div>{if !empty($m.type) && $m['type'] == 'video'}<video src="{$m.url}" controls></video>{else}<img src="{$m.url}" alt="media" loading="lazy">{/if}</div>
+                        {/foreach}
+                    </div>
+                    {/if}
+                </div>
+                {/foreach}
+            </div>
+        </div>
+    </div>
+
+    {include file="components/_pagination" /}
+    {include file="components/_tabbar" /}
+</div>
+{/block}
+
+{block name="extra_head"}
+<link rel="stylesheet" href="/static/css/pages/case.css?v={$assets.css_ver}">
+{/block}

@@ -1,0 +1,244 @@
+{extend name="layout/base" /}
+
+{block name="extra_head"}
+<link rel="stylesheet" href="/static/css/pages/project-detail.css?v={$assets.css_ver}">
+{/block}
+
+{block name="content"}
+<div class="body">
+
+    <!-- 顶部吸顶 nav -->
+    <div class="detail-nav">
+        <a class="detail-nav__back" href="javascript:history.back()" aria-label="返回">
+            <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <div class="detail-nav__title">{$project.name|default=''}</div>
+    </div>
+
+    <!-- 顶部轮播 -->
+    {if !empty($project.banner)}
+    <div class="swiper-body">
+        <div class="swiper">
+            {foreach $project.banner as $idx=>$bn}
+            <div class="swiper-item" {if $idx > 0}style="display:none"{/if}>
+                {if !empty($bn.is_mp4) && !empty($bn.url)}
+                <div class="swiper-play"><img src="/static/detail/play.png" alt="play"></div>
+                {/if}
+                <img class="swiper-img" src="{$bn.cover|default=$bn.url}" alt="{$project.name|default=''} {:$idx + 1}" loading="{:$idx == 0 ? 'eager' : 'lazy'}">
+            </div>
+            {/foreach}
+        </div>
+        <div class="current">1/{:count($project.banner)}</div>
+    </div>
+    {/if}
+
+    <!-- 价格 + 项目名 -->
+    <div class="project-price-box">
+        <div class="price-title">
+            <div class="title">{$project.name|default=''}</div>
+            <div class="bottom-box">
+                <div class="price-top">
+                    <span class="price-cur">₩</span>
+                    <span class="price-val">{$project.korean_won}</span>
+                    {if !empty($project.unit)}<span class="price-unit">/{$project.unit}</span>{/if}
+                </div>
+                <span class="sale-num">{$tt['index.common.AlreadyBooked']|default='已预约'}{$project.sale_nums|default='0'}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 医生卡 -->
+    {if !empty($doctor) && !empty($doctor.id)}
+    <div class="project-price-box">
+        <div class="title-user">
+            <a class="user-left" href="/{$lang_seg}/doctor/{$doctor.slug|default=$doctor.id}">
+                {if !empty($doctor.cover_url)}
+                <img src="{$doctor.cover_url}" alt="{$doctor.name}" loading="lazy">
+                {/if}
+            </a>
+            <div class="user-right">
+                <div class="user-top">
+                    <a href="/{$lang_seg}/doctor/{$doctor.slug|default=$doctor.id}" class="user-name">{$doctor.name}</a>
+                    {if !empty($doctor.job_name)}<span class="user-job">{$doctor.job_name}</span>{/if}
+                </div>
+                {if !empty($tag)}
+                <div class="user-down">
+                    <span>{$tt['index.common.SpecializesIn']|default='擅长'}</span>
+                    {foreach $tag as $t}<span class="user-tag">{$t}</span>{/foreach}
+                </div>
+                {/if}
+            </div>
+        </div>
+    </div>
+    {/if}
+
+    <!-- 项目机构 -->
+    {if !empty($hospital) && !empty($hospital.id)}
+    <div class="mechanism">
+        <div class="mechanism-title">{$tt['projectDetails.Iteminstitution']|default='项目机构'}</div>
+        <a class="mechanism-detail" href="/{$lang_seg}/hospital/{$hospital.slug|default=$hospital.id}">
+            {if !empty($hospital.cover_url)}
+            <div class="mechanism-cover"><img src="{$hospital.cover_url}" alt="{$hospital.name}" loading="lazy"></div>
+            {/if}
+            <div class="mechanism-detail-left">
+                <div class="mechanism-detail-top">
+                    <span class="mechanism-name">{$hospital.name}</span>
+                    {if !empty($hospital.clinic_fee)}
+                    <span class="clinic-fee">{$tt['index.common.ConsultationFee']|default='面诊费'}:₩{$hospital.clinic_fee}</span>
+                    {/if}
+                </div>
+                <div class="mechanism-detail-down">{$hospital.zh_cn_address|default=''}</div>
+                {if !empty($hospital.response_time)}
+                <div class="mechanism-response">
+                    {$tt['index.common.BookingResponseTime']|default='预约响应时长'}:<span style="color:#fc6290d1">{$hospital.response_time} {$tt['index.common.Hour']|default='小时'}</span>
+                </div>
+                {/if}
+            </div>
+            <div class="mechanism-detail-right"><img src="/static/icon/right.svg" alt="more"></div>
+        </a>
+    </div>
+    {/if}
+
+    <!-- 精选案例 -->
+    {if !empty($cases)}
+    <div class="head">
+        <div class="head-left"><div></div>{$tt['index.common.FeaturedCases']|default='精选案例'}</div>
+        <div class="head-right">{$tt['index.common.ViewAll']|default='查看全部'}<img src="/static/icon/right.png" alt="more"></div>
+    </div>
+    <div class="case">
+        <div class="case-list">
+            {foreach $cases as $cs}
+            {if !empty($cs.pic_url_0)}
+            <div class="case-item">
+                <div class="cae-box">
+                    <div class="case-top">
+                        <div class="case-img" style="background-image: url('{$cs.pic_url_0}')"></div>
+                        {if $cs['pic_count'] >= 2}
+                        <div class="case-img" style="background-image: url('{$cs.pic_url_1}')"></div>
+                        {/if}
+                    </div>
+                    <div class="case-bottom">
+                        <div class="case-title"><div>{$cs.content|default=''}</div></div>
+                        <div class="case-user">
+                            <img src="{$cs.user.avatar}" alt="user">
+                            <span>{$cs.user.nickname}</span>
+                            <span class="toggle-lang">翻译</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/if}
+            {/foreach}
+        </div>
+    </div>
+    {/if}
+
+    <!-- 用户反馈 -->
+    {if !empty($comments) || !empty($tags)}
+    <div class="feedback-list-component">
+        <div class="head">
+            <div class="head-left"><div></div>{$tt['hospitalDetails.Userfeedback']|default='用户反馈'}</div>
+            <div class="head-right">{$tt['index.common.ViewAll']|default='查看全部'}<img src="/static/icon/right.png" alt="more"></div>
+        </div>
+        <div class="user-feedback">
+            {if !empty($tags)}
+            <div class="tags">{foreach $tags as $tg}<div class="tag">{$tg.name}</div>{/foreach}</div>
+            {/if}
+            <div class="feedback-list">
+                {foreach $comments as $cm}
+                <div class="feedback-item">
+                    <div class="feedback-header">
+                        <div>
+                            <img class="avatar" src="{$cm.avatar}" alt="user">
+                            <div class="user-info"><div class="username"><span>{$cm.nickname}</span></div></div>
+                        </div>
+                    </div>
+                    {if !empty($cm.rating)}
+                    <div class="star-rating">
+                        <div class="stars">
+                            {foreach name=":range(1,5)" item="n"}<span class="star{if $n <= $cm['rating']} active{/if}">★</span>{/foreach}
+                        </div>
+                        <span class="rating-num">{$cm.rating}.0</span>
+                    </div>
+                    {/if}
+                    <div class="feedback-content">{$cm.content}<span class="toggle-lang">翻译</span></div>
+                    {if !empty($cm.mediaList)}
+                    <div class="feedback-images">
+                        {foreach $cm.mediaList as $m}
+                        <div>{if $m['type'] == 'video'}<video src="{$m.url}" controls></video>{else}<img src="{$m.url}" alt="media" loading="lazy">{/if}</div>
+                        {/foreach}
+                    </div>
+                    {/if}
+                </div>
+                {/foreach}
+            </div>
+        </div>
+    </div>
+    {/if}
+
+    <!-- 项目介绍(富文本) -->
+    {if !empty($project.content)}
+    <div class="head">
+        <div class="head-left"><div></div>{$tt['projectDetails.Itemintroduction']|default='项目介绍'}</div>
+    </div>
+    <div class="text">{$project.content|raw}</div>
+    {/if}
+
+    <!-- 推荐项目(同分类) -->
+    {if !empty($related)}
+    <div class="head">
+        <div class="head-left"><div></div>{$tt['projectDetails.Itemrecommend']|default='推荐项目'}</div>
+    </div>
+    <div class="list">
+        {foreach $related as $rp}
+        <a class="list-odd-detail" href="/{$lang_seg}/project/{$rp.slug|default=$rp.id}">
+            <div class="list-odd-img">
+                {if !empty($rp.cover_url)}<img src="{$rp.cover_url}" alt="{$rp.name}" loading="lazy">{/if}
+            </div>
+            <div class="list-odd-title one-ellipsis">{$rp.name}</div>
+            <div class="list-odd-price">
+                <span class="list-odd-price-currency">₩</span>{$rp.korean_won}{if !empty($rp.unit)}<span class="list-odd-price-unit">/{$rp.unit}</span>{/if}
+            </div>
+        </a>
+        {/foreach}
+    </div>
+    {/if}
+
+    <!-- 底部按钮 -->
+    <div class="btns">
+        <div class="btns-detail">
+            <a class="btns-img" href="#app-download">
+                <img src="/static/detail/android-icon.png" alt="download">
+                <span class="h5-app-text">下载</span>
+            </a>
+            <div class="btns-img">
+                <img src="/static/detail/btns3.svg" alt="favorite">
+                <span>{$tt['index.common.Favorites']|default='收藏'}</span>
+            </div>
+            {if !empty($hospital.is_cooper) && $hospital.is_cooper == 1}
+            <div class="btns-right">
+                {$tt['index.common.BookNow']|default='预约面诊'}
+                <span class="orderpoint">{$tt['point.Orderpoint']|default='下单送积分'}</span>
+            </div>
+            {/if}
+            <div class="btns-right btns-consult">
+                <span class="custom-icon custom-icon-kefu1"></span>
+                {$tt['index.common.chatNow']|default='咨询一下'}
+            </div>
+        </div>
+    </div>
+
+    <!-- App 下载弹窗 -->
+    <div id="app-download" class="app-popup-mask">
+        <div class="app-popup">
+            <a class="app-popup-close" href="#" aria-label="关闭">✕</a>
+            <div class="app-popup-title">BeautsGO 彼此美</div>
+            <a class="app-popup-link" href="https://apps.apple.com/" target="_blank" rel="noopener">
+                <img class="app-popup-qrcode" src="/static/detail/android-icon.png" alt="App 下载二维码">
+            </a>
+            <div class="app-popup-tip">扫码下载 APP,享专属预约权益</div>
+        </div>
+    </div>
+
+</div>
+{/block}

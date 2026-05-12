@@ -1,0 +1,65 @@
+{extend name="layout/base" /}
+{block name="extra_head"}
+<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">
+<style>
+.compare-table { background:#fff; margin:12px 0; padding:0; overflow-x:auto; }
+.compare-table table { width:100%; border-collapse:collapse; min-width:100%; }
+.compare-table th, .compare-table td { padding:12px 10px; border:1px solid #f1f1f1; font-size:13px; vertical-align:top; }
+.compare-table th { background:#fafafa; color:#666; font-weight:500; min-width:70px; white-space:nowrap; text-align:left; }
+.compare-table td { color:#1B1B1B; min-width:120px; }
+.compare-table .cover { width:90px; height:90px; object-fit:cover; border-radius:6px; }
+.compare-table .name { font-weight:600; font-size:15px; margin-top:5px; }
+</style>
+{/block}
+{block name="content"}
+<div class="user-page">
+    <div class="page-head">
+        <a class="back-btn" href="/{$lang_seg}/compare/select?type={$type}" aria-label="返回">‹</a>
+        <h1 class="page-title">{$typeName}对比</h1>
+    </div>
+
+    {if empty($list)}
+    <div class="empty">未找到对比数据,请检查 ID 是否有效</div>
+    {else}
+    <div class="compare-table">
+        <table>
+            <tr>
+                <th></th>
+                {foreach $list as $item}
+                <td>
+                    {if !empty($item.cover_url) || !empty($item.cover) || !empty($item.thumb)}
+                    <img class="cover" src="{$item.cover_url|default=$item.cover[0]['url']|default=$item.thumb[0]['url']|default=''}" alt="">
+                    {/if}
+                    <div class="name">
+                        <a href="/{$lang_seg}/{if $type == 1}hospital{elseif $type == 2}doctor{else}project{/if}/{$item.slug|default=$item.id}" style="color:inherit; text-decoration:none;">
+                            {$item.name|default=''}
+                        </a>
+                    </div>
+                </td>
+                {/foreach}
+            </tr>
+            {if $type == 1}
+                <tr><th>等级</th>{foreach $list as $i}<td>{$i.level_name|default='-'}</td>{/foreach}</tr>
+                <tr><th>商圈</th>{foreach $list as $i}<td>{$i.trading_area_name|default='-'}</td>{/foreach}</tr>
+                <tr><th>地址</th>{foreach $list as $i}<td>{$i.zh_cn_address|default='-'}</td>{/foreach}</tr>
+                <tr><th>医生数</th>{foreach $list as $i}<td>{$i.doctors_count|default='-'}</td>{/foreach}</tr>
+                <tr><th>响应时长</th>{foreach $list as $i}<td>{$i.response_time_str|default=$i.response_time}小时</td>{/foreach}</tr>
+                <tr><th>面诊费</th>{foreach $list as $i}<td>{if !empty($i.clinic_fee)}₩{$i.clinic_fee}{else}-{/if}</td>{/foreach}</tr>
+            {elseif $type == 2}
+                <tr><th>职位</th>{foreach $list as $i}<td>{$i.job_name|default='-'}</td>{/foreach}</tr>
+                <tr><th>所属医院</th>{foreach $list as $i}<td>{$i.hospital_name|default=$i.hospital.name|default='-'}</td>{/foreach}</tr>
+                <tr><th>学历</th>{foreach $list as $i}<td>{$i.education|default='-'}</td>{/foreach}</tr>
+                <tr><th>毕业院校</th>{foreach $list as $i}<td>{$i.school|default='-'}</td>{/foreach}</tr>
+                <tr><th>擅长</th>{foreach $list as $i}<td>{if !empty($i.tag)}{:is_array($i['tag'])?implode('、',$i['tag']):$i['tag']}{else}-{/if}</td>{/foreach}</tr>
+            {else}
+                <tr><th>价格</th>{foreach $list as $i}<td>₩{$i.korean_won|default=$i.price|default='-'}{if !empty($i.unit)}/{$i.unit}{/if}</td>{/foreach}</tr>
+                <tr><th>销量</th>{foreach $list as $i}<td>{$i.sale_nums|default='0'}</td>{/foreach}</tr>
+                <tr><th>所属医院</th>{foreach $list as $i}<td>{$i.hospital_name|default=$i.hospital.name|default='-'}</td>{/foreach}</tr>
+                <tr><th>医生</th>{foreach $list as $i}<td>{$i.doctor_name|default=$i.doctor.name|default='-'}</td>{/foreach}</tr>
+            {/if}
+        </table>
+    </div>
+    {/if}
+    {include file="components/_tabbar" /}
+</div>
+{/block}

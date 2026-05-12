@@ -1,0 +1,12 @@
+#!/usr/bin/env php
+<?php
+namespace think;
+
+// ThinkPHP 命令行入口
+define('BASE_PATH', __DIR__ . DIRECTORY_SEPARATOR);
+
+require __DIR__ . '/vendor/autoload.php';
+
+// 执行HTTP应用并响应
+$console = (new App())->console;
+$response = $console->run();

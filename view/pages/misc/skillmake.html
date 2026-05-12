@@ -1,0 +1,12 @@
+{extend name="layout/base" /}
+{block name="extra_head"}
+<style>
+.skill-bg{position:relative;min-height:100vh;background:#fc6290 url('{$bgImage}') no-repeat top center / 100% auto}
+.skill-cta{position:fixed;left:50%;bottom:32px;transform:translateX(-50%);display:inline-block;padding:16px 64px;background:#fff;color:#fc6290;border-radius:999px;font-size:14px;font-weight:600;text-decoration:none;box-shadow:0 10px 30px rgba(252,98,144,.45)}
+</style>
+{/block}
+{block name="content"}
+<section class="skill-bg">
+    <a class="skill-cta" href="/{$lang_seg}/appointment?h={$h|default=''}&p={$p|default=''}">{$tt['make.Bookhospital']|default='预约项目'}</a>
+</section>
+{/block}

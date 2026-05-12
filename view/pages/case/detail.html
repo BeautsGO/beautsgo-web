@@ -1,0 +1,44 @@
+{extend name="layout/base" /}
+
+{block name="extra_head"}
+<link rel="stylesheet" href="/static/css/pages/case.css?v={$assets.css_ver}">
+{/block}
+
+{block name="content"}
+<article class="case-detail">
+    <div class="page-head">
+        <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="page-title">案例详情</h1>
+    </div>
+
+    <div class="case-detail__images">
+        {foreach $case.pictures as $pic}
+        {if !empty($pic.url)}
+        <img src="{$pic.url}" alt="case picture" loading="lazy">
+        {/if}
+        {/foreach}
+    </div>
+
+    <div class="case-detail__body">
+        <div class="case-detail__user">
+            <img src="{$case.user.avatar}" alt="user">
+            <span class="nickname">{$case.user.nickname}</span>
+            <time>{:date('Y-m-d', $case.create_time)}</time>
+        </div>
+        <div class="case-detail__content">{$case.content|default=''}</div>
+
+        {if !empty($case.related) && !empty($case.related.id)}
+        <div class="case-detail__related">
+            <div class="related-title">{$tt['index.common.Related']|default='关联'}{if $case.related.typeKey == 'hospital'}机构{elseif $case.related.typeKey == 'doctor'}医生{else}项目{/if}</div>
+            <a class="related-card" href="/{$lang_seg}/{$case.related.typeKey}/{$case.related.slug}">
+                {if !empty($case.related.cover_url)}<img src="{$case.related.cover_url}" alt="{$case.related.name}" loading="lazy">{/if}
+                <div class="related-name">{$case.related.name}</div>
+                {if !empty($case.related.zh_cn_address)}<div class="related-meta">{$case.related.zh_cn_address}</div>{/if}
+                {if !empty($case.related.korean_won)}<div class="related-meta">₩ {$case.related.korean_won}</div>{/if}
+            </a>
+        </div>
+        {/if}
+    </div>
+    {include file="components/_tabbar" /}
+</article>
+{/block}

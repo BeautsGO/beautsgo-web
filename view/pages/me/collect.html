@@ -1,0 +1,47 @@
+{extend name="layout/base" /}
+
+{block name="extra_head"}
+<link rel="stylesheet" href="/static/css/pages/index.css?v={$assets.css_ver}">
+<style>
+.collect-page { background:#f6f6f6; min-height:100vh; padding-bottom:70px; }
+.page-head { background:#fff; height:44px; display:flex; align-items:center; padding:0 15px; border-bottom:1px solid #f1f1f1; position:sticky; top:0; z-index:20; }
+.page-head .back-btn { width:30px; height:30px; display:flex; align-items:center; justify-content:center; color:#1B1B1B; font-size:22.5px; text-decoration:none; }
+.page-head .page-title { flex:1; margin:0; text-align:center; font-size:16px; font-weight:600; color:#1B1B1B; margin-right:30px; }
+.collect-tabs { display:flex; background:#fff; padding:10px 0 0; border-bottom:1px solid #f5f5f5; }
+.collect-tabs a { flex:1; text-align:center; padding:12px 0 10px; color:#666; text-decoration:none; font-size:15px; position:relative; }
+.collect-tabs a.active { color:#1B1B1B; font-weight:600; }
+.collect-tabs a.active::after { content:''; position:absolute; left:50%; bottom:0; width:30px; height:3px; background:#9791F6; border-radius:1.5px; transform:translateX(-50%); }
+.empty { text-align:center; padding:40px 0; color:#999; font-size:13px; }
+</style>
+{/block}
+
+{block name="content"}
+<div class="collect-page">
+    <div class="page-head">
+        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
+        <h1 class="page-title">我的收藏</h1>
+    </div>
+    <div class="collect-tabs">
+        <a class="{if $type == 1}active{/if}" href="?type=1">机构</a>
+        <a class="{if $type == 2}active{/if}" href="?type=2">医生</a>
+        <a class="{if $type == 3}active{/if}" href="?type=3">项目</a>
+    </div>
+
+    {if empty($list)}
+    <div class="empty">{$tt['point.Empty']|default='暂无收藏'}</div>
+    {/if}
+
+    {if $type == 1}
+    <div class="list-jg">{foreach $list as $h}{include file="components/_card_hospital" /}{/foreach}</div>
+    {/if}
+    {if $type == 2}
+    <div class="list-ys">{foreach $list as $d}{include file="components/_card_doctor" /}{/foreach}</div>
+    {/if}
+    {if $type == 3}
+    <div class="list-xm">{foreach $list as $p}{include file="components/_card_project" /}{/foreach}</div>
+    {/if}
+
+    {include file="components/_pagination" /}
+    {include file="components/_tabbar" /}
+</div>
+{/block}

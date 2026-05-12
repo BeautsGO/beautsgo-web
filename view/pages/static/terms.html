@@ -1,0 +1,46 @@
+{extend name="layout/base" /}
+
+{block name="extra_head"}
+<link rel="stylesheet" href="/static/css/pages/static.css?v={$assets.css_ver}">
+<style>
+.static-page { background:#fff; min-height:100vh; padding-bottom:70px; }
+.static-page .page-head { background:#fff; height:44px; display:flex; align-items:center; padding:0 15px; border-bottom:1px solid #f1f1f1; position:sticky; top:0; z-index:20; }
+.static-page .back-btn { width:30px; height:30px; display:flex; align-items:center; justify-content:center; color:#1B1B1B; font-size:22.5px; text-decoration:none; }
+.static-page .page-title { flex:1; margin:0; text-align:center; font-size:16px; font-weight:600; color:#1B1B1B; margin-right:30px; }
+.static-page__body { padding:15px 16px; font-size:13px; line-height:1.7; color:#333; }
+.static-page__body h2 { font-size:15px; margin:12px 0 6px; color:#1B1B1B; }
+.static-page__body p { margin:0 0 8px; }
+.static-page__body ol { padding-left:20px; }
+</style>
+{/block}
+
+{block name="content"}
+<div class="static-page">
+    <div class="page-head">
+        <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="page-title">{$heading}</h1>
+    </div>
+    <article class="static-page__body">
+        <p>本服务条款("条款")适用于您访问和使用 BeautsGO(以下称"平台")。请仔细阅读以下内容,使用平台即表示您接受本条款。</p>
+
+        <h2>1. 服务定位</h2>
+        <p>平台为求美者与韩国境内合作医美机构之间提供信息展示、预约对接、咨询服务。最终医疗服务由相应机构按照韩国法律法规独立提供,平台不直接提供任何医疗行为。</p>
+
+        <h2>2. 账户与责任</h2>
+        <p>使用平台预约/咨询服务时,您应提供真实有效的联系方式,并对账户安全负责。任何因账户被盗用产生的后果由您自行承担。</p>
+
+        <h2>3. 价格与活动</h2>
+        <p>平台公示的价格以"中韩同价"原则展示,实际成交价以面诊评估后机构出具的报价为准。活动有效期、积分兑换规则以公示页面为准。</p>
+
+        <h2>4. 知识产权</h2>
+        <p>平台展示的医院、医生、项目图片、文字、Logo 等内容,知识产权归 BeautsGO 或相应权利人所有,未经授权不得转载、用于商业用途。</p>
+
+        <h2>5. 免责条款</h2>
+        <p>医美属于医疗行为,具备一定风险。平台不对治疗效果作出保证。请您在签署任何同意书前充分了解项目内容、风险与禁忌。</p>
+
+        <h2>6. 条款修订</h2>
+        <p>BeautsGO 有权根据业务调整与法律变更修订本条款,修订后于平台公示。继续使用即视为接受新版本。</p>
+    </article>
+    {include file="components/_tabbar" /}
+</div>
+{/block}

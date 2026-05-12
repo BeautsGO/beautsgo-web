@@ -1,0 +1,39 @@
+{extend name="layout/base" /}
+{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+{block name="content"}
+<div class="user-page">
+    <div class="page-head">
+        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
+        <h1 class="page-title">我的钱包</h1>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#FE739D,#afa7ef); color:#fff; padding:30px 20px; margin:12px 16px; border-radius:15px;">
+        <div style="font-size:13px; opacity:.85; margin-bottom:6px;">账户余额(¥)</div>
+        <div style="font-size:40px; font-weight:700;">¥{$balance|number_format=2}</div>
+    </div>
+
+    <div class="u-tabs-bar">
+        <a class="{if $type == 0}active{/if}" href="?type=0">全部</a>
+        <a class="{if $type == 1}active{/if}" href="?type=1">收入</a>
+        <a class="{if $type == 2}active{/if}" href="?type=2">支出</a>
+    </div>
+
+    {if empty($list)}<div class="empty">{$tt['point.Empty']|default='暂无明细'}</div>{/if}
+
+    <div class="u-list">
+    {foreach $list as $r}
+        <div class="u-list-item">
+            <div class="u-list-item__body">
+                <div class="u-list-item__title">{$r.title|default=$r.name|default='账户变动'}</div>
+                <div class="u-list-item__time">{if !empty($r.create_time)}{:is_numeric($r.create_time)?date('Y-m-d H:i',$r.create_time):$r.create_time}{/if}</div>
+            </div>
+            <div style="display:flex; align-items:center; font-size:15px; font-weight:700; color:{:$r['amount']>0?'#4CD964':'#EF5189'};">
+                {if $r['amount']>0}+{/if}{$r.amount|default=$r.price|default='0'}
+            </div>
+        </div>
+    {/foreach}
+    </div>
+    {include file="components/_pagination" /}
+    {include file="components/_tabbar" /}
+</div>
+{/block}

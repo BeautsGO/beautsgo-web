@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="{$seo.og.locale|default='zh-CN'}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <!-- ===== TDK：100% 由后端 API 数据动态组装 ===== -->
+    <title>{$seo.title|default='BeautsGO'}</title>
+    <meta name="description" content="{$seo.description|default=''}">
+    <meta name="keywords" content="{$seo.keywords|default=''}">
+
+    {if !empty($seo.canonical)}
+    <link rel="canonical" href="{$seo.canonical}">
+    {/if}
+
+    <!-- ===== Open Graph (社交分享) ===== -->
+    {foreach $seo.og as $k => $v}
+    <meta property="og:{$k}" content="{$v}">
+    {/foreach}
+
+    <!-- ===== hreflang (多语言版本) ===== -->
+    {foreach $seo.hreflang as $code => $href}
+    <link rel="alternate" hreflang="{$code}" href="{$href}">
+    {/foreach}
+
+    <!-- ===== 关键 CSS：UniApp 编译产物，类名 100% 一致 ===== -->
+    <link rel="preload" href="/static/css/uni.css?v={$assets.css_ver}" as="style">
+    <link rel="stylesheet" href="/static/css/uni.css?v={$assets.css_ver}">
+    <link rel="stylesheet" href="/static/css/iconfont.css?v={$assets.css_ver}">
+    <link rel="stylesheet" href="/static/css/app.css?v={$assets.css_ver}">
+
+    <!-- ===== JSON-LD Schema.org 结构化数据 ===== -->
+    {foreach $seo.jsonld as $schema}
+    <script type="application/ld+json">{:json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)}</script>
+    {/foreach}
+
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+    {block name="extra_head"}{/block}
+</head>
+<body>
+    {include file="layout/header"}
+
+    <main class="page-main" role="main">
+        {block name="content"}{/block}
+    </main>
+
+    {include file="layout/footer"}
+
+    <!-- 浏览轨迹埋点配置(app.js 读取后 fire-and-forget 调 /api/user/optSave) -->
+    <script>window.__BG_TRACK__={api:"{$apiBaseUrl}/user/optSave",payload:{:json_encode($tracking, JSON_UNESCAPED_UNICODE)}};</script>
+    <!-- 通用 UI 工具(模拟 UniApp API:lightbox、toast、copy、call、countdown) -->
+    <script defer src="/static/js/uni-shim.js?v={$assets.js_ver}"></script>
+    <!-- 非关键 JS 放底部，不阻塞首屏 -->
+    <script defer src="/static/js/app.js?v={$assets.js_ver}"></script>
+    {block name="extra_script"}{/block}
+</body>
+</html>

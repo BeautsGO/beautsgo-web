@@ -1,0 +1,87 @@
+<div class="filter-bar">
+    <!-- 1) 商圈 -->
+    <details class="filter-col">
+        <summary>
+            <span class="filter-col__label{if $filterParams.area} filter-col__label--active{/if}">{$tt['filter.area']|default='商圈'}</span>
+            <span class="filter-col__caret"></span>
+        </summary>
+        <div class="filter-col__panel">
+            <a class="filter-chip {if !$filterParams.area}filter-chip--active{/if}" href="?tab={$tab}">{$tt['index.tabs.all']|default='全部'}</a>
+            {foreach $filterOpts.area as $a}
+            <a class="filter-chip {if $filterParams.area == $a.id}filter-chip--active{/if}"
+               href="?tab={$tab}&area={$a.id}{if $filterParams.level}&level={$filterParams.level}{/if}{if $filterParams.category}&category={$filterParams.category}{/if}{if $filterParams.service}&service={$filterParams.service}{/if}">{$a.name}</a>
+            {/foreach}
+        </div>
+    </details>
+
+    <!-- 2) 医院特色 -->
+    <details class="filter-col">
+        <summary>
+            <span class="filter-col__label{if $filterParams.level} filter-col__label--active{/if}">{$tt['filter.feature']|default='医院特色'}</span>
+            <span class="filter-col__caret"></span>
+        </summary>
+        <div class="filter-col__panel">
+            <a class="filter-chip {if !$filterParams.level}filter-chip--active{/if}"
+               href="?tab={$tab}{if $filterParams.area}&area={$filterParams.area}{/if}{if $filterParams.category}&category={$filterParams.category}{/if}{if $filterParams.service}&service={$filterParams.service}{/if}">{$tt['index.tabs.all']|default='全部'}</a>
+            {foreach $filterOpts.feature as $f}
+            <a class="filter-chip {if $filterParams.level == $f.id}filter-chip--active{/if}"
+               href="?tab={$tab}&level={$f.id}{if $filterParams.area}&area={$filterParams.area}{/if}{if $filterParams.category}&category={$filterParams.category}{/if}{if $filterParams.service}&service={$filterParams.service}{/if}">{$f.name}</a>
+            {/foreach}
+        </div>
+    </details>
+
+    <!-- 3) 热门项目 -->
+    <details class="filter-col">
+        <summary>
+            <span class="filter-col__label{if $filterParams.category} filter-col__label--active{/if}">{$tt['filter.hotProject']|default='热门项目'}</span>
+            <span class="filter-col__caret"></span>
+        </summary>
+        <div class="filter-col__panel">
+            <a class="filter-chip {if !$filterParams.category}filter-chip--active{/if}"
+               href="?tab={$tab}{if $filterParams.area}&area={$filterParams.area}{/if}{if $filterParams.level}&level={$filterParams.level}{/if}{if $filterParams.service}&service={$filterParams.service}{/if}">{$tt['index.tabs.all']|default='全部'}</a>
+            {foreach $filterOpts.classify as $cls}
+            <a class="filter-chip {if $filterParams.category == $cls.id}filter-chip--active{/if}"
+               href="?tab={$tab}&category={$cls.id}{if $filterParams.area}&area={$filterParams.area}{/if}{if $filterParams.level}&level={$filterParams.level}{/if}{if $filterParams.service}&service={$filterParams.service}{/if}">{$cls.name}</a>
+            {/foreach}
+        </div>
+    </details>
+
+    <!-- 4) 服务语种 -->
+    <details class="filter-col">
+        <summary>
+            <span class="filter-col__label{if $filterParams.service} filter-col__label--active{/if}">{$tt['filter.serviceLang']|default='服务语种'}</span>
+            <span class="filter-col__caret"></span>
+        </summary>
+        <div class="filter-col__panel">
+            <a class="filter-chip {if !$filterParams.service}filter-chip--active{/if}"
+               href="?tab={$tab}{if $filterParams.area}&area={$filterParams.area}{/if}{if $filterParams.level}&level={$filterParams.level}{/if}{if $filterParams.category}&category={$filterParams.category}{/if}">{$tt['index.tabs.all']|default='全部'}</a>
+            {foreach $filterOpts.serviceLang as $sl}
+            <a class="filter-chip {if $filterParams.service == $sl.id}filter-chip--active{/if}"
+               href="?tab={$tab}&service={$sl.id}{if $filterParams.area}&area={$filterParams.area}{/if}{if $filterParams.level}&level={$filterParams.level}{/if}{if $filterParams.category}&category={$filterParams.category}{/if}">{$sl.name}</a>
+            {/foreach}
+        </div>
+    </details>
+
+    <!-- 5) 综合筛选 -->
+    <details class="filter-col filter-col--icon">
+        <summary>
+            <span class="filter-col__icon" aria-hidden="true">≡</span>
+            <span class="filter-col__label">{$tt['filter.btnLabel']|default='筛选'}</span>
+        </summary>
+        <div class="filter-col__panel filter-col__panel--wide">
+            {if !empty($filterOpts.specialty)}
+            <div class="filter-section">
+                <div class="filter-section__title">{$tt['filter.specialty']|default='擅长项目'}</div>
+                <div class="filter-section__list">
+                    {foreach $filterOpts.specialty as $sp}
+                    <a class="filter-chip" href="?tab={$tab}&level={$sp.id}">{$sp.name}</a>
+                    {/foreach}
+                </div>
+            </div>
+            {/if}
+            <div class="filter-popup__actions">
+                <a class="filter-btn filter-btn--reset" href="?tab={$tab}">{$tt['filter.reset']|default='重置'}</a>
+            </div>
+        </div>
+    </details>
+</div>

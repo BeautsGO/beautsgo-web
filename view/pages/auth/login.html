@@ -1,0 +1,317 @@
+{extend name="layout/base" /}
+
+{block name="extra_head"}
+<style>
+/* ============================================================
+ * Login 1:1 还原 (pages/login/login.vue scoped scss, rpx→px 1rpx=0.5px)
+ * ============================================================ */
+.login-page{
+    min-height: 100vh; box-sizing: border-box; padding: 10px 0;
+    overflow-y: auto; overflow-x: hidden;
+    display: flex; flex-direction: column; align-items: center;
+    background: #fff;
+}
+.login-content{ flex: 1; width: 100%; max-width: 100vw; margin: 0 auto;
+    display: flex; flex-direction: column; justify-content: flex-start; }
+.login-form-wrapper{ min-height: 80vh; display: flex; flex-direction: column; padding-bottom: 20px; }
+
+.login-page .logo{ width: 100%; display: flex; justify-content: center; margin: 15px 0 25px; }
+.login-page .logo img{ width: 107px; height: 77px; object-fit: contain; }
+
+.login-page .login-header{
+    width: calc(100% - 60px); margin: 0 30px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+}
+.login-page .login-title{ font-size: 16px; color: #000; font-weight: 700; margin-bottom: 15px; }
+.login-page .terms-agreement{
+    display: flex; align-items: flex-start; font-size: 14px;
+    color: #999; line-height: 20px; flex-wrap: wrap; width: 100%;
+}
+.login-page .checkbox-wrapper{ flex-shrink: 0; margin-right: 8px; margin-top: 2px; cursor: pointer; }
+.login-page .checkbox{
+    width: 16px; height: 16px; border: 1px solid #ddd; border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .3s; background: #fff;
+}
+.login-page .checkbox.checkbox-active{ background: #ff92b0; border-color: #ff92b0; }
+.login-page .checkbox.checkbox-active::after{
+    content: ''; width: 8px; height: 4px; border-left: 2px solid #fff; border-bottom: 2px solid #fff;
+    transform: rotate(-45deg); margin-top: -2px;
+}
+.login-page .terms-text{ flex: 1; display: flex; flex-wrap: wrap; align-items: center; color: #333; }
+.login-page .terms-link{ color: #ff92b0; text-decoration: none; }
+
+/* 手机号登录区 */
+.login-page .container{ display: flex; flex-direction: column; align-items: center; width: 100%; }
+.login-page .content{ padding: 24px 24px 0; width: 100%; box-sizing: border-box; }
+
+.login-page .country-selector{ position: relative; margin-bottom: 16px; width: 100%; }
+.login-page .selected-country{
+    display: flex; align-items: center; padding: 8px; border: 1px solid #ddd; border-radius: 8px;
+    cursor: pointer; box-sizing: border-box; background: #fff;
+}
+.login-page .selected-country .flag{ width: 20px; height: 14px; margin-right: 12px; object-fit: cover; border-radius: 2px; }
+.login-page .selected-country .country-name{
+    font-weight: 500; flex: 1; font-size: 14px; color: #333;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.login-page .selected-country .arrow{ width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #666; transition: transform .2s; }
+.login-page .country-selector.open .selected-country .arrow{ transform: rotate(180deg); }
+
+.login-page .dropdown{
+    position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px;
+    background: #fff; border: 1px solid #eee; border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 100;
+    display: none; box-sizing: border-box;
+}
+.login-page .country-selector.open .dropdown{ display: block; }
+.login-page .dropdown .search-box{ padding: 8px 12px; border-bottom: 1px solid #eee; }
+.login-page .dropdown .search-input{
+    width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 10px;
+    font-size: 12px; height: 30px; box-sizing: border-box; outline: none;
+}
+.login-page .dropdown-list{ max-height: 240px; overflow-y: auto; }
+.login-page .dropdown-list .country-item{
+    display: flex; align-items: center; padding: 8px;
+    cursor: pointer; border-bottom: 1px solid #f5f5f5; box-sizing: border-box;
+}
+.login-page .dropdown-list .country-item:last-child{ border-bottom: none; }
+.login-page .dropdown-list .country-item:hover{ background: #f5f5f5; }
+.login-page .dropdown-list .country-item .flag{ width: 20px; height: 14px; margin-right: 12px; flex-shrink: 0; object-fit: cover; border-radius: 2px; }
+.login-page .dropdown-list .country-info{ flex: 1; min-width: 0; }
+.login-page .dropdown-list .country-info .name{
+    font-weight: 500; display: block; font-size: 14px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.login-page .dropdown-list .country-info .native-name{
+    font-size: 10px; color: #666; display: block;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.login-page .dropdown-list .code{ color: #666; font-size: 14px; margin-left: 8px; flex-shrink: 0; }
+
+.login-page .phone-input-container{
+    display: flex; align-items: stretch; border: 1px solid #ddd; border-radius: 8px;
+    overflow: hidden; width: 100%; margin-bottom: 16px;
+}
+.login-page .phone-prefix, .login-page .code-action{
+    padding: 11px; background: #f5f5f5; color: #666; font-size: 12px;
+    flex-shrink: 0; display: flex; align-items: center;
+    border: 0;
+}
+.login-page .code-action{ color: #ff92b0; font-weight: 500; cursor: pointer; }
+.login-page .code-action:disabled{ color: #999; cursor: not-allowed; }
+.login-page .phone-input{ flex: 1; padding: 8px; border: 0; outline: none; font-size: 16px; min-width: 0; background: transparent; }
+.login-page .phone-input::placeholder{ font-size: 12px; color: #bdbdbd; }
+
+/* 分隔线 */
+.login-page .divider-container{ display: flex; align-items: center; margin: 20px 24px; }
+.login-page .divider-line{ flex: 1; height: 1px; background: #ddd; }
+.login-page .divider-text{ font-size: 12px; color: #999; padding: 0 10px; }
+
+/* 第三方登录 */
+.login-page .third-party-login-methods{
+    display: flex; flex-direction: column; gap: 12px;
+    padding: 0 24px; margin-bottom: 20px;
+}
+.login-page .third-party-login-button{
+    display: flex; align-items: center; justify-content: center;
+    padding: 12px 16px; border: 1px solid #ddd; border-radius: 8px;
+    background: #fff; cursor: pointer; width: 100%; box-sizing: border-box;
+    transition: all .3s; text-decoration: none; color: #333;
+}
+.login-page .third-party-login-button:active{ background: #f5f5f5; border-color: #ccc; }
+.login-page .third-party-login-button img{ width: 20px; height: 20px; margin-right: 8px; flex-shrink: 0; }
+.login-page .third-party-login-button span{ font-size: 14px; color: #333; font-weight: 500; }
+
+/* 主登录按钮 */
+.login-page .login-submit-button{
+    height: 44px; width: 300px; margin: 16px auto 0;
+    border-radius: 25px; background: #fd85a9;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700; color: #fff;
+    border: 0; cursor: pointer;
+    box-shadow: 0 4px 12px rgba(253,133,169,.35);
+}
+.login-page .login-submit-button:disabled{ background: #f5b8c8; cursor: not-allowed; box-shadow: none; }
+
+/* 错误提示 */
+.login-page .login-error{
+    margin: 12px 24px 0; padding: 8px 12px;
+    background: #fff5fa; color: #ef5189; font-size: 12px;
+    border-radius: 6px; text-align: center;
+}
+</style>
+{/block}
+
+{block name="content"}
+<div class="login-page">
+    <div class="login-content">
+        <div class="login-form-wrapper">
+            <div class="logo"><img src="/static/logo.png" alt="BeautsGO"></div>
+            <div class="login-header">
+                <div class="login-title">{$tt['login.title']|default='登录'}</div>
+                <div class="terms-agreement">
+                    <div class="checkbox-wrapper" id="termsCb">
+                        <div class="checkbox" id="termsCbIcon"></div>
+                    </div>
+                    <div class="terms-text">
+                        我已阅读并同意
+                        <a class="terms-link" href="/{$lang_seg}/terms">{$tt['comment.UserAgreement']|default='用户协议'}</a>
+                        和
+                        <a class="terms-link" href="/{$lang_seg}/privacy">{$tt['common.PrivacyPolicy']|default='隐私政策'}</a>
+                    </div>
+                </div>
+            </div>
+
+            <form method="post" action="/{$lang_seg}/login" id="loginForm">
+                {if !empty($back)}<input type="hidden" name="back" value="{$back|raw}">{/if}
+                <input type="hidden" name="country_id" id="countryId" value="44">
+
+                <div class="container">
+                    <div class="content">
+                        <!-- 国家选择 -->
+                        <div class="country-selector" id="ctSel">
+                            <div class="selected-country" id="ctSelHead">
+                                <img src="https://flagcdn.com/w40/cn.png" class="flag" alt="" id="ctFlag">
+                                <span class="country-name" id="ctName">{$tt['login.defaultCountry']|default='中国'}</span>
+                                <span class="arrow"></span>
+                            </div>
+                            <div class="dropdown">
+                                <div class="search-box">
+                                    <input class="search-input" id="ctSearch" placeholder="{$tt['login.searchCountry']|default='搜索国家/地区'}" autocomplete="off">
+                                </div>
+                                <div class="dropdown-list" id="ctList">
+                                    <div class="country-item" data-id="44" data-dial="86" data-name="中国" data-native="China" data-flag="https://flagcdn.com/w40/cn.png">
+                                        <img class="flag" src="https://flagcdn.com/w40/cn.png" alt="">
+                                        <div class="country-info"><span class="name">中国</span><span class="native-name">China</span></div>
+                                        <span class="code">+86</span>
+                                    </div>
+                                    <div class="country-item" data-id="113" data-dial="82" data-name="韩国" data-native="대한민국" data-flag="https://flagcdn.com/w40/kr.png">
+                                        <img class="flag" src="https://flagcdn.com/w40/kr.png" alt="">
+                                        <div class="country-info"><span class="name">韩国</span><span class="native-name">대한민국</span></div>
+                                        <span class="code">+82</span>
+                                    </div>
+                                    <div class="country-item" data-id="234" data-dial="1" data-name="美国" data-native="United States" data-flag="https://flagcdn.com/w40/us.png">
+                                        <img class="flag" src="https://flagcdn.com/w40/us.png" alt="">
+                                        <div class="country-info"><span class="name">美国</span><span class="native-name">United States</span></div>
+                                        <span class="code">+1</span>
+                                    </div>
+                                    <div class="country-item" data-id="106" data-dial="81" data-name="日本" data-native="日本" data-flag="https://flagcdn.com/w40/jp.png">
+                                        <img class="flag" src="https://flagcdn.com/w40/jp.png" alt="">
+                                        <div class="country-info"><span class="name">日本</span><span class="native-name">日本</span></div>
+                                        <span class="code">+81</span>
+                                    </div>
+                                    <div class="country-item" data-id="216" data-dial="66" data-name="泰国" data-native="ประเทศไทย" data-flag="https://flagcdn.com/w40/th.png">
+                                        <img class="flag" src="https://flagcdn.com/w40/th.png" alt="">
+                                        <div class="country-info"><span class="name">泰国</span><span class="native-name">ประเทศไทย</span></div>
+                                        <span class="code">+66</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 手机号 -->
+                        <div class="phone-input-container">
+                            <span class="phone-prefix" id="ctPrefix">+86</span>
+                            <input class="phone-input" type="tel" name="phone" placeholder="{$tt['me.userInfoSet.phonePlc']|default='请输入手机号'}" value="{$phone|default=''}" required autocomplete="tel">
+                        </div>
+
+                        <!-- 验证码 -->
+                        <div class="phone-input-container">
+                            <input class="phone-input" type="tel" name="code" maxlength="6" placeholder="{$tt['me.userInfoSet.otpPlc']|default='请输入验证码'}" required autocomplete="one-time-code">
+                            <button class="code-action" type="button" id="getCodeBtn">{$tt['login.getCode']|default='获取验证码'}</button>
+                        </div>
+                    </div>
+                </div>
+
+                {if !empty($error)}<div class="login-error">{$error}</div>{/if}
+
+                <!-- 分隔线 + 第三方 -->
+                <div class="divider-container">
+                    <div class="divider-line"></div>
+                    <span class="divider-text">{$tt['login.othertxt']|default='其他登录方式'}</span>
+                    <div class="divider-line"></div>
+                </div>
+                <div class="third-party-login-methods">
+                    <a class="third-party-login-button" href="javascript:BG.toast('请使用手机号登录,Google 登录暂未开放','info')">
+                        <img src="https://beautsgoimg.59w.net/20250805145532/6891aae400665.png" alt="Google">
+                        <span>{$tt['login.googleLogin']|default='通过 Google 继续'}</span>
+                    </a>
+                    <a class="third-party-login-button" href="javascript:BG.toast('请使用手机号登录,Apple 登录暂未开放','info')">
+                        <img src="https://beautsgoimg.59w.net/20250805083436/6891519c9d37e.png" alt="Apple">
+                        <span>{$tt['login.appleLogin']|default='通过 Apple 继续'}</span>
+                    </a>
+                </div>
+
+                <!-- 主按钮 -->
+                <button class="login-submit-button" type="submit" id="loginBtn" disabled>
+                    <span class="login-button-text">{$tt['login.Loginbtn']|default='立即登录'}</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    var agreed = false;
+    var cb = document.getElementById('termsCb');
+    var cbIcon = document.getElementById('termsCbIcon');
+    var btn = document.getElementById('loginBtn');
+    cb.addEventListener('click', function(){
+        agreed = !agreed;
+        cbIcon.classList.toggle('checkbox-active', agreed);
+        btn.disabled = !agreed;
+    });
+
+    // 国家下拉
+    var sel = document.getElementById('ctSel');
+    var head = document.getElementById('ctSelHead');
+    var search = document.getElementById('ctSearch');
+    var list = document.getElementById('ctList');
+    var flag = document.getElementById('ctFlag');
+    var nameEl = document.getElementById('ctName');
+    var prefix = document.getElementById('ctPrefix');
+    var cidField = document.getElementById('countryId');
+    head.addEventListener('click', function(){ sel.classList.toggle('open'); if(sel.classList.contains('open')) search.focus(); });
+    document.addEventListener('click', function(e){ if(!sel.contains(e.target)) sel.classList.remove('open'); });
+    search.addEventListener('input', function(){
+        var kw = search.value.trim().toLowerCase();
+        list.querySelectorAll('.country-item').forEach(function(it){
+            var n = (it.dataset.name + ' ' + it.dataset.native + ' ' + it.dataset.dial).toLowerCase();
+            it.style.display = n.indexOf(kw) >= 0 ? '' : 'none';
+        });
+    });
+    list.addEventListener('click', function(e){
+        var it = e.target.closest('.country-item'); if(!it) return;
+        flag.src = it.dataset.flag; nameEl.textContent = it.dataset.name;
+        prefix.textContent = '+' + it.dataset.dial; cidField.value = it.dataset.id;
+        sel.classList.remove('open');
+    });
+
+    // 获取验证码
+    var getBtn = document.getElementById('getCodeBtn');
+    getBtn.addEventListener('click', function(){
+        var phone = document.querySelector('input[name=phone]').value.trim();
+        if(!phone){ BG.toast('请输入手机号', 'error'); return; }
+        if(getBtn.disabled) return;
+        getBtn.disabled = true;
+        fetch('/{$lang_seg}/login/send-code', {
+            method: 'POST', credentials: 'same-origin',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'phone=' + encodeURIComponent(phone) + '&country_id=' + encodeURIComponent(cidField.value)
+        }).then(function(r){ return r.json(); }).then(function(j){
+            BG.toast(j.msg || (j.ok ? '验证码已发送' : '发送失败'), j.ok ? 'success' : 'error');
+            if(j.ok){ BG.countdown(getBtn, 60, '重新获取'); }
+            else { getBtn.disabled = false; }
+        }).catch(function(){
+            BG.toast('网络错误', 'error'); getBtn.disabled = false;
+        });
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', function(e){
+        if(!agreed){ e.preventDefault(); BG.toast('请勾选用户协议和隐私协议', 'error'); }
+    });
+})();
+</script>
+{/block}

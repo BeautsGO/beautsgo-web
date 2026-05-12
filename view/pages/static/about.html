@@ -1,0 +1,44 @@
+{extend name="layout/base" /}
+
+{block name="extra_head"}
+<style>
+.static-page { background: #fff; min-height: 100vh; padding-bottom: 70px; }
+.static-page .page-head { background: #fff; height: 44px; display:flex; align-items:center; padding:0 15px; border-bottom: 1px solid #f1f1f1; position: sticky; top:0; z-index:20; }
+.static-page .back-btn { width: 30px; height: 30px; display:flex; align-items:center; justify-content:center; color:#1B1B1B; font-size:22.5px; text-decoration:none; }
+.static-page .page-title { flex:1; margin:0; text-align:center; font-size:16px; font-weight:600; color:#1B1B1B; margin-right:30px; }
+.static-page__body { padding: 15px 16px; font-size: 14px; line-height: 1.7; color: #333; }
+.static-page__body h2 { font-size:17px; margin:16px 0 8px; color:#1B1B1B; }
+.static-page__body p { margin: 0 0 10px; }
+.static-page__body ul { padding-left: 20px; margin: 0 0 10px; }
+.static-page__body li { margin-bottom: 5px; }
+</style>
+{/block}
+
+{block name="content"}
+<div class="static-page">
+    <div class="page-head">
+        <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="page-title">{$heading}</h1>
+    </div>
+    <article class="static-page__body">
+        <h2>BeautsGO 是什么</h2>
+        <p>BeautsGO(彼此美)是连接中国求美者与韩国顶尖医美机构的预约平台,主张<strong>中韩同价、价格透明</strong>。我们与首尔江南、狎鸥亭、清潭洞等核心商圈的 900+ 整形外科、皮肤科、抗衰中心建立长期合作。</p>
+
+        <h2>为什么选择我们</h2>
+        <ul>
+            <li>所有合作机构均完成资质审核,公开持牌信息</li>
+            <li>价格、活动、面诊费、积分兑换全部透明公示</li>
+            <li>提供中文/英文/日文/泰文全程语言服务</li>
+            <li>接送机、地陪翻译、酒店预订、合规出口等闭环服务</li>
+            <li>真实用户案例与评价,无水军刷分</li>
+        </ul>
+
+        <h2>覆盖项目</h2>
+        <p>整形外科(双眼皮、隆鼻、轮廓、抗衰提拉)、皮肤科(超声刀、热玛吉、水光针、激光、玻尿酸、肉毒)、毛发种植、男士整形、口腔正畸种植、男科妇科等全品类。</p>
+
+        <h2>联系我们</h2>
+        <p>合作邮箱:business@beautsgo.com;客服请在 App / 网页右下角发起对话。</p>
+    </article>
+    {include file="components/_tabbar" /}
+</div>
+{/block}

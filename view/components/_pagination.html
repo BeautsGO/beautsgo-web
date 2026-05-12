@@ -1,0 +1,13 @@
+{if $totalPages > 1}
+<nav class="pagination" role="navigation" aria-label="分页">
+    {if $page > 1}
+    <a class="pagination__btn" rel="prev"
+       href="?tab={$tab}&page={:$page - 1}{if $filterParams.area}&area={$filterParams.area}{/if}{if $filterParams.level}&level={$filterParams.level}{/if}{if $filterParams.category}&category={$filterParams.category}{/if}">{$tt['pagination.prev']|default='上一页'}</a>
+    {/if}
+    <span class="pagination__info">{$page} / {$totalPages}</span>
+    {if $page < $totalPages}
+    <a class="pagination__btn" rel="next"
+       href="?tab={$tab}&page={:$page + 1}{if $filterParams.area}&area={$filterParams.area}{/if}{if $filterParams.level}&level={$filterParams.level}{/if}{if $filterParams.category}&category={$filterParams.category}{/if}">{$tt['pagination.next']|default='下一页'}</a>
+    {/if}
+</nav>
+{/if}

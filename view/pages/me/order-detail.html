@@ -1,0 +1,42 @@
+{extend name="layout/base" /}
+{block name="extra_head"}
+<style>
+.od-page{padding:0 0 24px;background:#f7f7f9;min-height:100vh}
+.od-top{padding:24px 16px;background:linear-gradient(135deg,#fc6290,#ff8aac);color:#fff}
+.od-top .st{font-size:16px;font-weight:600}
+.od-top .tip{margin-top:6px;font-size:12px;opacity:.85}
+.od-card{margin:14px;padding:16px;background:#fff;border-radius:10px}
+.od-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed #eee;font-size:12px;color:#333;gap:14px}
+.od-row:last-child{border-bottom:0}
+.od-row .l{color:#999;white-space:nowrap}
+.od-row .r{text-align:right;flex:1;word-break:break-all}
+.od-kf{text-align:center;padding:18px 0}
+.od-kf img{width:160px;height:160px;border-radius:6px}
+.od-kf .t{margin-top:10px;font-size:12px;color:#888;line-height:1.6}
+</style>
+{/block}
+{block name="content"}
+{$st = $info.status|default=0}
+<section class="od-page">
+    <div class="page-head" style="background:transparent;color:#fff"><a class="back-btn" href="/{$lang_seg}/me/order" aria-label="返回" style="color:#fff">‹</a></div>
+    <div class="od-top">
+        <div class="st">{$info.status_text|default=''}</div>
+        <div class="tip">{$tt['order.tipBelow']|default='请添加专属客服跟进后续服务'}</div>
+    </div>
+    {if !empty($wxCode)}
+    <div class="od-card od-kf">
+        <img src="{$wxCode}" alt="客服二维码">
+        <div class="t">{$tt['order.Addcustomerservice']|default='请添加您的专属客服'}</div>
+    </div>
+    {/if}
+    <div class="od-card">
+        <div class="od-row"><span class="l">{$tt['make.Bookhospital']|default='预约机构'}</span><span class="r">{$info.hospital_name|default=''}</span></div>
+        {if !empty($info.d_id)}<div class="od-row"><span class="l">{$tt['index.common.doctor']|default='医生'}</span><span class="r">{$info.doctor_name|default=''}</span></div>{/if}
+        {if !empty($info.p_id)}<div class="od-row"><span class="l">{$tt['make.Bookitem']|default='预约项目'}</span><span class="r">{$info.project_name|default=''}</span></div>{/if}
+        {if !empty($info.refer_no)}<div class="od-row"><span class="l">{$tt['order.Ordernum']|default='订单号'}</span><span class="r">{$info.refer_no}</span></div>{/if}
+        {if !empty($info.create_time)}<div class="od-row"><span class="l">{$tt['order.Ordertime']|default='下单时间'}</span><span class="r">{$info.create_time}</span></div>{/if}
+        {if !empty($info.callback_time)}<div class="od-row"><span class="l">{$tt['order.Paytime']|default='支付时间'}</span><span class="r">{$info.callback_time}</span></div>{/if}
+        {if !empty($info.price)}<div class="od-row"><span class="l">{$tt['order.price']|default='金额'}</span><span class="r">¥{$info.price}</span></div>{/if}
+    </div>
+</section>
+{/block}

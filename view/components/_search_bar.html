@@ -1,0 +1,22 @@
+<div class="search-bar">
+    <div class="top">
+        <div class="search">
+            <a class="search-box" href="/{$lang_seg}/search{if !empty($filterParams.kw)}?q={$filterParams.kw|raw}{/if}" aria-label="搜索">
+                <img class="search-icon" src="/static/search.png" alt="">
+                <span class="search-text">{$filterParams.kw|default=$tt['index.search.placeholder']|default='搜索机构、项目、医生'}</span>
+            </a>
+            <details class="contact-box lang-switch">
+                <summary aria-label="切换语言">
+                    <img src="/static/langchange.png" alt="lang">
+                </summary>
+                <div class="lang-options">
+                    <a href="/cn/" hreflang="zh-CN" {if $lang == 'zh-Hans'}aria-current="true"{/if}>中文(简体)</a>
+                    <a href="/zh/" hreflang="zh-TW" {if $lang == 'zh-Hant'}aria-current="true"{/if}>中文(繁體)</a>
+                    <a href="/en/" hreflang="en"    {if $lang == 'en'}aria-current="true"{/if}>English</a>
+                    <a href="/ja/" hreflang="ja"    {if $lang == 'ja'}aria-current="true"{/if}>日本語</a>
+                    <a href="/th/" hreflang="th"    {if $lang == 'th'}aria-current="true"{/if}>ภาษาไทย</a>
+                </div>
+            </details>
+        </div>
+    </div>
+</div>

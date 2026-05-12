@@ -1,0 +1,11 @@
+{extend name="layout/base" /}
+{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">
+<style>.msg-page{padding:16px;background:#fff;min-height:100vh}.msg-title{font-size:14px;font-weight:600;margin:0 0 8px}.msg-time{color:#999;font-size:12px;margin-bottom:16px}.msg-content{font-size:12px;line-height:1.8;color:#333}.msg-content img{max-width:100% !important;height:auto !important}</style>{/block}
+{block name="content"}
+<section class="msg-page">
+    <div class="page-head"><a class="back-btn" href="/{$lang_seg}/me/news" aria-label="返回">‹</a><h1 class="page-title">{$tt['news.detail']|default='消息详情'}</h1></div>
+    <h2 class="msg-title">{$info.title|default='系统消息'}</h2>
+    {if !empty($info.create_time)}<div class="msg-time">{if is_numeric($info.create_time)}{:date('Y-m-d H:i', (int)$info.create_time)}{else/}{$info.create_time}{/if}</div>{/if}
+    <div class="msg-content">{$info.content|default=''|raw}</div>
+</section>
+{/block}

@@ -1,0 +1,26 @@
+{if !empty($classes)}
+<div class="nav-swiper">
+    <div class="nav-swiper__track">
+        {php}$classPages = array_chunk($classes, 10);{/php}
+        {foreach $classPages as $pi=>$pageCls}
+        <div class="nav-swiper__page" id="nav-swiper-page-{$pi}">
+            <div class="classify-box">
+                {foreach $pageCls as $cls}
+                <a class="classify-item" href="/{$lang_seg}/projects/category/{$cls.slug|default=$cls.id}">
+                    {if !empty($cls.icon)}<img src="{$cls.icon}" alt="{$cls.name}" loading="lazy">{/if}
+                    <span>{$cls.name}</span>
+                </a>
+                {/foreach}
+            </div>
+        </div>
+        {/foreach}
+    </div>
+    {if count($classPages) > 1}
+    <div class="nav-swiper__dots">
+        {foreach $classPages as $pi=>$_}
+        <a class="nav-swiper__dot{if $pi == 0} nav-swiper__dot--active{/if}" href="#nav-swiper-page-{$pi}" aria-label="第 {:$pi+1} 页"></a>
+        {/foreach}
+    </div>
+    {/if}
+</div>
+{/if}

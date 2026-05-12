@@ -1,0 +1,30 @@
+{extend name="layout/base" /}
+{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+{block name="content"}
+<div class="user-page">
+    <div class="page-head">
+        <a class="back-btn" href="/{$lang_seg}/me/settings" aria-label="返回">‹</a>
+        <h1 class="page-title">更换手机号</h1>
+    </div>
+    {if $saved}<div class="msg-ok">手机号已更换</div>{/if}
+    {if !empty($error)}<div class="msg-err">{$error}</div>{/if}
+    <form method="post" action="/{$lang_seg}/me/change-phone">
+        <div class="u-form-card">
+            <div class="u-form-row">
+                <div class="u-form-row__label">当前账号</div>
+                <div class="u-form-row__field"><input value="{$user.phone|default=''}" disabled style="background:#f5f5f5;color:#999;"></div>
+            </div>
+            <div class="u-form-row">
+                <div class="u-form-row__label">新手机号</div>
+                <div class="u-form-row__field"><input type="tel" name="new_phone" placeholder="请输入新手机号" required inputmode="numeric"></div>
+            </div>
+            <div class="u-form-row">
+                <div class="u-form-row__label">验证码</div>
+                <div class="u-form-row__field"><input type="text" name="code" placeholder="验证码" required></div>
+            </div>
+        </div>
+        <button class="u-btn-primary" type="submit">提交</button>
+    </form>
+    {include file="components/_tabbar" /}
+</div>
+{/block}

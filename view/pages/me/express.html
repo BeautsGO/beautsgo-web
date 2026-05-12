@@ -1,0 +1,41 @@
+{extend name="layout/base" /}
+{block name="extra_head"}
+<style>
+.ex-page{padding:16px;background:#f7f7f9;min-height:100vh}
+.ex-head{padding:14px 16px;background:#fff;border-radius:10px;margin-bottom:14px;display:flex;align-items:center;gap:12px}
+.ex-head img{width:42px;height:42px;border-radius:6px;object-fit:contain;background:#f1f1f3}
+.ex-head .meta{flex:1}
+.ex-head .name{font-size:12px;font-weight:600;color:#222}
+.ex-head .num{font-size:12px;color:#999;margin-top:2px;word-break:break-all}
+.ex-trace{background:#fff;border-radius:10px;padding:10px 16px}
+.ex-trace .step{position:relative;padding:14px 0 14px 22px;border-left:1px dashed #ddd;font-size:12px;color:#666}
+.ex-trace .step:first-child{color:#fc6290}
+.ex-trace .step:before{content:'';position:absolute;left:-5px;top:18px;width:9px;height:9px;border-radius:50%;background:#ccc}
+.ex-trace .step:first-child:before{background:#fc6290}
+.ex-trace .step .time{display:block;font-size:11px;color:#999;margin-bottom:2px}
+</style>
+{/block}
+{block name="content"}
+<section class="ex-page">
+    <div class="page-head"><a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a><h1 class="page-title">{$tt['express.title']|default='物流详情'}</h1></div>
+    <div class="ex-head">
+        {if !empty($express.expressCompanyLogo)}<img src="{$express.expressCompanyLogo}" alt="">{/if}
+        <div class="meta">
+            <div class="name">{$express.expressCompanyName|default='-'}</div>
+            <div class="num">{$express.number|default=''}</div>
+        </div>
+    </div>
+    <div class="ex-trace">
+        {if !empty($express.logisticsTraceDetails) && is_array($express.logisticsTraceDetails)}
+        {foreach $express.logisticsTraceDetails as $t}
+        <div class="step">
+            <span class="time">{$t.time|default=''}</span>
+            <span>{$t.desc|default=''}</span>
+        </div>
+        {/foreach}
+        {else/}
+        <div class="empty" style="padding:40px 0;text-align:center;color:#999">{$tt['point.Empty']|default='暂无物流信息'}</div>
+        {/if}
+    </div>
+</section>
+{/block}

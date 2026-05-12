@@ -1,0 +1,21 @@
+<a class="list-item" href="/{$lang_seg}/project/{$p.slug|default=$p.id}">
+    <div class="list-item-left">
+        {if !empty($p.cover_url)}
+        <img src="{$p.cover_url}" alt="{$p.name}" loading="lazy">
+        {/if}
+    </div>
+    <div class="list-item-right">
+        <div class="list-item-title">{$p.name}</div>
+        <div class="list-item-price-box">
+            <div class="yy-price-wrap">
+                <span class="price-hb-price">₩ {$p.korean_won}</span>
+                {if !empty($p.unit)}<span class="price-unit">/{$p.unit}</span>{/if}
+            </div>
+            {if !empty($p.sale_nums)}<span class="sale-num">{$tt['index.common.AlreadyRedeemed']|default='已售'}{$p.sale_nums}</span>{/if}
+        </div>
+        <div class="list-item-info">
+            {if !empty($p.hospital_name)}<span class="info-hospital">{$p.hospital_name}</span>{/if}
+            {if !empty($p.doctor_name)}<span class="info-doctor">{$p.doctor_name}</span>{/if}
+        </div>
+    </div>
+</a>

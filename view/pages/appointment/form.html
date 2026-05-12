@@ -1,0 +1,88 @@
+{extend name="layout/base" /}
+
+{block name="extra_head"}
+<style>
+.appt-page { background:#f6f6f6; min-height:100vh; padding-bottom:70px; }
+.page-head { background:#fff; height:44px; display:flex; align-items:center; padding:0 15px; border-bottom:1px solid #f1f1f1; position:sticky; top:0; z-index:20; }
+.page-head .back-btn { width:30px; height:30px; display:flex; align-items:center; justify-content:center; color:#1B1B1B; font-size:22.5px; text-decoration:none; }
+.page-head .page-title { flex:1; margin:0; text-align:center; font-size:16px; font-weight:600; color:#1B1B1B; margin-right:30px; }
+.appt-target { background:#fff; padding:15px 16px; margin-bottom:12px; display:flex; gap:12px; }
+.appt-target img { width:70px; height:70px; border-radius:8px; object-fit:cover; }
+.appt-target__name { font-size:15px; font-weight:600; color:#1B1B1B; margin-bottom:4px; }
+.appt-target__meta { font-size:12px; color:#999; }
+.appt-form { background:#fff; padding:0; }
+.form-row { display:flex; align-items:center; padding:15px 16px; border-bottom:1px solid #f5f5f5; }
+.form-row label { width:80px; font-size:14px; color:#1B1B1B; }
+.form-row input, .form-row textarea { flex:1; min-height:34px; padding:8px 0; border:0; background:transparent; font-size:14px; outline:none; resize:vertical; }
+.form-row textarea { padding:8px 0; }
+.btn-submit { display:block; width:calc(100% - 32px); margin:20px 16px; height:47px; background:#FE739D; color:#fff; border:0; border-radius:24px; font-size:16px; font-weight:600; }
+.appt-msg { padding:8px 16px; font-size:12px; }
+.appt-msg.err { color:#EF5189; }
+</style>
+{/block}
+
+{block name="content"}
+<div class="appt-page">
+    <div class="page-head">
+        <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="page-title">预约面诊</h1>
+    </div>
+
+    {if !empty($hospital)}
+    <div class="appt-target">
+        {if !empty($hospital.cover_url)}<img src="{$hospital.cover_url}" alt="">{/if}
+        <div>
+            <div class="appt-target__name">{$hospital.name|default=''}</div>
+            <div class="appt-target__meta">{$hospital.zh_cn_address|default=''}</div>
+        </div>
+    </div>
+    {/if}
+    {if !empty($doctor)}
+    <div class="appt-target">
+        {if !empty($doctor.cover_url)}<img src="{$doctor.cover_url}" alt="">{/if}
+        <div>
+            <div class="appt-target__name">{$doctor.name|default=''}</div>
+            <div class="appt-target__meta">{$doctor.job_name|default=''} · {$doctor.hospital.name|default=''}</div>
+        </div>
+    </div>
+    {/if}
+    {if !empty($project)}
+    <div class="appt-target">
+        {if !empty($project.cover_url)}<img src="{$project.cover_url}" alt="">{/if}
+        <div>
+            <div class="appt-target__name">{$project.name|default=''}</div>
+            <div class="appt-target__meta">₩ {$project.korean_won|default=''}{if !empty($project.unit)}/{$project.unit}{/if}</div>
+        </div>
+    </div>
+    {/if}
+
+    {if !empty($error)}<div class="appt-msg err">{$error}</div>{/if}
+
+    <form method="post" action="/{$lang_seg}/appointment" class="appt-form">
+        <input type="hidden" name="h_id" value="{$hospital.id|default=0}">
+        <input type="hidden" name="d_id" value="{$doctor.id|default=0}">
+        <input type="hidden" name="p_id" value="{$project.id|default=0}">
+        <div class="form-row">
+            <label>姓名</label>
+            <input type="text" name="name" placeholder="您的姓名" value="{$user.nickname|default=''}" required>
+        </div>
+        <div class="form-row">
+            <label>联系电话</label>
+            <input type="tel" name="phone" placeholder="联系电话" required inputmode="numeric">
+        </div>
+        <div class="form-row">
+            <label>微信号</label>
+            <input type="text" name="wechat" placeholder="选填,方便顾问联系">
+        </div>
+        <div class="form-row">
+            <label>意向时间</label>
+            <input type="date" name="visit_date">
+        </div>
+        <div class="form-row" style="align-items:flex-start;">
+            <label style="padding-top:8px;">备注</label>
+            <textarea name="remark" rows="3" placeholder="描述您关心的问题"></textarea>
+        </div>
+        <button class="btn-submit" type="submit">提交预约</button>
+    </form>
+</div>
+{/block}

@@ -1,0 +1,17 @@
+<a class="sp_item" href="/{$lang_seg}/point/{$sp.slug|default=$sp.id}">
+    <div class="sp_img">
+        {if !empty($sp.cover_url)}
+        <img src="{$sp.cover_url}" alt="{$sp.title}" loading="lazy">
+        {/if}
+    </div>
+    <div class="sp_text">
+        <div class="sp_title">{$sp.title}</div>
+        <div class="sp_num">
+            <div class="sp_jf_num">
+                <span class="sp_jf_pt">{$sp.point} {$tt['index.common.point']|default='积分'}</span>
+                {if !empty($sp.price)}<span class="sp_jf_yuan">+¥{$sp.price}</span>{/if}
+            </div>
+            <div class="sp_dh_num">{$tt['index.common.AlreadyRedeemed']|default='已兑'}{$sp.redeem_num}</div>
+        </div>
+    </div>
+</a>

@@ -1,0 +1,44 @@
+{extend name="layout/base" /}
+{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+{block name="content"}
+<div class="user-page">
+    <div class="page-head">
+        <a class="back-btn" href="/{$lang_seg}/point/shop" aria-label="返回">‹</a>
+        <h1 class="page-title">积分兑换</h1>
+    </div>
+
+    {if !empty($error)}<div class="msg-err">{$error}</div>{/if}
+
+    <div style="display:flex; gap:12px; padding:15px 16px; background:#fff; margin-bottom:12px;">
+        {if !empty($item.cover_url)}<img src="{$item.cover_url}" alt="" style="width:80px; height:80px; border-radius:6px; object-fit:cover;">{/if}
+        <div>
+            <div style="font-size:15px; font-weight:600; color:#1B1B1B; margin-bottom:6px;">{$item.title}</div>
+            <div style="color:#EF5189; font-weight:700; font-size:15px;">{$item.point} 积分{if !empty($item.price)} + ¥{$item.price}{/if}</div>
+        </div>
+    </div>
+
+    <form method="post" action="/{$lang_seg}/point/confirm">
+        <input type="hidden" name="pid" value="{$item.id}">
+        <div class="u-form-card">
+            <div class="u-form-row">
+                <div class="u-form-row__label">收件人</div>
+                <div class="u-form-row__field"><input type="text" name="name" placeholder="姓名" required></div>
+            </div>
+            <div class="u-form-row">
+                <div class="u-form-row__label">联系电话</div>
+                <div class="u-form-row__field"><input type="tel" name="phone" placeholder="电话" required inputmode="numeric"></div>
+            </div>
+            <div class="u-form-row">
+                <div class="u-form-row__label">收件地址</div>
+                <div class="u-form-row__field"><textarea name="address" rows="3" placeholder="省市区 + 详细地址" required></textarea></div>
+            </div>
+            <div class="u-form-row">
+                <div class="u-form-row__label">备注</div>
+                <div class="u-form-row__field"><textarea name="remark" rows="2" placeholder="选填"></textarea></div>
+            </div>
+        </div>
+        <button class="u-btn-primary" type="submit">确认兑换</button>
+    </form>
+    {include file="components/_tabbar" /}
+</div>
+{/block}

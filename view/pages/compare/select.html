@@ -1,0 +1,33 @@
+{extend name="layout/base" /}
+{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+{block name="content"}
+<div class="user-page">
+    <div class="page-head">
+        <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="page-title">选择对比项</h1>
+    </div>
+    <div class="u-tabs-bar">
+        <a class="{if $type == 1}active{/if}" href="?type=1">机构</a>
+        <a class="{if $type == 2}active{/if}" href="?type=2">医生</a>
+        <a class="{if $type == 3}active{/if}" href="?type=3">项目</a>
+    </div>
+
+    <form method="get" action="/{$lang_seg}/compare">
+        <input type="hidden" name="type" value="{$type}">
+        <div class="u-form-card">
+            <div class="u-form-row">
+                <div class="u-form-row__label">ID 列表</div>
+                <div class="u-form-row__field">
+                    <input type="text" name="ids" placeholder="多个 id 用逗号分隔,例: 254,349,978" required>
+                </div>
+            </div>
+        </div>
+        <button class="u-btn-primary" type="submit">开始对比</button>
+    </form>
+
+    <div style="padding:0 16px; color:#999; font-size:12px;">
+        提示:可以在{:$type == 1?'机构':$type == 2?'医生':'项目'}列表页点击卡片右上角的对比按钮添加,本页面是 SSR 简化版直接输入 ID。
+    </div>
+    {include file="components/_tabbar" /}
+</div>
+{/block}

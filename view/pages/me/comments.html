@@ -1,0 +1,29 @@
+{extend name="layout/base" /}
+{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+{block name="content"}
+<div class="user-page">
+    <div class="page-head">
+        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
+        <h1 class="page-title">我的评价</h1>
+    </div>
+    {if empty($list)}<div class="empty">{$tt['point.Empty']|default='暂无评价'}</div>{/if}
+    <div class="u-list">
+    {foreach $list as $c}
+        <a class="u-list-item" href="/{$lang_seg}/{if $c.type == 1}hospital{elseif $c.type == 2}doctor{else}project{/if}/{$c.with_id}">
+            <div class="u-list-item__body">
+                <div class="u-list-item__title">
+                    {if $c.rating > 0}{foreach name=":range(1,$c['rating'])" item="i"}★{/foreach}{/if}
+                    <span style="color:#999; font-size:12px; margin-left:5px;">
+                        {if $c.type == 1}机构评价{elseif $c.type == 2}医生评价{else}项目评价{/if}
+                    </span>
+                </div>
+                <div class="u-list-item__meta">{$c.content|default=''}</div>
+                <div class="u-list-item__time">{:is_numeric($c.create_time)?date('Y-m-d',$c.create_time):$c.create_time}</div>
+            </div>
+        </a>
+    {/foreach}
+    </div>
+    {include file="components/_pagination" /}
+    {include file="components/_tabbar" /}
+</div>
+{/block}

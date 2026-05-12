@@ -1,0 +1,291 @@
+{extend name="layout/base" /}
+
+{block name="extra_head"}
+<link rel="stylesheet" href="/static/css/pages/doctor-detail.css?v={$assets.css_ver}">
+{/block}
+
+{block name="content"}
+<div class="body">
+
+    <!-- 顶部吸顶 nav -->
+    <div class="detail-nav">
+        <a class="detail-nav__back" href="javascript:history.back()" aria-label="返回">
+            <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <div class="detail-nav__title">{$doctor.name|default=''}</div>
+    </div>
+
+    <!-- 顶部轮播 -->
+    {if !empty($doctor.banner)}
+    <div class="swiper-body">
+        <div class="swiper">
+            {foreach $doctor.banner as $idx=>$bn}
+            <div class="swiper-item" {if $idx > 0}style="display:none"{/if}>
+                {if !empty($bn.is_mp4) && !empty($bn.url)}
+                <div class="swiper-play"><img src="/static/detail/play.png" alt="play"></div>
+                {/if}
+                <img class="swiper-img" src="{$bn.cover|default=$bn.url}" alt="{$doctor.name|default=''} {:$idx + 1}" loading="{:$idx == 0 ? 'eager' : 'lazy'}">
+            </div>
+            {/foreach}
+        </div>
+        <div class="current">1/{:count($doctor.banner)}</div>
+    </div>
+    {/if}
+
+    <!-- 个人资料 -->
+    <div class="user">
+        <div class="username">
+            <div class="username-left">
+                {$doctor.name|default=''}
+                {if !empty($doctor.education)}<span class="username-edu">{$doctor.education}</span>{/if}
+            </div>
+        </div>
+        <div class="user-list">
+            {if !empty($doctor.age)}<div class="user-list-detail">{$doctor.age}{$tt['doctorDetails.YearsOld']|default='岁'}</div>{/if}
+            {if !empty($doctor.blood)}<div class="user-list-detail">{$doctor.blood}</div>{/if}
+            {if !empty($doctor.constellation)}<div class="user-list-detail">{$doctor.constellation}</div>{/if}
+            {if !empty($doctor.faith)}<div class="user-list-detail">{$doctor.faith}</div>{/if}
+            {if !empty($doctor.school)}<div class="user-list-detail">{$doctor.school}</div>{/if}
+        </div>
+        <div class="user-br"></div>
+        {if !empty($doctor.visit_time)}
+        <div class="user-box">
+            <div class="user-box-detail" style="width:100%;">
+                <div>{$tt['doctorDetails.BusinessHours']|default='营业时间'}</div>
+                <span class="user-box-detail__val">{$doctor.visit_time}</span>
+            </div>
+        </div>
+        {/if}
+        <div class="user-box">
+            {if !empty($doctor.working_time)}
+            <div class="user-box-detail">
+                <div>{$tt['doctorDetails.YearsOfExperience']|default='从业时间'}</div>
+                <span class="user-box-detail__val">{$doctor.working_time}</span>
+            </div>
+            {/if}
+            {if !empty($doctor.job_name)}
+            <div class="user-box-detail">
+                <div>{$tt['doctorDetails.Position']|default='职位'}</div>
+                <span class="user-box-detail__val">{$doctor.job_name}</span>
+            </div>
+            {/if}
+            {if !empty($doctor.surgical_style)}
+            <div class="user-box-detail">
+                <div>{$tt['doctorDetails.SurgicalStyle']|default='手术风格'}</div>
+                <span class="user-box-detail__val">{$doctor.surgical_style}</span>
+            </div>
+            {/if}
+            <div class="user-box-detail">
+                <div>{$tt['doctorDetails.UniversityTeaching']|default='大学执教'}</div>
+                <span class="user-box-detail__val">{if !empty($doctor.is_teach) && $doctor.is_teach == 1}{$tt['index.common.yes']|default='是'}{else}{$tt['index.common.no']|default='否'}{/if}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 擅长项目 -->
+    {if !empty($doctor.tag)}
+    <div class="good">
+        <div class="good-title">{$tt['doctorDetails.SpecializesIn']|default='医生擅长'}</div>
+        <div class="good-text">{:implode('、', $doctor['tag'])}</div>
+    </div>
+    {/if}
+
+    <!-- 执业机构 -->
+    {if !empty($hospital) && !empty($hospital.id)}
+    <div class="mechanism">
+        <div class="mechanism-title">{$tt['doctorDetails.AffiliatedInstitution']|default='执业机构'}</div>
+        <a class="mechanism-detail" href="/{$lang_seg}/hospital/{$hospital.slug|default=$hospital.id}">
+            {if !empty($hospital.cover_url)}
+            <div class="mechanism-cover"><img src="{$hospital.cover_url}" alt="{$hospital.name}" loading="lazy"></div>
+            {/if}
+            <div class="mechanism-detail-left">
+                <div class="mechanism-detail-top">
+                    <span class="mechanism-name">{$hospital.name}</span>
+                    {if !empty($hospital.clinic_fee)}
+                    <span class="clinic-fee">{$tt['index.common.ConsultationFee']|default='面诊费'}:₩{$hospital.clinic_fee}</span>
+                    {/if}
+                </div>
+                <div class="mechanism-detail-down">{$hospital.address|default=$hospital.zh_cn_address|default=''}</div>
+                {if !empty($hospital.response_time)}
+                <div class="mechanism-response">
+                    {$tt['index.common.BookingResponseTime']|default='预约响应时长'}:<span style="color:#fc6290d1">{$hospital.response_time} {$tt['index.common.Hour']|default='小时'}</span>
+                </div>
+                {/if}
+            </div>
+            <div class="mechanism-detail-right">
+                <img src="/static/icon/right.svg" alt="more">
+            </div>
+        </a>
+    </div>
+    {/if}
+
+    <!-- 精选案例 -->
+    {if !empty($cases)}
+    <div class="head">
+        <div class="head-left">
+            <div></div>
+            {$tt['index.common.FeaturedCases']|default='精选案例'}
+        </div>
+        <div class="head-right">
+            {$tt['index.common.ViewAll']|default='查看全部'}
+            <img src="/static/icon/right.png" alt="more">
+        </div>
+    </div>
+    <div class="case">
+        <div class="case-list">
+            {foreach $cases as $cs}
+            {if !empty($cs.pic_url_0)}
+            <div class="case-item">
+                <div class="cae-box">
+                    <div class="case-top">
+                        <div class="case-img" style="background-image: url('{$cs.pic_url_0}')"></div>
+                        {if $cs['pic_count'] >= 2}
+                        <div class="case-img" style="background-image: url('{$cs.pic_url_1}')"></div>
+                        {/if}
+                    </div>
+                    <div class="case-bottom">
+                        <div class="case-title"><div>{$cs.content|default=''}</div></div>
+                        <div class="case-user">
+                            <img src="{$cs.user.avatar}" alt="user">
+                            <span>{$cs.user.nickname}</span>
+                            <span class="toggle-lang">翻译</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/if}
+            {/foreach}
+        </div>
+    </div>
+    {/if}
+
+    <!-- 用户反馈 (FeedbackList) -->
+    {if !empty($comments) || !empty($tags)}
+    <div class="feedback-list-component">
+        <div class="head">
+            <div class="head-left">
+                <div></div>
+                {$tt['hospitalDetails.Userfeedback']|default='用户反馈'}
+            </div>
+            <div class="head-right">
+                {$tt['index.common.ViewAll']|default='查看全部'}
+                <img src="/static/icon/right.png" alt="more">
+            </div>
+        </div>
+        <div class="user-feedback">
+            {if !empty($tags)}
+            <div class="tags">{foreach $tags as $tg}<div class="tag">{$tg.name}</div>{/foreach}</div>
+            {/if}
+            <div class="feedback-list">
+                {foreach $comments as $cm}
+                <div class="feedback-item">
+                    <div class="feedback-header">
+                        <div>
+                            <img class="avatar" src="{$cm.avatar}" alt="user">
+                            <div class="user-info">
+                                <div class="username"><span>{$cm.nickname}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    {if !empty($cm.rating)}
+                    <div class="star-rating">
+                        <div class="stars">
+                            {foreach name=":range(1,5)" item="n"}<span class="star{if $n <= $cm['rating']} active{/if}">★</span>{/foreach}
+                        </div>
+                        <span class="rating-num">{$cm.rating}.0</span>
+                    </div>
+                    {/if}
+                    <div class="feedback-content">{$cm.content}<span class="toggle-lang">翻译</span></div>
+                    {if !empty($cm.mediaList)}
+                    <div class="feedback-images">
+                        {foreach $cm.mediaList as $m}
+                        <div>{if $m['type'] == 'video'}<video src="{$m.url}" controls></video>{else}<img src="{$m.url}" alt="media" loading="lazy">{/if}</div>
+                        {/foreach}
+                    </div>
+                    {/if}
+                </div>
+                {/foreach}
+            </div>
+        </div>
+    </div>
+    {/if}
+
+    <!-- 医生简历(富文本) -->
+    {if !empty($doctor.curriculum_vitae)}
+    <div class="head">
+        <div class="head-left">
+            <div></div>
+            {$tt['doctorDetails.DeansProfile']|default='院长简介'}
+        </div>
+    </div>
+    <div class="text">{$doctor.curriculum_vitae|raw}</div>
+    {/if}
+
+    <!-- 特色项目 -->
+    {if !empty($projects)}
+    <div class="head">
+        <div class="head-left">
+            <div></div>
+            {$tt['doctorDetails.SignaturePrograms']|default='特色项目'}
+        </div>
+        <div class="head-right">
+            {$tt['index.common.ViewAll']|default='查看全部'}
+            <img src="/static/icon/right.png" alt="more">
+        </div>
+    </div>
+    <div class="project">
+        {foreach $projects as $pj}
+        <a class="project-detail" href="/{$lang_seg}/project/{$pj.en_name|default=$pj.id}">
+            {if !empty($pj.cover_url)}
+            <img src="{$pj.cover_url}" alt="{$pj.name}" loading="lazy">
+            {/if}
+            <div class="two-ellipsis">{$pj.name}</div>
+            <div class="project-price-box">
+                <div class="project-price-value">
+                    <span class="project-price-currency">₩</span>{$pj.korean_won}
+                    {if !empty($pj.unit)}<span class="project-price-unit">/{$pj.unit}</span>{/if}
+                </div>
+            </div>
+        </a>
+        {/foreach}
+    </div>
+    {/if}
+
+    <!-- 底部按钮 -->
+    <div class="btns">
+        <div class="btns-detail">
+            <a class="btns-img" href="#app-download">
+                <img src="/static/detail/android-icon.png" alt="download">
+                <span class="h5-app-text">下载</span>
+            </a>
+            <div class="btns-img">
+                <img src="/static/detail/btns3.svg" alt="favorite">
+                <span>{$tt['index.common.Favorites']|default='收藏'}</span>
+            </div>
+            {if !empty($hospital.is_cooper) && $hospital.is_cooper == 1}
+            <div class="btns-right">
+                {$tt['index.common.BookNow']|default='预约面诊'}
+                <span class="orderpoint">{$tt['point.Orderpoint']|default='下单送积分'}</span>
+            </div>
+            {/if}
+            <div class="btns-right btns-consult">
+                <span class="custom-icon custom-icon-kefu1"></span>
+                {$tt['index.common.chatNow']|default='咨询一下'}
+            </div>
+        </div>
+    </div>
+
+    <!-- App 下载弹窗 -->
+    <div id="app-download" class="app-popup-mask">
+        <div class="app-popup">
+            <a class="app-popup-close" href="#" aria-label="关闭">✕</a>
+            <div class="app-popup-title">BeautsGO 彼此美</div>
+            <a class="app-popup-link" href="https://apps.apple.com/" target="_blank" rel="noopener">
+                <img class="app-popup-qrcode" src="/static/detail/android-icon.png" alt="App 下载二维码">
+            </a>
+            <div class="app-popup-tip">扫码下载 APP,享专属预约权益</div>
+        </div>
+    </div>
+
+</div>
+{/block}

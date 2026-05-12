@@ -1,0 +1,41 @@
+{extend name="layout/base" /}
+
+{block name="extra_head"}
+<link rel="stylesheet" href="/static/css/pages/case.css?v={$assets.css_ver}">
+{/block}
+
+{block name="content"}
+<div class="case-detail">
+    <div class="page-head">
+        <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="page-title">积分商品</h1>
+    </div>
+
+    <div class="case-detail__images">
+        {if !empty($item.cover_url)}<img src="{$item.cover_url}" alt="{$item.title}" loading="lazy">{/if}
+    </div>
+
+    <div class="case-detail__body">
+        <h2 style="font-size:18px; color:#1B1B1B; margin:0 0 8px;">{$item.title}</h2>
+        <div style="display:flex; align-items:baseline; gap:8px; margin-bottom:12px;">
+            <span style="color:#EF5189; font-weight:700; font-size:20px;">{$item.point} 积分</span>
+            {if !empty($item.price)}<span style="color:#999; font-size:12px;">+ ¥{$item.price}</span>{/if}
+            <span style="margin-left:auto; color:#999; font-size:11px;">已兑 {$item.redeem_num}</span>
+        </div>
+        <div class="case-detail__content" style="margin-bottom:12px;">{$item.content|raw}</div>
+
+        {if !empty($hospitals)}
+        <div class="case-detail__related">
+            <div class="related-title">适用医院</div>
+            {foreach $hospitals as $h}
+            <a class="related-card" href="/{$lang_seg}/hospital/{$h.slug}" style="margin-bottom:8px;">
+                {if !empty($h.cover_url)}<img src="{$h.cover_url}" alt="{$h.name}" loading="lazy">{/if}
+                <div class="related-name">{$h.name}</div>
+            </a>
+            {/foreach}
+        </div>
+        {/if}
+    </div>
+    {include file="components/_tabbar" /}
+</div>
+{/block}

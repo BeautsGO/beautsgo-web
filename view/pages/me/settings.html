@@ -1,0 +1,58 @@
+{extend name="layout/base" /}
+{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+{block name="content"}
+<div class="user-page">
+    <div class="page-head">
+        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
+        <h1 class="page-title">设置</h1>
+    </div>
+
+    <div class="u-list" style="margin-top:12px;">
+        <a class="u-list-item" href="/{$lang_seg}/me/profile">
+            <div class="u-list-item__body">
+                <div class="u-list-item__title">个人资料</div>
+                <div class="u-list-item__meta">头像、昵称、性别</div>
+            </div>
+            <div style="display:flex; align-items:center; color:#ccc; font-size:15px;">›</div>
+        </a>
+        <div class="u-list-item">
+            <div class="u-list-item__body">
+                <div class="u-list-item__title">账号 / 邮箱</div>
+                <div class="u-list-item__meta">{$user.phone|default=''}</div>
+            </div>
+        </div>
+        <a class="u-list-item" href="/{$lang_seg}/me/wallet">
+            <div class="u-list-item__body"><div class="u-list-item__title">我的钱包</div></div>
+            <div style="display:flex; align-items:center; color:#ccc; font-size:15px;">›</div>
+        </a>
+        <a class="u-list-item" href="/{$lang_seg}/me/points-log">
+            <div class="u-list-item__body"><div class="u-list-item__title">积分明细</div></div>
+            <div style="display:flex; align-items:center; color:#ccc; font-size:15px;">›</div>
+        </a>
+    </div>
+
+    <div class="u-list" style="margin-top:12px;">
+        <a class="u-list-item" href="/{$lang_seg}/me/feedback">
+            <div class="u-list-item__body"><div class="u-list-item__title">意见反馈</div></div>
+            <div style="display:flex; align-items:center; color:#ccc; font-size:15px;">›</div>
+        </a>
+        <a class="u-list-item" href="/{$lang_seg}/about">
+            <div class="u-list-item__body"><div class="u-list-item__title">关于 BeautsGO</div></div>
+            <div style="display:flex; align-items:center; color:#ccc; font-size:15px;">›</div>
+        </a>
+        <a class="u-list-item" href="/{$lang_seg}/terms">
+            <div class="u-list-item__body"><div class="u-list-item__title">服务条款</div></div>
+            <div style="display:flex; align-items:center; color:#ccc; font-size:15px;">›</div>
+        </a>
+        <a class="u-list-item" href="/{$lang_seg}/privacy">
+            <div class="u-list-item__body"><div class="u-list-item__title">隐私政策</div></div>
+            <div style="display:flex; align-items:center; color:#ccc; font-size:15px;">›</div>
+        </a>
+    </div>
+
+    <div style="text-align:center; padding:24px 0;">
+        <a href="/{$lang_seg}/logout" style="display:inline-block; padding:12px 45px; background:#fff; color:#EF5189; border-radius:24px; font-size:14px; text-decoration:none; border:1px solid #FD83AB;">退出登录</a>
+    </div>
+    {include file="components/_tabbar" /}
+</div>
+{/block}

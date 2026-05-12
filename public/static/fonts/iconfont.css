@@ -1,0 +1,71 @@
+@font-face {
+  font-family: "custom-icon"; /* Project id 5003270 */
+  src: url('/static/fonts/iconfont.woff2?t=1756275910435') format('woff2'),
+       url('/static/fonts/iconfont.woff?t=1756275910435') format('woff'),
+       url('/static/fonts/iconfont.ttf?t=1756275910435') format('truetype');
+}
+
+.custom-icon {
+  font-family: "custom-icon" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.custom-icon-kefu:before {
+  content: "\e605";
+}
+
+.custom-icon-kefu1:before {
+  content: "\ec2e";
+}
+
+.custom-icon-shipin:before {
+  content: "\e61d";
+}
+
+.custom-icon-wenjianleixing-suolvetu-wenjianjia:before {
+  content: "\e6a9";
+}
+
+.custom-icon-tupian:before {
+  content: "\e67f";
+}
+
+.custom-icon-yuanquanjiahao:before {
+  content: "\e633";
+}
+
+.custom-icon-wenjian:before {
+  content: "\e606";
+}
+
+.custom-icon-icons-biaoqingfasong:before {
+  content: "\e6fd";
+}
+
+.custom-icon-zhifubaozhifu:before {
+  content: "\e634";
+}
+
+.custom-icon-Paypal:before {
+  content: "\ea24";
+}
+
+.custom-icon-phone:before {
+  content: "\e640";
+}
+
+.custom-icon-wechat:before {
+  content: "\e763";
+}
+
+.custom-icon-line:before {
+  content: "\ebf5";
+}
+
+.custom-icon-whatsapp:before {
+  content: "\e8ec";
+}
+

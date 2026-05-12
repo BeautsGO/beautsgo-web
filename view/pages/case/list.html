@@ -1,0 +1,39 @@
+{extend name="layout/base" /}
+
+{block name="extra_head"}
+<link rel="stylesheet" href="/static/css/pages/case.css?v={$assets.css_ver}">
+{/block}
+
+{block name="content"}
+<div class="case-page">
+    <div class="page-head">
+        <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="page-title">医美案例</h1>
+    </div>
+
+    {if empty($list)}
+    <div class="empty">{$tt['point.Empty']|default='暂无案例'}</div>
+    {/if}
+
+    <div class="case-grid">
+        {foreach $list as $cs}
+        <a class="case-card" href="/{$lang_seg}/case/{$cs.id}">
+            <div class="case-card__imgs">
+                {if !empty($cs.pic_url_0)}<img src="{$cs.pic_url_0}" alt="case" loading="lazy">{/if}
+                {if !empty($cs.pic_url_1)}<img src="{$cs.pic_url_1}" alt="case" loading="lazy">{/if}
+            </div>
+            <div class="case-card__text">
+                <div class="case-card__content">{$cs.content|default=''}</div>
+                <div class="case-card__user">
+                    <img src="{$cs.user.avatar}" alt="user">
+                    <span>{$cs.user.nickname}</span>
+                </div>
+            </div>
+        </a>
+        {/foreach}
+    </div>
+
+    {include file="components/_pagination" /}
+    {include file="components/_tabbar" /}
+</div>
+{/block}

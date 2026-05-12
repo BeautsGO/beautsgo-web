@@ -1,0 +1,42 @@
+{extend name="layout/base" /}
+{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+{block name="content"}
+<div class="user-page">
+    <div class="page-head">
+        <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="page-title">写评价</h1>
+    </div>
+    {if !empty($subjectName)}
+    <div style="padding:12px 16px;background:#fff;font-size:14px;color:#1B1B1B;">
+        评价对象:<strong>{$subjectName}</strong>
+    </div>
+    {/if}
+    {if $saved}<div class="msg-ok">评价已发布,感谢您的反馈</div>{/if}
+    {if !empty($error)}<div class="msg-err">{$error}</div>{/if}
+
+    <form method="post" action="/{$lang_seg}/comment/publish?type={$type}&with_id={$with_id}">
+        <input type="hidden" name="type" value="{$type}">
+        <input type="hidden" name="with_id" value="{$with_id}">
+        <div class="u-form-card">
+            <div class="u-form-row">
+                <div class="u-form-row__label">评分</div>
+                <div class="u-form-row__field">
+                    <div class="u-rate">
+                        <input id="r5" type="radio" name="rating" value="5" checked><label for="r5">★</label>
+                        <input id="r4" type="radio" name="rating" value="4"><label for="r4">★</label>
+                        <input id="r3" type="radio" name="rating" value="3"><label for="r3">★</label>
+                        <input id="r2" type="radio" name="rating" value="2"><label for="r2">★</label>
+                        <input id="r1" type="radio" name="rating" value="1"><label for="r1">★</label>
+                    </div>
+                </div>
+            </div>
+            <div class="u-form-row">
+                <div class="u-form-row__label">评价内容</div>
+                <div class="u-form-row__field"><textarea name="content" rows="5" placeholder="分享您的真实就医体验,帮助其他求美者做更明智的决策" required></textarea></div>
+            </div>
+        </div>
+        <button class="u-btn-primary" type="submit">发布评价</button>
+    </form>
+    {include file="components/_tabbar" /}
+</div>
+{/block}

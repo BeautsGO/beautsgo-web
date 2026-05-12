@@ -1,0 +1,24 @@
+{extend name="layout/base" /}
+{block name="extra_head"}
+<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">
+<link rel="stylesheet" href="/static/css/pages/index.css?v={$assets.css_ver}">
+{/block}
+{block name="content"}
+<div class="user-page index-body">
+    <div class="page-head">
+        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
+        <h1 class="page-title">浏览记录</h1>
+    </div>
+    <div class="u-tabs-bar">
+        <a class="{if $type == 1}active{/if}" href="?type=1">机构</a>
+        <a class="{if $type == 2}active{/if}" href="?type=2">医生</a>
+        <a class="{if $type == 3}active{/if}" href="?type=3">项目</a>
+    </div>
+    {if empty($list)}<div class="empty">{$tt['point.Empty']|default='暂无浏览记录'}</div>{/if}
+    {if $type == 1}<div class="list-jg">{foreach $list as $h}{include file="components/_card_hospital" /}{/foreach}</div>{/if}
+    {if $type == 2}<div class="list-ys">{foreach $list as $d}{include file="components/_card_doctor" /}{/foreach}</div>{/if}
+    {if $type == 3}<div class="list-xm">{foreach $list as $p}{include file="components/_card_project" /}{/foreach}</div>{/if}
+    {include file="components/_pagination" /}
+    {include file="components/_tabbar" /}
+</div>
+{/block}

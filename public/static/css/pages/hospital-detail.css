@@ -1,0 +1,1059 @@
+@charset "UTF-8";
+.skeleton-box {
+  background: #fff;
+  min-height: 100vh;
+}
+.skeleton-box .skeleton-img {
+  width: 100%;
+  height: 100%;
+  background-color: #f6f6f6;
+}
+.skeleton-box .skeleton-txt {
+  margin: 10px;
+}
+.skeleton-box .skeleton-txt .skeleton-title {
+  width: calc(100% - 20px);
+  height: 24px;
+  background-color: #f6f6f6;
+  border-radius: 8px;
+}
+.skeleton-box .skeleton-txt .skeleton-adress {
+  margin-top: 5px;
+  width: calc(100% - 20px);
+  height: 10px;
+  background-color: #f6f6f6;
+  border-radius: 8px;
+}
+.skeleton-box .skeleton-txt .skeleton-time {
+  margin-top: 10px;
+  width: 75px;
+  height: 10px;
+  background-color: #f6f6f6;
+  border-radius: 8px;
+}
+.skeleton-box .skeleton-txt .skeleton-price-list-box {
+  margin: 25px;
+  background-color: #FFFFFF;
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+.skeleton-box .skeleton-txt .skeleton-price-list-box .price-list-item-1 {
+  color: #c6c6c7;
+  height: 80%;
+  flex: 33%;
+  text-align: center;
+}
+.skeleton-box .skeleton-txt .skeleton-price-list-box .price-list-item {
+  background: #f6f6f6;
+  flex: 50%;
+  height: 25px;
+  border-radius: 4px;
+}
+.skeleton-box .skeleton-txt .skeleton-info {
+  margin-top: 25px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+.skeleton-box .skeleton-txt .skeleton-info .skeleton-info-left {
+  background-color: #f6f6f6;
+  border-radius: 8px;
+  height: 10px;
+  width: 50px;
+}
+.skeleton-box .skeleton-txt .skeleton-info .skeleton-info-right {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+  flex: 1;
+}
+.skeleton-box .skeleton-txt .skeleton-info .skeleton-info-right span {
+  width: 150px;
+  height: 10px;
+  border-radius: 4px;
+  background-color: #f6f6f6;
+  margin-bottom: 10px;
+}
+
+.jfdh-img {
+  animation: pulse 1.3s infinite;
+  font-size:18px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #ffcc34, #fd3c8c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
+  font-style: italic;
+  padding: 10px;
+}
+
+.tab-bg {
+  color: red;
+}
+
+.integral-box {
+  background: #fff;
+  padding: 0 10px 10px;
+}
+
+.price-list-box {
+  margin: 10px;
+  padding: 10px;
+  background-color: #FFFFFF;
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+.price-list-box .price-list-item-1 {
+  color: #c6c6c7;
+  height: 80%;
+  flex: 33%;
+  text-align: center;
+}
+.price-list-box .price-list-item {
+  position: relative;
+  color: #606266;
+  font-size: 15px;
+  flex: 33%;
+  text-align: center;
+}
+.price-list-box .price-list-tag {
+  display: block;
+  position: absolute;
+  top: -5px;
+  right: -20px;
+  height: 15px;
+  background: linear-gradient(270deg, #FF9AC3 0%, #FF9AC3 100%);
+  border-radius: 7.5px 7.5px 7.5px 0px;
+  font-weight: 400;
+  font-size:10px;
+  color: #FFFFFF;
+  text-align: center;
+  line-height: 15px;
+  animation: pulse 1.3s infinite;
+  padding: 2.5px;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.scroll-top {
+  position: fixed;
+  right: 10px;
+  bottom: 120px;
+  width: 35px;
+  height: 35px;
+  z-index: 99;
+}
+.scroll-top img {
+  width: 100%;
+  height: 100%;
+}
+
+.btns {
+  position: fixed;
+  z-index: 55;
+  bottom: 0;
+  /* #ifndef H5 */
+  left: 0;
+  width: 100%;
+  /* #endif */
+  /* #ifdef H5 */
+  /* 移动端：占满屏幕宽度 */
+  left: 0;
+  right: 0;
+  width: 100%;
+  /* #endif */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  box-sizing: border-box;
+  padding: 0 10px;
+  height: calc(50px + constant(safe-area-inset-bottom));
+  height: calc(50px + env(safe-area-inset-bottom));
+  padding-bottom: constant(safe-area-inset-bottom);
+  /* 兼容 iOS < 11.2 */
+  padding-bottom: env(safe-area-inset-bottom);
+  /* 兼容 iOS >= 11.2 */
+}
+.btns .btns-detail {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.btns .btns-detail .btns-right {
+  width: 190px;
+  height: 40px;
+  background: #FF9AC3;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size:15px;
+  font-family: Microsoft YaHei-Regular, Microsoft YaHei;
+  font-weight: 400;
+  color: #FFFFFF;
+  position: relative;
+}
+.btns .btns-detail .btns-right .orderpoint {
+  position: absolute;
+  top: -10px;
+  left: 46%;
+  transform: translateX(-50%);
+  min-width: 78px;
+  height: 20px;
+  padding: 0 6px;
+  background: linear-gradient(270deg, #fd6a69 0%, #fe2c39 100%);
+  border-radius: 10px 10px 10px 3px;
+  font-weight: 400;
+  font-size:10px;
+  color: #ffffff;
+  text-align: center;
+  line-height: 20px;
+  white-space: nowrap;
+}
+.btns .btns-detail .btns-consult {
+  background: #00c853;
+  animation: breathe 2s ease-in-out infinite;
+  box-shadow: 0 0 10px rgba(0, 200, 83, 0.6);
+}
+.btns .btns-detail .btns-consult .custom-icon-kefu1 {
+  margin-right: 5px;
+  font-size:16px;
+  animation: icon-pulse 1.5s ease-in-out infinite;
+}
+.btns .btns-detail .haschat {
+  background: #00c853;
+  animation: breathe 2s ease-in-out infinite;
+  box-shadow: 0 0 10px rgba(0, 200, 83, 0.6);
+}
+.btns .btns-detail .notchat {
+  background: #bfbfbf;
+  box-shadow: 0 0 10px #bfbfbf;
+}
+.btns .btns-detail .btns-img {
+  width: 40px;
+  /* 稍微加大点空间 */
+  text-align: center;
+  font-size:10px;
+  font-family: Microsoft YaHei-Light, Microsoft YaHei;
+  font-weight: 300;
+  color: #666666;
+}
+.btns .btns-detail .btns-img span {
+  max-width: 100%;
+  white-space: nowrap;
+  /* 禁止换行 */
+  overflow: hidden;
+  /* 溢出隐藏 */
+  text-overflow: ellipsis;
+  display: inline-block;
+}
+.btns .btns-detail .btns-img img {
+  width: 25px;
+  height: 25px;
+  margin-bottom: 2.5px;
+}
+.btns .btns-detail .btns-img .img-box {
+  position: relative;
+  display: inline-block;
+  width: 25px;
+  height: 25px;
+}
+.btns .btns-detail .btns-img .img-box img {
+  width: 25px;
+  height: 25px;
+  margin-bottom: 2.5px;
+}
+.btns .btns-detail .btns-img {
+  /* 在线状态小绿点 */
+}
+.btns .btns-detail .btns-img .online-dot {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  width: 6px;
+  height: 6px;
+  background-color: #00c853;
+  /* 绿色 */
+  border-radius: 50%;
+  border: 1px solid #fff;
+  /* 加个白边更清晰 */
+}
+.btns .btns-detail {
+  /* #ifdef H5 */
+  /* APP下载弹窗 */
+}
+.btns .btns-detail .app-popup-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btns .btns-detail .app-popup {
+  position: relative;
+  background: #fff;
+  border-radius: 12px;
+  padding: 30px 24px 20px;
+  text-align: center;
+  width: 260px;
+}
+.btns .btns-detail .app-popup-title {
+  font-size:15px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+.btns .btns-detail .app-popup-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size:16px;
+  color: #999;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+}
+.btns .btns-detail .app-popup-link {
+  display: block;
+}
+.btns .btns-detail .app-popup-qrcode {
+  width: 180px;
+  height: 180px;
+}
+.btns .btns-detail .app-popup-tip {
+  margin-top: 12px;
+  font-size:13px;
+  color: #666;
+}
+.btns .btns-detail {
+  /* #endif */
+}
+
+.more {
+  padding: 0;
+}
+.more .list {
+  background: #FFFFFF;
+  border-radius: 0;
+  padding: 7.5px 10px;
+  margin-bottom: 12px;
+}
+.more .list .list-address {
+  display: flex;
+  align-items: center;
+  font-size:12px;
+  font-family: PingFang SC-Light, PingFang SC;
+  font-weight: 300;
+  color: #999999;
+}
+.more .list .list-address img {
+  width: 10px;
+  height: 12px;
+  margin-right: 5px;
+}
+.more .list .list-box {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.more .list .list-box div {
+  font-size:10px;
+  font-family: PingFang SC-Light, PingFang SC;
+  font-weight: 300;
+  color: #EB689E;
+  flex-shrink: 0;
+  margin-bottom: 10px;
+  background: #FFEEF5;
+  border-radius: 10px;
+  padding: 3px 14px;
+  margin-right: 5px;
+}
+.more .list .list-title {
+  font-size:17px;
+  font-family: PingFang SC-Semibold, PingFang SC;
+  font-weight: 600;
+  color: #1B1B1B;
+  margin-bottom: 9px;
+}
+.more .list .list-img {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+.more .list .list-img .list-img-left {
+  flex: 2;
+  height: 133px;
+}
+.more .list .list-img .list-img-left img {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+}
+.more .list .list-img .list-img-right {
+  flex: 3;
+  height: 133px;
+  margin-left: 5px;
+}
+.more .list .list-img .list-img-right img {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+}
+
+.comment-more {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.comment-more div {
+  display: flex;
+  align-items: center;
+  font-size:10px;
+  font-family: PingFang SC-Light, PingFang SC;
+  font-weight: 300;
+  color: #666666;
+}
+.comment-more div img {
+  width: 18px;
+  height: 18px;
+}
+
+.comment {
+  width: 355px;
+  background: #FFFFFF;
+  border-radius: 10px;
+  box-sizing: border-box;
+  padding: 11.5px 8px;
+  margin: 0 auto;
+}
+.comment .comment-list .br {
+  width: 100%;
+  height: 0.5px;
+  background-color: #F1F1F1;
+  margin: 12px 0;
+}
+.comment .comment-list .comment-detail {
+  font-size:13px;
+  font-family: PingFang SC-Regular, PingFang SC;
+  font-weight: 400;
+  color: #333333;
+  line-height: 20px;
+  margin-bottom: 8px;
+}
+.comment .comment-list .comment-img {
+  display: flex;
+  flex-wrap: wrap;
+}
+.comment .comment-list .comment-img div {
+  width: 105px;
+  height: 105px;
+  margin: 0 4px 8px;
+}
+.comment .comment-list .comment-img div img {
+  width: 100%;
+  height: 100%;
+  border-radius: 7px;
+}
+.comment .comment-list .comment-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+.comment .comment-list .comment-title .comment-title-left {
+  display: flex;
+  align-items: center;
+  font-size:12px;
+  font-family: PingFang SC-Regular, PingFang SC;
+  font-weight: 400;
+  color: #1B1B1B;
+}
+.comment .comment-list .comment-title .comment-title-left img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+.comment .comment-list .comment-title .comment-title-right {
+  font-size:10px;
+  font-family: PingFang SC-Regular, PingFang SC;
+  font-weight: 400;
+  color: #999999;
+}
+
+.case > div:last-child {
+  margin-bottom: 0px !important;
+}
+
+.case {
+  width: 100%;
+  background: #fff;
+  border-radius: 10px;
+  box-sizing: border-box;
+  padding: 8px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: row;
+}
+.case .case-list {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  margin-bottom: 12.5px;
+  width: 100%;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+.case .case-list .case-item {
+  width: calc(50% - 10px);
+  height: 210px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.case .case-list .cae-box {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.case .case-list .nologin {
+  filter: blur(10px);
+}
+.case .case-list .case-top {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+}
+.case .case-list .case-top .case-img {
+  background-position: center;
+  background-size: cover;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.case .case-list .case-bottom {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background: #fff;
+  padding: 5px 10px;
+}
+.case .case-list .case-bottom .case-title {
+  font-size:12px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  /* 设置为2表示只显示两行 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 11px;
+}
+.case .case-list .case-bottom .case-user {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+.case .case-list .case-bottom .case-user img {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #ccc;
+  margin-right: 7px;
+}
+.case .case-list .case-bottom .case-user span {
+  font-size:12px;
+  color: #afafaf;
+}
+
+.expert::-webkit-scrollbar {
+  display: none;
+}
+
+.expert {
+  width: calc(100% - 6px);
+  margin: 0 auto;
+  background: #FFFFFF;
+  border-radius: 10px;
+  box-sizing: border-box;
+  padding: 8px 3px;
+  overflow-y: scroll;
+  display: flex;
+}
+.expert .expert-detail {
+  flex-shrink: 0;
+  width: 110px;
+  margin: 0 5px;
+  text-align: center;
+  background: #FFFFFF;
+  box-shadow: 0px 1px 3px 0.5px rgba(168, 168, 168, 0.1);
+  border-radius: 4px;
+}
+.expert .expert-detail .expert-img {
+  width: 110px;
+  height: 141px;
+}
+.expert .expert-detail .expert-img img {
+  width: 100%;
+  height: 100%;
+  border-radius: 7px;
+}
+.expert .expert-detail .expert-title {
+  font-size:14px;
+  font-family: PingFang SC-Regular, PingFang SC;
+  font-weight: 400;
+  color: #333333;
+  margin: 10px 0 3.5px;
+}
+.expert .expert-detail .expert-span {
+  font-size:12px;
+  font-family: PingFang SC-Light, PingFang SC;
+  font-weight: 300;
+  color: #A1A1A1;
+  padding-bottom: 9px;
+}
+
+.project {
+  width: calc(100% - 16px);
+  background: #FFFFFF;
+  border-radius: 10px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  box-sizing: border-box;
+  padding: 8px;
+}
+.project .project-top {
+  margin-bottom: 0px !important;
+}
+.project .project-detail {
+  flex-shrink: 0;
+  width: calc(50% - 4px);
+  margin-bottom: 15px;
+}
+.project .project-detail img {
+  width: 100%;
+  height: 110px;
+  border-radius: 7px;
+}
+.project .project-detail .two-ellipsis {
+  margin-top: 5.5px;
+  font-size:12px;
+  font-family: PingFangSC-Regular-, PingFangSC-Regular;
+  font-weight: normal;
+  color: #333333;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.project .project-detail .project-price-box {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 5px;
+}
+.project .project-detail .project-price-box .project-price-value {
+  font-size:12px;
+  color: #EF5189;
+  font-weight: 700;
+}
+.project .project-detail .project-price-box .project-price-value .project-price-currency {
+  font-size:10px;
+}
+.project .project-detail .project-price-box .project-price-value .project-price-unit {
+  font-size:10px;
+  color: #606060;
+  font-weight: normal;
+}
+
+.head {
+  padding: 20px 10px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.head .head-left {
+  display: flex;
+  align-items: center;
+  font-size:14px;
+  font-family: PingFang SC-Medium, PingFang SC;
+  font-weight: 500;
+  color: #1B1B1B;
+}
+.head .head-left div {
+  width: 2px;
+  height: 13px;
+  background: #333333;
+  border-radius: 10px;
+  margin-right: 6px;
+}
+.head .head-left span {
+  font-size:11px;
+  color: #6d6d6d;
+}
+.head .head-right {
+  display: flex;
+  align-items: center;
+  font-size:10px;
+  font-family: PingFang SC-Regular, PingFang SC;
+  font-weight: 400;
+  color: #A1A1A1;
+}
+.head .head-right img {
+  width: 5px;
+  height: 9px;
+  margin-left: 6px;
+}
+
+.center-img {
+  width: 355px;
+  height: 111px;
+  margin: 11px auto 0px;
+}
+.center-img img {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+}
+
+.tab {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 19px 10px;
+}
+.tab .tab-detail {
+  font-size:14px;
+  font-family: PingFang SC-Regular, PingFang SC;
+  font-weight: 400;
+  color: #656565;
+  margin-right: 25px;
+}
+.tab .tab-active {
+  font-size:15px;
+  font-family: PingFang SC-Semibold, PingFang SC;
+  font-weight: 600;
+  color: #333333;
+  position: relative;
+}
+.tab .tab-detail-active {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  bottom: -2px;
+  display: flex;
+  justify-content: center;
+}
+.tab .tab-detail-active div {
+  width: 15px;
+  height: 3px;
+  background: #FF9AC3;
+  border-radius: 5px;
+}
+
+.body {
+  background-color: #f5f5f5;
+  box-sizing: border-box;
+  padding-bottom: 95px;
+}
+
+.title {
+  background-color: #ffffff;
+  padding: 10px;
+}
+.title .addres-title {
+  font-size:13px;
+  font-family: PingFang SC-Regular, PingFang SC;
+  font-weight: 400;
+  color: #333333;
+  margin: 13px 0 6px;
+}
+.title .addres {
+  display: flex;
+  align-items: center;
+  font-size:10px;
+  font-family: PingFang SC-Light, PingFang SC;
+  font-weight: 300;
+  color: #999999;
+}
+.title .addres img {
+  width: 10.5px;
+  height: 12.5px;
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+.title .title-list {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 14.5px;
+  margin-top: 12px;
+}
+.title .title-list .title-list-left {
+  display: flex;
+  align-items: center;
+  font-size:11px;
+  font-family: PingFang SC-Regular, PingFang SC;
+  font-weight: 400;
+  color: #666666;
+}
+.title .title-list .title-list-left .title-list-detail {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  margin-right: 24px;
+}
+.title .title-list .title-list-left .title-list-detail img {
+  width: 18px;
+  height: 18px;
+  margin-right: 5px;
+}
+.title .title-list .title-list-right {
+  display: flex;
+  align-items: center;
+  font-size:10px;
+  font-family: PingFang SC-Light, PingFang SC;
+  font-weight: 300;
+  color: #AAAAAA;
+}
+.title .title-list .title-list-right img {
+  width: 20px;
+  height: 20px;
+}
+.title .title-time {
+  padding-top: 17px;
+  display: flex;
+  font-size:12px;
+  font-family: PingFang SC-Regular, PingFang SC;
+  font-weight: 400;
+  color: #333333;
+}
+.title .title-time .title-time-left {
+  height: 100%;
+  flex-shrink: 0;
+}
+.title .title-time .title-time-list div {
+  flex-shrink: 0;
+  margin-right: 10px;
+  margin-bottom: 5px;
+}
+.title .title-address {
+  display: flex;
+  align-items: center;
+  font-size:13px;
+  font-family: PingFang SC-Regular, PingFang SC;
+  font-weight: 400;
+  color: #999999;
+  margin: 18px 0 3px;
+}
+.title .title-address img {
+  flex-shrink: 0;
+  width: 15px;
+  height: 17px;
+  margin-right: 4px;
+}
+.title .title-english {
+  font-size:11px;
+  font-family: PingFang SC-Regular, PingFang SC;
+  font-weight: 400;
+  color: #999999;
+  margin-bottom: 3px;
+}
+.title .bold-font {
+  color: rgba(252, 98, 144, 0.8196078431);
+}
+.title .title-name {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size:20px;
+  font-family: PingFang SC-Semibold, PingFang SC;
+  font-weight: 600;
+  color: #1B1B1B;
+  margin-bottom: 2px;
+}
+.title .title-name .share {
+  width: 25px;
+  height: 25px;
+  flex-shrink: 0;
+  margin-left: 10px;
+}
+.title .title-name .share img {
+  width: 100%;
+  height: 100%;
+}
+
+.swiper-body {
+  position: relative;
+  width: 100%;
+  /* #ifndef H5 */
+  height: 100%;
+  /* #endif */
+  /* #ifdef H5 */
+  height: 0;
+  padding-bottom: 100%;
+  /* #endif */
+}
+
+.current {
+  position: absolute;
+  right: 10px;
+  bottom: 24px;
+  background: rgba(51, 51, 51, 0.5);
+  border-radius: 10px;
+  padding: 3px 7px;
+  font-size:12px;
+  font-family: Microsoft YaHei-Regular, Microsoft YaHei;
+  font-weight: 400;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+}
+.current div {
+  display: flex;
+  align-items: center;
+  border-left: 0.5px solid #ffffff;
+  padding-left: 6px;
+  margin-left: 6px;
+}
+.current div img {
+  width: 10px;
+  height: 9px;
+  margin-right: 2.5px;
+}
+
+.swiper {
+  width: 100%;
+  /* #ifndef H5 */
+  height: 100%;
+  /* #endif */
+  /* #ifdef H5 */
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  /* #endif */
+}
+
+.video {
+  width: 100%;
+  height: 424.9px;
+  background-color: #000;
+  position: relative;
+}
+.video .video-out {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.video .video-out .video-out-detail {
+  text-align: center;
+  line-height: 20px;
+  height: 20px;
+  width: 55px;
+  background-color: #f5f5f5;
+  border-radius: 9px;
+  font-size:10px;
+  font-family: PingFangSC-Regular-, PingFangSC-Regular;
+  font-weight: normal;
+  color: #333333;
+}
+
+.swiper-item {
+  width: 100%;
+  /* #ifndef H5 */
+  height: 100%;
+  /* #endif */
+  /* #ifdef H5 */
+  height: 100%;
+  /* #endif */
+  position: relative;
+}
+.swiper-item .swiper-play {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+.swiper-item .swiper-play img {
+  width: 45px;
+  height: 45px;
+}
+.swiper-item .swiper-img {
+  width: 100%;
+  height: 100%;
+}
+
+.u-tabs {
+  overflow: hidden;
+}
+
+/* 呼吸灯动画 */
+@keyframes breathe {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(0, 200, 83, 0.6);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(0, 200, 83, 0.9);
+    transform: scale(1.02);
+  }
+}
+/* 图标跳动动画 */
+@keyframes icon-pulse {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  10% {
+    transform: translateY(-4px) scale(1.15);
+  }
+  20% {
+    transform: translateY(0) scale(1);
+  }
+  30% {
+    transform: translateY(-2px) scale(1.08);
+  }
+  40% {
+    transform: translateY(0) scale(1);
+  }
+}
+.lazy-placeholder {
+  height: 1px;
+  overflow: hidden;
+}

@@ -1,0 +1,57 @@
+{extend name="layout/base" /}
+{block name="extra_head"}
+<style>
+.sh{background:#f7f7f9;min-height:100vh}
+.sh .head{padding:12px 16px;background:#fff}
+.sh form{display:flex;gap:8px;padding:10px 16px;background:#fff}
+.sh form input{flex:1;height:36px;padding:0 14px;border-radius:999px;border:0;background:#f3f3f7;font-size:12px}
+.sh form button{padding:0 18px;border-radius:999px;border:0;background:#fc6290;color:#fff;font-size:12px}
+.sh .lvls{display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px;background:#fff;border-top:1px solid #f0f0f3}
+.sh .lvls a{padding:6px 14px;border-radius:999px;font-size:12px;color:#555;text-decoration:none;background:#f3f3f7}
+.sh .lvls a.active{background:#fc6290;color:#fff}
+.sh .list{padding:12px}
+.sh .row{display:flex;gap:12px;background:#fff;border-radius:10px;padding:12px;margin-bottom:10px;text-decoration:none;color:inherit}
+.sh .row img{width:64px;height:64px;border-radius:6px;object-fit:cover;background:#f1f1f3}
+.sh .row .meta{flex:1;min-width:0}
+.sh .row .name{font-size:14px;font-weight:600;color:#222;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.sh .row .sub{color:#888;font-size:12px;margin-top:4px}
+.sh .row .addr{color:#999;font-size:12px;margin-top:2px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.empty{padding:60px 0;text-align:center;color:#999}
+</style>
+{/block}
+{block name="content"}
+<section class="sh">
+    <div class="head"><div class="page-head"><a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a><h1 class="page-title">{$tt['make.title']|default='选择预约机构'} ({$total})</h1></div></div>
+    <form method="get" action="">
+        {if $level > 0}<input type="hidden" name="level" value="{$level}">{/if}
+        <input type="search" name="q" value="{$q}" placeholder="{$tt['make.placeholder']|default='输入机构名'}">
+        <button type="submit">{$tt['index.common.search']|default='搜索'}</button>
+    </form>
+    <div class="lvls">
+        <a href="?level=0{if $q != ''}&q={$q}{/if}" class="{if $level == 0}active{/if}">{$tt['point.All']|default='全部'}</a>
+        {foreach $levels as $l}
+        <a href="?level={$l.id|default=0}{if $q != ''}&q={$q}{/if}" class="{if $level == $l.id}active{/if}">{$l.name|default=''}</a>
+        {/foreach}
+    </div>
+    <div class="list">
+        {if empty($list)}
+        <div class="empty">{$tt['point.Empty']|default='暂无机构'}</div>
+        {else/}
+        {foreach $list as $h}
+        {$slug = $h.en_name|default=$h.id|default=0}
+        {$cover = ''}
+        {if !empty($h.cover) && is_array($h.cover)}{$cover = $h.cover[0]['url']|default=''}{/if}
+        <a class="row" href="/{$lang_seg}/appointment?h_id={$h.id|default=0}">
+            {if !empty($cover)}<img src="{$cover}" alt="" loading="lazy">{else/}<div style="width:64px;height:64px;background:#f1f1f3;border-radius:6px"></div>{/if}
+            <div class="meta">
+                <div class="name">{$h.name|default=''}</div>
+                <div class="sub">{$h.level_name|default=''}{if !empty($h.doctors_count)} · {$tt['index.common.doctor']|default='医生'} {$h.doctors_count}{/if}</div>
+                <div class="addr">{$h.zh_cn_address|default=$h.address|default=''}</div>
+            </div>
+        </a>
+        {/foreach}
+        {/if}
+    </div>
+    {include file="components/_pagination" /}
+</section>
+{/block}

@@ -1,0 +1,31 @@
+<a class="list-item" href="/{$lang_seg}/hospital/{$h.slug|default=$h.id}">
+    <div class="list-item-left">
+        {if !empty($h.cover_url)}
+        <img src="{$h.cover_url}" alt="{$h.name}" loading="lazy">
+        {/if}
+    </div>
+    <div class="list-item-right">
+        <div class="hospital-title">
+            <span class="hospital-title-txt">{$h.name}</span>
+            {if !empty($h.same_price)}<span class="hospital-tag same-price">{$tt['hospital.samePrice']|default='中韩同价'}</span>{/if}
+        </div>
+        <div class="hospital-address">
+            {if !empty($h.trading_area_name)}{$h.trading_area_name}{/if}
+            {if !empty($h.level_name)} | {$h.level_name}{/if}
+            {if $h.doctors_count > 0} | {$h.doctors_count} {$tt['hospital.doctorsUnit']|default='位医生'}{/if}
+        </div>
+        {if !empty($h.response_time_str)}
+        <div class="response-time">{$tt['index.common.BookingResponseTime']|default='预约响应时长'} {$h.response_time_str}</div>
+        {/if}
+        {if !empty($h.recommend_project)}
+        <div class="hospital-items">
+            {foreach $h.recommend_project as $rp}
+            <div class="hospital-item">
+                <span class="hospital-item__name">{$rp.name}</span>
+                <span class="hospital-item__price">₩ {$rp.price_str|default=$rp.korean_won}</span>
+            </div>
+            {/foreach}
+        </div>
+        {/if}
+    </div>
+</a>

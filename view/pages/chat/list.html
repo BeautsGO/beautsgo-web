@@ -1,0 +1,26 @@
+{extend name="layout/base" /}
+{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+{block name="content"}
+<div class="user-page">
+    <div class="page-head">
+        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
+        <h1 class="page-title">客服会话</h1>
+    </div>
+    {if empty($list)}<div class="empty">{$tt['point.Empty']|default='暂无会话'}</div>{/if}
+    <div class="u-list">
+    {foreach $list as $c}
+        <a class="u-list-item" href="/{$lang_seg}/chat/{$c.h_id|default=$c.hospital_id|default=0}">
+            {if !empty($c.cover_url) || !empty($c.cover)}
+            <div class="u-list-item__cover"><img src="{$c.cover_url|default=$c.cover}" alt="" loading="lazy"></div>
+            {/if}
+            <div class="u-list-item__body">
+                <div class="u-list-item__title">{$c.hospital_name|default=$c.name|default='客服'}</div>
+                <div class="u-list-item__meta">{$c.last_message|default=$c.content|default='点击进入会话'}</div>
+                <div class="u-list-item__time">{if !empty($c.unread_count)}{$c.unread_count} 条未读{/if}</div>
+            </div>
+        </a>
+    {/foreach}
+    </div>
+    {include file="components/_tabbar" /}
+</div>
+{/block}

@@ -1,0 +1,19 @@
+{extend name="layout/base" /}
+{block name="extra_head"}
+<style>
+.kf-body{padding:60px 20px;text-align:center;background:linear-gradient(180deg,#ffe9f1 0%,#fff 280px);min-height:100vh}
+.kf-body .kf-tip{font-size:15px;color:#222;margin-bottom:36px}
+.kf-body .wx-code{display:inline-block;padding:14px;background:#fff;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.06)}
+.kf-body .wx-code img{width:240px;height:240px;object-fit:contain;display:block}
+.kf-body .kf-btn{display:inline-block;margin-top:36px;padding:14px 48px;background:#fc6290;color:#fff;border-radius:999px;text-decoration:none;font-size:12px}
+</style>
+{/block}
+{block name="content"}
+<section class="kf-body">
+    <div class="kf-tip">{$tt['aboutus.AddCustomerservice']|default='添加专属客服'}</div>
+    {if !empty($wxCode)}
+    <div class="wx-code"><img src="{$wxCode}" alt="客服二维码" loading="lazy"></div>
+    {/if}
+    <a class="kf-btn" href="/{$lang_seg}/contact">{$tt['aboutus.Contactcustomerservice']|default='在线联系客服'}</a>
+</section>
+{/block}

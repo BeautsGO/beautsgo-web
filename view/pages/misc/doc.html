@@ -1,0 +1,46 @@
+{extend name="layout/base" /}
+{block name="extra_head"}
+<style>
+.doc-page{padding:16px;background:#f7f7f9;min-height:100vh}
+.doc-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.doc-tabs a{padding:8px 16px;border-radius:6px;background:#fff;color:#444;text-decoration:none;font-size:12px}
+.doc-tabs a.active{background:#fc6290;color:#fff}
+.doc-table-wrap{overflow-x:auto;background:#fff;border-radius:8px}
+.doc-table{border-collapse:collapse;min-width:100%;font-size:12px}
+.doc-table th,.doc-table td{padding:8px 12px;border-bottom:1px solid #eee;white-space:nowrap}
+.doc-table th{background:#f2f3f7;text-align:left}
+.empty{padding:60px 0;text-align:center;color:#999}
+</style>
+{/block}
+{block name="content"}
+<section class="doc-page">
+    <h1 class="page-title" style="margin:0 0 12px;font-size:12px">数据表</h1>
+    <div class="doc-tabs">
+        {foreach $sheets as $i => $s}
+        <a href="?s={$i}" class="{if $i == $active}active{/if}">{$s.name|default=$s.title|default=$s.id}</a>
+        {/foreach}
+    </div>
+    {if empty($columns)}
+        <div class="empty">{$tt['point.Empty']|default='暂无数据'}</div>
+    {else/}
+    <div class="doc-table-wrap">
+        <table class="doc-table">
+            <thead>
+            <tr>
+                {foreach $columns as $c}<th>{$c.title|default=$c.name|default=$c}</th>{/foreach}
+            </tr>
+            </thead>
+            <tbody>
+            {foreach $rows as $row}
+            <tr>
+                {foreach $columns as $c}
+                <td>{:isset($row[$c['key']??$c['field']??'']) ? $row[$c['key']??$c['field']??''] : ''}</td>
+                {/foreach}
+            </tr>
+            {/foreach}
+            </tbody>
+        </table>
+    </div>
+    {/if}
+</section>
+{/block}

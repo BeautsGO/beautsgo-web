@@ -1,0 +1,30 @@
+{extend name="layout/base" /}
+{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+{block name="content"}
+<div class="user-page">
+    <div class="page-head">
+        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
+        <h1 class="page-title">每日签到</h1>
+    </div>
+
+    {if !empty($error)}<div class="msg-err">{$error}</div>{/if}
+    {if $signed}<div class="msg-ok">签到成功 🎉</div>{/if}
+
+    <div style="background:linear-gradient(135deg,#afa7ef,#FE739D); color:#fff; padding:30px 20px; margin:12px 16px 0; border-radius:15px;">
+        <div style="font-size:13px; opacity:.85; margin-bottom:6px;">我的积分</div>
+        <div style="font-size:40px; font-weight:700;">{$point}</div>
+        <div style="font-size:12px; opacity:.85; margin-top:10px;">每日签到可领积分,可在积分商城兑换体验金、护肤品等</div>
+    </div>
+
+    <form method="post" action="/{$lang_seg}/point/sign">
+        <button class="u-btn-primary" type="submit" {if $signed}disabled{/if}>
+            {if $signed}今日已签到{else}立即签到{/if}
+        </button>
+    </form>
+
+    <div style="text-align:center; margin-top:15px;">
+        <a href="/{$lang_seg}/point/task" style="color:#FE739D; font-size:13px; text-decoration:none;">查看积分任务 ›</a>
+    </div>
+    {include file="components/_tabbar" /}
+</div>
+{/block}

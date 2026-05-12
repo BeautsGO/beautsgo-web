@@ -1,0 +1,26 @@
+{extend name="layout/base" /}
+{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+{block name="content"}
+<div class="chat-page user-page">
+    <div class="page-head">
+        <a class="back-btn" href="/{$lang_seg}/chat" aria-label="返回">‹</a>
+        <h1 class="page-title">{$hospital.name|default='在线咨询'}</h1>
+    </div>
+    {if !empty($error)}<div class="msg-err">{$error}</div>{/if}
+    {if $sent}<div class="msg-ok">已发送</div>{/if}
+
+    <div class="chat-history">
+        {foreach $history as $msg}
+        <div class="chat-bubble {if !empty($msg.is_self) || (!empty($msg.send_type) && $msg.send_type == 1)}chat-bubble--me{else}chat-bubble--kf{/if}">
+            {$msg.content|default=$msg.message|default=''}
+        </div>
+        {/foreach}
+        {if empty($history)}<div class="empty">开始对话吧</div>{/if}
+    </div>
+
+    <form class="chat-input-bar" method="post" action="/{$lang_seg}/chat/{$hospital.id|default=0}">
+        <input type="text" name="content" placeholder="输入消息…" required maxlength="200" autocomplete="off">
+        <button type="submit">发送</button>
+    </form>
+</div>
+{/block}

@@ -1,0 +1,30 @@
+{extend name="layout/base" /}
+{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+{block name="content"}
+<div class="user-page">
+    <div class="page-head">
+        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
+        <h1 class="page-title">积分任务</h1>
+    </div>
+    {if empty($tasks)}<div class="empty">{$tt['point.Empty']|default='暂无任务'}</div>{/if}
+    <div class="u-list">
+    {foreach $tasks as $t}
+        <div class="u-list-item">
+            <div class="u-list-item__body">
+                <div class="u-list-item__title">{$t.title|default=$t.name|default='任务'}</div>
+                <div class="u-list-item__meta">{$t.description|default=$t.intro|default=''}</div>
+                <div class="u-list-item__time">+{$t.point|default=$t.reward|default=0} 积分</div>
+            </div>
+            <div style="display:flex; align-items:center;">
+                {if !empty($t.done) || !empty($t.is_done)}
+                <span style="color:#999; font-size:12px;">已完成</span>
+                {else}
+                <span style="color:#FE739D; font-size:12px;">去完成 ›</span>
+                {/if}
+            </div>
+        </div>
+    {/foreach}
+    </div>
+    {include file="components/_tabbar" /}
+</div>
+{/block}

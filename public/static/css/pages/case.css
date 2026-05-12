@@ -1,0 +1,113 @@
+@charset "UTF-8";
+/* ============================================================
+ * 案例页(列表 + 详情)样式 —— 单位 cqw
+ * ============================================================ */
+
+.case-page, .case-detail {
+    background: #f6f6f6; min-height: 100vh;
+    padding-bottom: 70px;
+}
+.page-head {
+    background: #fff;
+    height: 44px;
+    display: flex; align-items: center;
+    padding: 0 15px;
+    position: sticky; top: 0; z-index: 20;
+    border-bottom: 1px solid #f1f1f1;
+}
+.page-head .back-btn {
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    color: #1B1B1B; font-size:22px;
+    text-decoration: none;
+}
+.page-head .page-title {
+    flex: 1; margin: 0;
+    text-align: center;
+    font-size:16px; font-weight: 600; color: #1B1B1B;
+    margin-right: 30px;
+}
+
+.empty {
+    text-align: center; padding: 40px 0;
+    color: #999; font-size:13px;
+}
+
+/* ===== 案例列表 ===== */
+.case-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 10px;
+}
+.case-card {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    text-decoration: none; color: inherit;
+    display: flex; flex-direction: column;
+}
+.case-card__imgs {
+    display: grid; grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    height: 150px; background: #f5f5f5;
+}
+.case-card__imgs img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.case-card__text { padding: 8px; }
+.case-card__content {
+    font-size:12px; color: #333; line-height: 1.4;
+    overflow: hidden; text-overflow: ellipsis;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    margin-bottom: 6px;
+}
+.case-card__user {
+    display: flex; align-items: center; gap: 5px;
+    font-size:10px; color: #999;
+}
+.case-card__user img {
+    width: 18px; height: 18px; border-radius: 50%; object-fit: cover;
+}
+
+/* ===== 案例详情 ===== */
+.case-detail__images img {
+    width: 100%; display: block; background: #f5f5f5;
+}
+.case-detail__body {
+    background: #fff; margin-top: 10px;
+    padding: 12px 10px;
+}
+.case-detail__user {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 12px;
+}
+.case-detail__user img {
+    width: 30px; height: 30px; border-radius: 50%; object-fit: cover;
+}
+.case-detail__user .nickname { font-size:14px; font-weight: 500; color: #333; }
+.case-detail__user time { font-size:11px; color: #999; margin-left: auto; }
+.case-detail__content {
+    font-size:14px; color: #333; line-height: 1.6;
+    white-space: pre-wrap; word-break: break-word;
+}
+.case-detail__related { margin-top: 15px; }
+.related-title {
+    font-size:13px; font-weight: 600; color: #1B1B1B;
+    margin-bottom: 8px;
+}
+.related-card {
+    display: flex; flex-direction: column;
+    background: #f9f9f9; border-radius: 8px;
+    overflow: hidden;
+    text-decoration: none; color: inherit;
+    padding: 10px;
+    gap: 5px;
+}
+.related-card img {
+    width: 100%; height: 190px;
+    border-radius: 6px; object-fit: cover;
+    background: #f5f5f5;
+}
+.related-card .related-name {
+    font-size:14px; font-weight: 600; color: #1B1B1B;
+}
+.related-card .related-meta { font-size:12px; color: #666; }
