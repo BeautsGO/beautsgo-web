@@ -8,6 +8,17 @@ use think\facade\Route;
 // 全局占位符 pattern：slug 允许字母数字+连字符（默认只允许 \w 不含 -，会截断 slug）
 $slugPattern = ['slug' => '[A-Za-z0-9\-]+'];
 
+// 任何带尾斜杠的非根 URL → 301 redirect 到去掉斜杠的版本
+// 避免 /cn/ /cn/hospital/ 等被 route_complete_match=true 拒匹配
+$_uri  = $_SERVER['REQUEST_URI'] ?? '';
+$_path = parse_url($_uri, PHP_URL_PATH) ?: '/';
+if ($_path !== '/' && substr($_path, -1) === '/') {
+    $qs = parse_url($_uri, PHP_URL_QUERY);
+    $target = rtrim($_path, '/') . ($qs !== null && $qs !== '' ? '?' . $qs : '');
+    header('Location: ' . $target, true, 301);
+    exit;
+}
+
 // 首页
 Route::get('/',  'Index/index');
 

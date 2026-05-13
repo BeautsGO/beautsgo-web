@@ -18,20 +18,16 @@
     </div>
     {/if}
 
-    <!-- 吸顶 tabs -->
+    <!-- 吸顶 tabs:只在搜索页显示 4 个类型切换;直接访问 /hospital /doctor /project 不显示 -->
     <div class="list-box sticky-tabs">
+        {if $isSearch}
         <div class="u-tabs">
-            {if $isSearch}
-                {foreach $tabLabels as $i=>$label}
-                <a class="u-tabs__item {if $tab == $i}u-tabs__item--active{/if}"
-                   href="?q={$keyword|raw}&tab={$i}">{$label}</a>
-                {/foreach}
-            {else}
-                <a class="u-tabs__item {if $tab == 0}u-tabs__item--active{/if}" href="/{$lang_seg}/hospital">{$tabLabels[0]}</a>
-                <a class="u-tabs__item {if $tab == 1}u-tabs__item--active{/if}" href="/{$lang_seg}/project">{$tabLabels[1]}</a>
-                <a class="u-tabs__item {if $tab == 2}u-tabs__item--active{/if}" href="/{$lang_seg}/doctor">{$tabLabels[2]}</a>
-            {/if}
+            {foreach $tabLabels as $i=>$label}
+            <a class="u-tabs__item {if $tab == $i}u-tabs__item--active{/if}"
+               href="?q={$keyword|raw}&tab={$i}">{$label}</a>
+            {/foreach}
         </div>
+        {/if}
         {if $tab <= 2}
             {include file="components/_filter_box" /}
         {/if}

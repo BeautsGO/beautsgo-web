@@ -1,23 +1,23 @@
 <nav class="tabbar" role="navigation" aria-label="主导航">
-    <a class="tabbar__item {if !empty($tab) && $tab == 0}tabbar__item--active{/if}" href="/{$lang_seg}/">
+    <a class="tabbar__item {if $tabbar_active == 'home'}tabbar__item--active{/if}" href="/{$lang_seg}/">
         <img src="/static/home.png" alt="" class="tabbar__icon tabbar__icon--off">
         <img src="/static/home-active.png" alt="" class="tabbar__icon tabbar__icon--on">
         <span class="tabbar__label">{$tt['tabbar.home']|default='首页'}</span>
     </a>
-    <a class="tabbar__item" href="/{$lang_seg}/hospital">
+    <a class="tabbar__item {if $tabbar_active == 'hospital'}tabbar__item--active{/if}" href="/{$lang_seg}/hospital">
         <img src="/static/hospital.png" alt="" class="tabbar__icon tabbar__icon--off">
         <img src="/static/hospital-active.png" alt="" class="tabbar__icon tabbar__icon--on">
         <span class="tabbar__label">{$tt['tabbar.hospital']|default='机构'}</span>
     </a>
-    <a class="tabbar__item tabbar__item--center" href="/{$lang_seg}/?tab=3" aria-label="积分">
+    <a class="tabbar__item tabbar__item--center {if $tabbar_active == 'point'}tabbar__item--active{/if}" href="/{$lang_seg}/point/shop" aria-label="积分">
         <span class="tabbar__center-icon">★</span>
     </a>
-    <a class="tabbar__item" href="/{$lang_seg}/doctor">
+    <a class="tabbar__item {if $tabbar_active == 'doctor'}tabbar__item--active{/if}" href="/{$lang_seg}/doctor">
         <img src="/static/doctor.png" alt="" class="tabbar__icon tabbar__icon--off">
         <img src="/static/doctor-active.png" alt="" class="tabbar__icon tabbar__icon--on">
         <span class="tabbar__label">{$tt['tabbar.doctor']|default='医生'}</span>
     </a>
-    <a class="tabbar__item" href="/{$lang_seg}/me">
+    <a class="tabbar__item {if $tabbar_active == 'me'}tabbar__item--active{/if}" href="/{$lang_seg}/me">
         <img src="/static/mine.png" alt="" class="tabbar__icon tabbar__icon--off">
         <img src="/static/mine-active.png" alt="" class="tabbar__icon tabbar__icon--on">
         <span class="tabbar__label">{$tt['tabbar.me']|default='我的'}</span>

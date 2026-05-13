@@ -130,7 +130,27 @@ abstract class BaseController
             'tt'              => $tt,
             'tracking'        => $tracking,
             'apiBaseUrl'      => rtrim((string) config('api.base_url'), '/'),
+            'tabbar_active'   => $this->resolveTabbarActive(),
         ];
+    }
+
+    /**
+     * 判断底部 tabbar 当前应该高亮哪一项
+     *   home / hospital / doctor / me / point
+     */
+    private function resolveTabbarActive(): string
+    {
+        $path = '/' . trim((string) $this->request->pathinfo(), '/');
+        // 去掉语言前缀 (cn/zh/en/ja/th)
+        $path = preg_replace('#^/(cn|zh|en|ja|th)(?=/|$)#', '', $path);
+        $path = $path === '' ? '/' : $path;
+
+        if ($path === '/' || $path === '') return 'home';
+        if (preg_match('#^/hospital(/|$)#', $path)) return 'hospital';
+        if (preg_match('#^/doctor(/|$)#', $path))   return 'doctor';
+        if (preg_match('#^/me(/|$)#', $path))       return 'me';
+        if (preg_match('#^/point(/|$)#', $path))    return 'point';
+        return '';
     }
 
     /**

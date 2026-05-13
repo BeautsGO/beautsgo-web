@@ -295,20 +295,20 @@
                 <img src="/static/detail/android-icon.png" alt="download">
                 <span class="h5-app-text">下载</span>
             </a>
-            <div class="btns-img">
+            <a class="btns-img" href="javascript:BG.toast('请登录后收藏','info')" data-collect="doctor:{$doctor.id|default=0}">
                 <img src="/static/detail/btns3.svg" alt="favorite">
                 <span>{$tt['index.common.Favorites']|default='收藏'}</span>
-            </div>
+            </a>
             {if !empty($hospital.is_cooper) && $hospital.is_cooper == 1}
-            <div class="btns-right">
+            <a class="btns-right" href="/{$lang_seg}/appointment?h_id={$hospital.id|default=0}&d_id={$doctor.id|default=0}">
                 {$tt['index.common.BookNow']|default='预约面诊'}
                 <span class="orderpoint">{$tt['point.Orderpoint']|default='下单送积分'}</span>
-            </div>
+            </a>
             {/if}
-            <div class="btns-right btns-consult">
+            <a class="btns-right btns-consult" href="/{$lang_seg}/chat/{$hospital.id|default=$doctor.h_id|default=0}">
                 <span class="custom-icon custom-icon-kefu1"></span>
                 {$tt['index.common.chatNow']|default='咨询一下'}
-            </div>
+            </a>
         </div>
     </div>
 
