@@ -1,26 +1,79 @@
 {extend name="layout/base" /}
-{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+
+{block name="extra_head"}
+<style>
+.chat-list-page{ background: #f6f6f6; min-height: 100vh; padding-bottom: 70px; }
+.chat-list-page .page-head{
+    position: sticky; top: 0; z-index: 20; height: 44px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+    display: flex; align-items: center; padding: 0 15px;
+}
+.chat-list-page .back-btn{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 20px; }
+.chat-list-page .page-title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+
+.cl-list{ background: #fff; }
+.cl-item{
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; border-bottom: 1px solid #f5f5f5;
+    text-decoration: none; color: inherit; position: relative;
+}
+.cl-item:last-child{ border-bottom: 0; }
+.cl-item__avatar{
+    width: 50px; height: 50px; border-radius: 50%;
+    background: #f3f3f7; overflow: hidden; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+}
+.cl-item__avatar img{ width: 100%; height: 100%; object-fit: cover; }
+.cl-item__body{ flex: 1; min-width: 0; }
+.cl-item__row1{ display: flex; align-items: center; justify-content: space-between; }
+.cl-item__name{ font-size: 15px; font-weight: 600; color: #1B1B1B; max-width: 60%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cl-item__time{ font-size: 11px; color: #bbb; flex-shrink: 0; }
+.cl-item__row2{ display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+.cl-item__msg{ font-size: 13px; color: #999; max-width: 80%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cl-item__badge{
+    min-width: 18px; height: 18px; line-height: 18px;
+    padding: 0 5px; border-radius: 9px; background: #FF4D4D; color: #fff;
+    font-size: 11px; text-align: center; font-weight: 500; flex-shrink: 0;
+}
+.empty{ text-align: center; padding: 80px 20px; color: #999; font-size: 13px; }
+.empty img{ width: 100px; opacity: .5; margin: 0 auto 12px; }
+</style>
+{/block}
+
 {block name="content"}
-<div class="user-page">
+<div class="chat-list-page">
     <div class="page-head">
         <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
-        <h1 class="page-title">客服会话</h1>
+        <h1 class="page-title">{$tt['chat.title']|default='消息'}</h1>
     </div>
-    {if empty($list)}<div class="empty">{$tt['point.Empty']|default='暂无会话'}</div>{/if}
-    <div class="u-list">
-    {foreach $list as $c}
-        <a class="u-list-item" href="/{$lang_seg}/chat/{$c.h_id|default=$c.hospital_id|default=0}">
-            {if !empty($c.cover_url) || !empty($c.cover)}
-            <div class="u-list-item__cover"><img src="{$c.cover_url|default=$c.cover}" alt="" loading="lazy"></div>
-            {/if}
-            <div class="u-list-item__body">
-                <div class="u-list-item__title">{$c.hospital_name|default=$c.name|default='客服'}</div>
-                <div class="u-list-item__meta">{$c.last_message|default=$c.content|default='点击进入会话'}</div>
-                <div class="u-list-item__time">{if !empty($c.unread_count)}{$c.unread_count} 条未读{/if}</div>
+
+    {if empty($list)}
+    <div class="empty">{$tt['chat.empty']|default='暂无会话,去机构详情找心仪的医生发起咨询吧'}</div>
+    {else/}
+    <div class="cl-list">
+        {foreach $list as $c}
+        <a class="cl-item" href="/{$lang_seg}/chat/{$c.h_id|default=$c.hospital_id|default=0}">
+            <div class="cl-item__avatar">
+                {if !empty($c.cover_url) || !empty($c.cover)}
+                <img src="{$c.cover_url|default=$c.cover}" alt="" loading="lazy">
+                {else/}
+                <span style="color:#fe739d;font-size:20px">●</span>
+                {/if}
+            </div>
+            <div class="cl-item__body">
+                <div class="cl-item__row1">
+                    <div class="cl-item__name">{$c.hospital_name|default=$c.name|default='客服'}</div>
+                    <div class="cl-item__time">{if !empty($c.last_time)}{if is_numeric($c.last_time)}{:date('m-d H:i', (int)$c.last_time)}{else/}{$c.last_time}{/if}{/if}</div>
+                </div>
+                <div class="cl-item__row2">
+                    <div class="cl-item__msg">{$c.last_message|default=$c.content|default=''}</div>
+                    {if !empty($c.unread_count)}<span class="cl-item__badge">{:$c['unread_count']>99?'99+':$c['unread_count']}</span>{/if}
+                </div>
             </div>
         </a>
-    {/foreach}
+        {/foreach}
     </div>
+    {/if}
     {include file="components/_tabbar" /}
 </div>
 {/block}

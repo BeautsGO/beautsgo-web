@@ -1,9 +1,49 @@
 {extend name="layout/base" /}
+
+{block name="extra_head"}
+<style>
+.ps-body{
+    min-height: 100vh;
+    background: linear-gradient(180deg,#afa7ef 0%,#fff 320px);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 60px 30px 30px; text-align: center; box-sizing: border-box;
+}
+.ps-icon{
+    width: 84px; height: 84px; border-radius: 50%;
+    background: linear-gradient(135deg,#fe739d,#ffabc7);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 48px; font-weight: 700;
+    box-shadow: 0 8px 28px rgba(254,115,157,.5);
+    animation: ps-pop .5s cubic-bezier(.5, 1.8, .5, 1) both,
+               ps-pulse 2s ease-in-out 0.6s infinite;
+}
+@keyframes ps-pop{ from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes ps-pulse{ 0%,100%{ transform: scale(1); } 50%{ transform: scale(1.05); } }
+.ps-title{ font-size: 22px; color: #1B1B1B; margin: 20px 0 8px; font-weight: 700; animation: ps-fade .5s .3s both; }
+.ps-tip{ font-size: 13px; color: #666; line-height: 1.6; margin: 0 0 30px; animation: ps-fade .5s .5s both; }
+.ps-tip b{ color: #fe739d; }
+@keyframes ps-fade{ from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.ps-actions{ display: flex; gap: 12px; animation: ps-fade .5s .7s both; }
+.ps-btn{
+    display: inline-block; padding: 11px 26px;
+    border-radius: 22px; font-size: 14px; text-decoration: none;
+}
+.ps-btn--primary{ background: #fe739d; color: #fff; box-shadow: 0 6px 16px rgba(254,115,157,.35); }
+.ps-btn--ghost{ background: rgba(255,255,255,.7); color: #555; border: 1px solid #ddd; }
+</style>
+{/block}
+
 {block name="content"}
-<div style="min-height:100vh; background:#f6f6f6; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px; text-align:center;">
-    <div style="font-size:80px; color:#4CD964; margin-bottom:15px;">✓</div>
-    <h1 style="font-size:21px; color:#1B1B1B; margin:0 0 10px;">兑换成功</h1>
-    <p style="font-size:14px; color:#666; line-height:1.6; margin:0 0 30px;">{if !empty($orderNo)}订单号:{$orderNo}<br>{/if}请耐心等待物流配送</p>
-    <a href="/{$lang_seg}/me/order" style="display:inline-block; padding:12px 30px; background:#FE739D; color:#fff; border-radius:24px; font-size:15px; text-decoration:none;">查看订单</a>
+<div class="ps-body">
+    <div class="ps-icon">✓</div>
+    <h1 class="ps-title">{$tt['point.successTitle']|default='兑换成功'}</h1>
+    <p class="ps-tip">
+        {if !empty($orderNo)}{$tt['order.Ordernum']|default='订单号'}:<b>{$orderNo}</b><br>{/if}
+        {$tt['point.successTip']|default='请耐心等待物流配送'}
+    </p>
+    <div class="ps-actions">
+        <a href="/{$lang_seg}/me/order" class="ps-btn ps-btn--primary">{$tt['point.viewOrder']|default='查看订单'}</a>
+        <a href="/{$lang_seg}/point/shop" class="ps-btn ps-btn--ghost">{$tt['point.keepShop']|default='继续逛逛'}</a>
+    </div>
 </div>
 {/block}

@@ -1,26 +1,117 @@
 {extend name="layout/base" /}
-{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+
+{block name="extra_head"}
+<style>
+.chat-page{
+    min-height: 100vh; background: #ebebec;
+    display: flex; flex-direction: column;
+    padding-bottom: 70px;
+}
+.chat-page .page-head{
+    position: sticky; top: 0; z-index: 20; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #e0e0e0;
+}
+.chat-page .back-btn{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 20px; }
+.chat-page .page-title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+
+.chat-history{
+    flex: 1; padding: 14px 12px 80px;
+    display: flex; flex-direction: column; gap: 12px;
+}
+.chat-bubble{
+    display: flex; gap: 8px; align-items: flex-end;
+    max-width: 100%;
+}
+.chat-bubble .ava{
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #ddd; flex-shrink: 0; overflow: hidden;
+}
+.chat-bubble .ava img{ width: 100%; height: 100%; object-fit: cover; }
+.chat-bubble .body{
+    max-width: 70%; padding: 10px 12px;
+    border-radius: 12px; word-break: break-word; font-size: 14px;
+    line-height: 1.5;
+}
+
+.chat-bubble--kf{ justify-content: flex-start; }
+.chat-bubble--kf .body{
+    background: #fff; color: #333;
+    border-top-left-radius: 4px;
+}
+
+.chat-bubble--me{ flex-direction: row-reverse; }
+.chat-bubble--me .body{
+    background: #fe739d; color: #fff;
+    border-top-right-radius: 4px;
+}
+
+.chat-bubble__time{
+    text-align: center; font-size: 11px; color: #999;
+    padding: 6px 0;
+}
+
+.chat-input-bar{
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 640px;
+    display: flex; gap: 8px; padding: 10px 12px;
+    background: #fff; border-top: 1px solid #e0e0e0;
+    box-sizing: border-box;
+}
+.chat-input-bar input{
+    flex: 1; height: 38px; padding: 0 14px;
+    border-radius: 19px; border: 0; background: #f3f3f7;
+    font-size: 14px; outline: none;
+}
+.chat-input-bar input:focus{ background: #fff; box-shadow: 0 0 0 1px #fe739d; }
+.chat-input-bar button{
+    padding: 0 18px; height: 38px; border: 0; border-radius: 19px;
+    background: #fe739d; color: #fff; font-size: 14px; cursor: pointer;
+}
+.chat-input-bar button:disabled{ background: #ccc; }
+
+.chat-msg.err{ margin: 8px 12px; padding: 8px; border-radius: 6px; background: #fff5fa; color: #ef5189; font-size: 12px; text-align: center; }
+.empty{ text-align: center; padding: 60px 0; color: #999; font-size: 13px; }
+</style>
+{/block}
+
 {block name="content"}
-<div class="chat-page user-page">
+<div class="chat-page">
     <div class="page-head">
         <a class="back-btn" href="/{$lang_seg}/chat" aria-label="返回">‹</a>
         <h1 class="page-title">{$hospital.name|default='在线咨询'}</h1>
     </div>
-    {if !empty($error)}<div class="msg-err">{$error}</div>{/if}
-    {if $sent}<div class="msg-ok">已发送</div>{/if}
 
-    <div class="chat-history">
-        {foreach $history as $msg}
-        <div class="chat-bubble {if !empty($msg.is_self) || (!empty($msg.send_type) && $msg.send_type == 1)}chat-bubble--me{else}chat-bubble--kf{/if}">
-            {$msg.content|default=$msg.message|default=''}
-        </div>
-        {/foreach}
-        {if empty($history)}<div class="empty">开始对话吧</div>{/if}
+    {if !empty($error)}<div class="chat-msg err">{$error}</div>{/if}
+
+    <div class="chat-history" id="chatHistory">
+        {if empty($history)}
+        <div class="empty">{$tt['chat.welcome']|default='开始对话吧,有任何疑问都可以咨询客服'}</div>
+        {else/}
+            {foreach $history as $msg}
+            {php}$isMe = !empty($msg['is_self']) || (!empty($msg['send_type']) && $msg['send_type'] == 1);{/php}
+            <div class="chat-bubble{if $isMe} chat-bubble--me{else/} chat-bubble--kf{/if}">
+                <div class="ava">
+                    {if $isMe && !empty($user.avatar)}<img src="{$user.avatar}" alt="">{elseif !$isMe && !empty($hospital.cover_url)}<img src="{$hospital.cover_url}" alt="">{/if}
+                </div>
+                <div class="body">{$msg.content|default=$msg.message|default=''}</div>
+            </div>
+            {/foreach}
+        {/if}
     </div>
 
-    <form class="chat-input-bar" method="post" action="/{$lang_seg}/chat/{$hospital.id|default=0}">
-        <input type="text" name="content" placeholder="输入消息…" required maxlength="200" autocomplete="off">
-        <button type="submit">发送</button>
+    <form class="chat-input-bar" method="post" action="/{$lang_seg}/chat/{$hospital.id|default=0}" autocomplete="off">
+        <input type="text" name="content" placeholder="{$tt['chat.placeholder']|default='输入消息…'}" required maxlength="200">
+        <button type="submit">{$tt['chat.send']|default='发送'}</button>
     </form>
 </div>
+
+<script>
+// 进入后滚到底部
+(function(){
+    var h = document.getElementById('chatHistory');
+    if(h) h.scrollTop = h.scrollHeight;
+    window.scrollTo(0, document.body.scrollHeight);
+})();
+</script>
 {/block}

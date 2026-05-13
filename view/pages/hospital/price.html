@@ -16,7 +16,7 @@
         <div class="empty">{$tt['point.Empty']|default='暂无价目表'}</div>
         {/if}
         {foreach $covers as $c}
-        {if !empty($c.url)}<img src="{$c.url}" alt="{$hospital.name} 价目表" loading="lazy">{/if}
+        {if !empty($c.url)}<img src="{$c.url}" alt="{$hospital.name} 价目表" loading="lazy" data-preview="{$c.url}" data-preview-group="price-pics">{/if}
         {/foreach}
     </div>
     {include file="components/_tabbar" /}
