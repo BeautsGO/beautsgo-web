@@ -298,3 +298,90 @@ body { background: #fff; }
 }
 .bg-lightbox__nav--prev{ left: 16px; }
 .bg-lightbox__nav--next{ right: 16px; }
+/* ============================================================
+ * Banner 自动轮播 + 视频按钮 + dots(SSR 端补)
+ * ============================================================ */
+.swiper-body { overflow: hidden; }
+.swiper-body .swiper { overflow: hidden; position: relative; }
+.swiper-body .swiper-track {
+    display: flex; width: 100%;
+    transition: transform .5s ease;
+}
+.swiper-body .swiper-item {
+    flex: 0 0 100%; position: relative;
+    /* 撤掉原 display:none */
+}
+.swiper-body .swiper-item .swiper-img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    cursor: zoom-in;
+}
+.swiper-body .swiper-dots {
+    position: absolute; bottom: 10px; left: 0; right: 0;
+    display: flex; justify-content: center; gap: 5px; z-index: 2;
+}
+.swiper-body .swiper-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255,255,255,.55); cursor: pointer;
+    transition: background .2s, width .2s;
+}
+.swiper-body .swiper-dot--active {
+    background: #fe739d; width: 14px; border-radius: 3px;
+}
+
+/* ============================================================
+ * 顶部 nav 右侧分享按钮
+ * ============================================================ */
+.detail-nav__share {
+    margin-left: auto;
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    color: #1B1B1B; text-decoration: none; flex-shrink: 0;
+}
+
+/* ============================================================
+ * 分享浮层(纯 CSS :target)
+ * ============================================================ */
+.share-popup {
+    position: fixed; inset: 0; z-index: 1000;
+    display: none;
+}
+.share-popup:target { display: block; }
+.share-popup__mask {
+    position: absolute; inset: 0; background: rgba(0,0,0,.5);
+}
+.share-popup__mask a { display: block; width: 100%; height: 100%; }
+.share-popup__box {
+    position: absolute; left: 50%; bottom: 0;
+    transform: translateX(-50%);
+    width: 100%; max-width: 640px;
+    background: #fff;
+    border-radius: 16px 16px 0 0;
+    padding: 18px 16px 28px;
+    box-sizing: border-box;
+    animation: share-slide-up .3s ease;
+}
+@keyframes share-slide-up {
+    from { transform: translateX(-50%) translateY(100%); }
+    to   { transform: translateX(-50%) translateY(0); }
+}
+.share-popup__close {
+    position: absolute; top: 12px; right: 16px;
+    width: 24px; height: 24px; line-height: 24px;
+    color: #999; text-decoration: none; text-align: center; font-size: 16px;
+}
+.share-popup__title {
+    text-align: center; font-size: 14px; color: #333; font-weight: 600;
+    margin-bottom: 16px;
+}
+.share-popup__items {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+}
+.share-popup__item {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    text-decoration: none; color: #333; font-size: 12px;
+}
+.share-popup__icon {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700;
+}

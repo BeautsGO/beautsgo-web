@@ -13,22 +13,59 @@
             <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
         <div class="detail-nav__title">{$doctor.name|default=''}</div>
+        <a class="detail-nav__share" href="#share-popup" aria-label="分享">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </a>
     </div>
 
-    <!-- 顶部轮播 -->
-    {if !empty($doctor.banner)}
-    <div class="swiper-body">
-        <div class="swiper">
-            {foreach $doctor.banner as $idx=>$bn}
-            <div class="swiper-item" {if $idx > 0}style="display:none"{/if}>
-                {if !empty($bn.is_mp4) && !empty($bn.url)}
-                <div class="swiper-play"><img src="/static/detail/play.png" alt="play"></div>
-                {/if}
-                <img class="swiper-img" src="{$bn.cover|default=$bn.url}" alt="{$doctor.name|default=''} {:$idx + 1}" loading="{:$idx == 0 ? 'eager' : 'lazy'}">
+    <!-- 分享浮层 -->
+    <div class="share-popup" id="share-popup">
+        <div class="share-popup__mask"><a href="#" aria-label="关闭"></a></div>
+        <div class="share-popup__box">
+            <a class="share-popup__close" href="#" aria-label="关闭">✕</a>
+            <div class="share-popup__title">{$tt['share.title']|default='分享给好友'}</div>
+            <div class="share-popup__items">
+                <a class="share-popup__item" href="https://api.whatsapp.com/send?text={$doctor.name|default=''|urlencode}%20{$seo.canonical|urlencode}" target="_blank">
+                    <span class="share-popup__icon" style="background:#25d366;color:#fff">W</span><span>WhatsApp</span>
+                </a>
+                <a class="share-popup__item" href="https://twitter.com/intent/tweet?text={$doctor.name|default=''|urlencode}&url={$seo.canonical|urlencode}" target="_blank">
+                    <span class="share-popup__icon" style="background:#1da1f2;color:#fff">X</span><span>Twitter</span>
+                </a>
+                <a class="share-popup__item" href="https://www.facebook.com/sharer/sharer.php?u={$seo.canonical|urlencode}" target="_blank">
+                    <span class="share-popup__icon" style="background:#1877f2;color:#fff">f</span><span>Facebook</span>
+                </a>
+                <a class="share-popup__item" href="javascript:BG.copy(location.href,'链接已复制')">
+                    <span class="share-popup__icon" style="background:#eee;color:#333">⌘</span><span>{$tt['share.copyLink']|default='复制链接'}</span>
+                </a>
             </div>
+        </div>
+    </div>
+
+    <!-- 顶部轮播 (自动 3s + dots) -->
+    {if !empty($doctor.banner)}
+    <div class="swiper-body" id="banner" data-autoplay="3000">
+        <div class="swiper">
+            <div class="swiper-track">
+                {foreach $doctor.banner as $idx=>$bn}
+                <div class="swiper-item">
+                    {if !empty($bn.is_mp4) && !empty($bn.url)}
+                    <a class="swiper-play" href="{$bn.url}" target="_blank" aria-label="播放视频"><img src="/static/detail/play.png" alt="play"></a>
+                    {/if}
+                    <img class="swiper-img" src="{$bn.cover|default=$bn.url}"
+                        data-preview="{$bn.cover|default=$bn.url}" data-preview-group="banner"
+                        alt="{$doctor.name|default=''} {:$idx + 1}" loading="{:$idx == 0 ? 'eager' : 'lazy'}">
+                </div>
+                {/foreach}
+            </div>
+        </div>
+        <div class="current"><span id="bannerIdx">1</span>/{:count($doctor.banner)}</div>
+        {if count($doctor.banner) > 1}
+        <div class="swiper-dots">
+            {foreach $doctor.banner as $idx=>$_}
+            <span class="swiper-dot {if $idx == 0}swiper-dot--active{/if}" data-idx="{$idx}"></span>
             {/foreach}
         </div>
-        <div class="current">1/{:count($doctor.banner)}</div>
+        {/if}
     </div>
     {/if}
 
@@ -138,9 +175,9 @@
             <div class="case-item">
                 <div class="cae-box">
                     <div class="case-top">
-                        <div class="case-img" style="background-image: url('{$cs.pic_url_0}')"></div>
+                        <div class="case-img" style="background-image: url('{$cs.pic_url_0}')" data-preview="{$cs.pic_url_0}" data-preview-group="case-{$cs.id|default=''}"></div>
                         {if $cs['pic_count'] >= 2}
-                        <div class="case-img" style="background-image: url('{$cs.pic_url_1}')"></div>
+                        <div class="case-img" style="background-image: url('{$cs.pic_url_1}')" data-preview="{$cs.pic_url_1}" data-preview-group="case-{$cs.id|default=''}"></div>
                         {/if}
                     </div>
                     <div class="case-bottom">
@@ -199,7 +236,7 @@
                     {if !empty($cm.mediaList)}
                     <div class="feedback-images">
                         {foreach $cm.mediaList as $m}
-                        <div>{if $m['type'] == 'video'}<video src="{$m.url}" controls></video>{else}<img src="{$m.url}" alt="media" loading="lazy">{/if}</div>
+                        <div>{if $m['type'] == 'video'}<video src="{$m.url}" controls></video>{else}<img src="{$m.url}" alt="media" loading="lazy" data-preview="{$m.url}" data-preview-group="cm-{$cm.id|default=''}">{/if}</div>
                         {/foreach}
                     </div>
                     {/if}
@@ -288,4 +325,29 @@
     </div>
 
 </div>
+
+<script>
+(function(){
+    var root = document.getElementById('banner'); if(!root) return;
+    var items = root.querySelectorAll('.swiper-item');
+    if(items.length <= 1) return;
+    var track = root.querySelector('.swiper-track');
+    var dots  = root.querySelectorAll('.swiper-dot');
+    var idxEl = document.getElementById('bannerIdx');
+    var autoMs = parseInt(root.dataset.autoplay || '3000', 10);
+    var idx = 0;
+    function go(n){
+        idx = (n + items.length) % items.length;
+        track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+        dots.forEach(function(d, i){ d.classList.toggle('swiper-dot--active', i === idx); });
+        if(idxEl) idxEl.textContent = (idx + 1);
+    }
+    dots.forEach(function(d, i){ d.addEventListener('click', function(){ go(i); reset(); }); });
+    var timer = null;
+    function reset(){ if(timer) clearInterval(timer); timer = setInterval(function(){ go(idx + 1); }, autoMs); }
+    reset();
+    root.addEventListener('mouseenter', function(){ if(timer) clearInterval(timer); });
+    root.addEventListener('mouseleave', reset);
+})();
+</script>
 {/block}
