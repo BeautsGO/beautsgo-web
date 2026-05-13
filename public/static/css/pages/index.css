@@ -91,20 +91,63 @@
     display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
 }
 
-/* ===== 3. Banner 轮播(横向 scroll-snap 取代 swiper) ===== */
+/* ===== 3. Banner 自动轮播(JS 控制 translateX,带 dots)===== */
 .index-body .hot-box { padding: 0 12px 12px; }
-.index-body .hot-swiper {
-    display: flex; gap: 8px; overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;  /* Firefox */
+.index-body .hot-swiper { position: relative; overflow: hidden; border-radius: 8px; }
+.index-body .hot-swiper .hot-track {
+    display: flex; width: 100%;
+    transition: transform .5s ease;
 }
-.index-body .hot-swiper::-webkit-scrollbar { display: none; }
 .index-body .hot-item {
-    flex: 0 0 100%; scroll-snap-align: start;
-    border-radius: 8px; overflow: hidden;
+    flex: 0 0 100%;
     aspect-ratio: 5/1; background: #f5f5f5;
+    overflow: hidden;
 }
 .index-body .hot-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.index-body .hot-dots {
+    position: absolute; bottom: 6px; left: 0; right: 0;
+    display: flex; justify-content: center; gap: 5px;
+    z-index: 2;
+}
+.index-body .hot-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255,255,255,.55); cursor: pointer;
+    transition: background .2s, width .2s;
+}
+.index-body .hot-dot--active { background: #fe739d; width: 14px; border-radius: 3px; }
+
+/* ===== 首页广告弹窗(zwy-popup 等价)===== */
+.index-popup{
+    position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 999;
+    display: flex; align-items: center; justify-content: center;
+}
+.index-popup__box{
+    position: relative; width: 240px; height: 365px;
+    background: transparent; border-radius: 13px; overflow: visible;
+}
+.index-popup__close{
+    position: absolute; top: -32px; right: -4px;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(255,255,255,.9); color: #333; border: 0;
+    font-size: 16px; cursor: pointer; z-index: 2;
+}
+.index-popup__swiper{
+    position: relative; width: 100%; height: 100%;
+    border-radius: 13px; overflow: hidden;
+}
+.index-popup__track{
+    display: flex; width: 100%; height: 100%;
+    transition: transform .5s ease;
+}
+.index-popup__item{
+    flex: 0 0 100%; height: 100%;
+    display: block;
+}
+.index-popup__item img{ width: 100%; height: 100%; object-fit: cover; display: block; }
+.index-popup__dots{
+    position: absolute; bottom: 8px; left: 0; right: 0;
+    display: flex; justify-content: center; gap: 5px; z-index: 2;
+}
 
 /* ===== 4. 吸顶 tabs(list-box + sticky-tabs) ===== */
 .index-body .list-box {

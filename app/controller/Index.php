@@ -41,6 +41,14 @@ class Index extends BaseController
         $banner     = $repo->fetchBanner();
         $filterOpts = $repo->fetchFilterOptions();
 
+        // 首页广告弹窗(PopWindow/pageList)— 一天一次,cookie 控制
+        $popList = [];
+        $popSeenCookie = $this->request->cookie('bg_pop_seen', '');
+        if ($popSeenCookie !== date('Ymd')) {
+            $popResp = $this->api->get('/PopWindow/pageList');
+            $popList = (array) ($popResp['data'] ?? []);
+        }
+
         // 当前 tab 列表
         $data = ['list' => [], 'total' => 0];
         switch ($tab) {
@@ -88,6 +96,7 @@ class Index extends BaseController
             'total'        => $data['total'],
             'integralCls'  => $integralCls,
             'tabLabels'    => $tabLabels,
+            'popList'      => $popList,
         ]);
     }
 

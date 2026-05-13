@@ -13,14 +13,48 @@
 
     {if !empty($banner)}
     <div class="hot-box">
-        <div class="hot-swiper">
-            {foreach $banner as $idx=>$bn}
-            <a class="hot-item" href="{$bn.path|default='#'}" {if !empty($bn.colors)}style="background-color:{$bn.colors}"{/if}>
-                {if !empty($bn.cover.url)}
-                <img src="{$bn.cover.url}" alt="{$bn.title|default=''}" loading="{:$idx === 0 ? 'eager' : 'lazy'}">
+        <div class="hot-swiper" id="hotSwiper" data-autoplay="3000">
+            <div class="hot-track">
+                {foreach $banner as $idx=>$bn}
+                <a class="hot-item" href="{$bn.path|default='#'}" {if !empty($bn.colors)}style="background-color:{$bn.colors}"{/if}>
+                    {if !empty($bn.cover.url)}
+                    <img src="{$bn.cover.url}" alt="{$bn.title|default=''}" loading="{:$idx === 0 ? 'eager' : 'lazy'}">
+                    {/if}
+                </a>
+                {/foreach}
+            </div>
+            {if count($banner) > 1}
+            <div class="hot-dots">
+                {foreach $banner as $idx=>$_}
+                <span class="hot-dot {if $idx == 0}hot-dot--active{/if}" data-idx="{$idx}"></span>
+                {/foreach}
+            </div>
+            {/if}
+        </div>
+    </div>
+    {/if}
+
+    {if !empty($popList)}
+    <!-- 首页广告弹窗(zwy-popup):一天弹一次,cookie 控制 -->
+    <div class="index-popup" id="indexPopup" role="dialog" aria-modal="true">
+        <div class="index-popup__box">
+            <button class="index-popup__close" id="indexPopupClose" aria-label="关闭">✕</button>
+            <div class="index-popup__swiper" id="popSwiper" data-autoplay="5000">
+                <div class="index-popup__track">
+                    {foreach $popList as $idx=>$p}
+                    <a class="index-popup__item" href="{$p.path|default=$p.url|default='#'}">
+                        {if !empty($p.advertise)}<img src="{$p.advertise}" alt="{$p.title|default=''}">{/if}
+                    </a>
+                    {/foreach}
+                </div>
+                {if count($popList) > 1}
+                <div class="index-popup__dots">
+                    {foreach $popList as $idx=>$_}
+                    <span class="hot-dot {if $idx == 0}hot-dot--active{/if}" data-idx="{$idx}"></span>
+                    {/foreach}
+                </div>
                 {/if}
-            </a>
-            {/foreach}
+            </div>
         </div>
     </div>
     {/if}
@@ -93,4 +127,51 @@
     {include file="components/_tabbar" /}
 
 </div>
+
+<script>
+(function(){
+    // ---- 通用 swiper(.hot-swiper / .index-popup__swiper):自动 + 点 dot 切换 ----
+    function bindSwiper(root){
+        if(!root) return;
+        var autoMs = parseInt(root.dataset.autoplay || '0', 10);
+        var items = root.querySelectorAll('.hot-item, .index-popup__item');
+        var dots  = root.querySelectorAll('.hot-dot');
+        if(items.length <= 1) return;
+        var idx = 0;
+        function go(n){
+            idx = (n + items.length) % items.length;
+            var track = root.querySelector('.hot-track, .index-popup__track');
+            if(track){ track.style.transform = 'translateX(-' + (idx * 100) + '%)'; }
+            dots.forEach(function(d, i){ d.classList.toggle('hot-dot--active', i === idx); });
+        }
+        dots.forEach(function(d, i){ d.addEventListener('click', function(){ go(i); reset(); }); });
+        var timer = null;
+        function reset(){
+            if(timer) clearInterval(timer);
+            if(autoMs > 0) timer = setInterval(function(){ go(idx + 1); }, autoMs);
+        }
+        reset();
+        // 鼠标悬停暂停
+        root.addEventListener('mouseenter', function(){ if(timer) clearInterval(timer); });
+        root.addEventListener('mouseleave', reset);
+    }
+    bindSwiper(document.getElementById('hotSwiper'));
+    bindSwiper(document.getElementById('popSwiper'));
+
+    // ---- 首页弹窗:关闭后 set cookie 24h 不再弹 ----
+    var pop = document.getElementById('indexPopup');
+    if(pop){
+        var close = document.getElementById('indexPopupClose');
+        function dismiss(){
+            pop.style.display = 'none';
+            var today = new Date(); today.setHours(23,59,59,0);
+            document.cookie = 'bg_pop_seen=' + (new Date()).toISOString().slice(0,10).replace(/-/g,'')
+                + '; expires=' + today.toUTCString() + '; path=/';
+        }
+        close.addEventListener('click', dismiss);
+        pop.addEventListener('click', function(e){ if(e.target === pop) dismiss(); });
+        document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && pop.style.display !== 'none') dismiss(); });
+    }
+})();
+</script>
 {/block}

@@ -14,22 +14,39 @@ class Me extends BaseController
     public function index()
     {
         $auth = new AuthService();
-        $user = $auth->getCurrentUser();
+        // 一次性拿 user/info + 各订单状态计数 + jfShow(对齐原 me.vue 的 GET /user/info)
+        $info = $auth->call('GET', '/user/info');
+        $data = (array) ($info['data'] ?? []);
+        $user = (array) ($data['user'] ?? $auth->getCurrentUser());
 
-        // 提醒数(消息/未读)
-        $reminds = $auth->call('GET', '/user/remindNum');
-        $points  = $auth->call('GET', '/user/getPoint');
-        $wallet  = $auth->call('GET', '/user/getWalletPrice');
+        // 兜底另外拉(老接口偶尔不返回这几个)
+        if (empty($data['order'])) {
+            $reminds = $auth->call('GET', '/user/remindNum');
+            $data['order'] = (array) ($reminds['data'] ?? []);
+        }
+        $orderCnt = (array) ($data['order'] ?? []);
+        $point   = (int) ($data['point'] ?? $user['point'] ?? 0);
+        $balance = (float) ($data['wallet_price'] ?? $user['wallet_price'] ?? 0);
+        $message = (int) ($data['message'] ?? 0);
+        $jfShow  = (bool) ($data['jfShow'] ?? false);
 
+        $this->trackPage('个人中心', (int) ($user['id'] ?? 0));
         $this->seo->setTdk('我的 - BeautsGO', '个人中心', '我的')
             ->setCanonical((string) config('seo.site_url') . '/' . $this->langSeg() . '/me')
             ->buildOrganization();
 
         return $this->render('pages/me/index', [
             'user'    => $user,
-            'reminds' => (array) ($reminds['data'] ?? []),
-            'points'  => (int)  ($points['data']['point'] ?? $points['data'] ?? 0),
-            'wallet'  => (float)($wallet['data']['wallet_price'] ?? $wallet['data'] ?? 0),
+            'point'   => $point,
+            'balance' => $balance,
+            'message' => $message,
+            'jfShow'  => $jfShow,
+            'order'   => [
+                'pay'     => (int) ($orderCnt['uPay']    ?? $orderCnt['pay']    ?? 0),
+                'booking' => (int) ($orderCnt['booking'] ?? 0),
+                'booked'  => (int) ($orderCnt['booked']  ?? 0),
+                'refund'  => (int) ($orderCnt['refund']  ?? 0),
+            ],
         ]);
     }
 

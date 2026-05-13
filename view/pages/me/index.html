@@ -2,96 +2,305 @@
 
 {block name="extra_head"}
 <style>
-.me-page { background:#f6f6f6; min-height:100vh; padding-bottom:70px; }
-.me-header { background:linear-gradient(135deg,#afa7ef,#968ae8); padding:30px 20px 55px; color:#fff; position:relative; }
-.me-user { display:flex; align-items:center; gap:15px; }
-.me-avatar { width:70px; height:70px; border-radius:50%; border:3px solid #fff; object-fit:cover; background:#f5f5f5; }
-.me-user__info { flex:1; }
-.me-user__name { font-size:19px; font-weight:600; margin-bottom:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.me-user__phone { font-size:12px; opacity:.8; }
-.me-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:0; background:#fff; border-radius:12px; margin:-30px 16px 15px; padding:16px 0; box-shadow:0 4px 20px rgba(0,0,0,0.06); }
-.me-stat { text-align:center; }
-.me-stat__value { font-size:21px; font-weight:700; color:#1B1B1B; }
-.me-stat__label { font-size:11px; color:#999; margin-top:4px; }
-.me-stat + .me-stat { border-left:1px solid #f1f1f1; }
-.me-menu { background:#fff; border-radius:12px; margin:0 16px 12px; overflow:hidden; }
-.me-menu__item { display:flex; align-items:center; padding:16px 16px; text-decoration:none; color:#1B1B1B; font-size:14px; border-bottom:1px solid #f5f5f5; }
-.me-menu__item:last-child { border-bottom:0; }
-.me-menu__icon { width:24px; height:24px; margin-right:12px; display:flex; align-items:center; justify-content:center; font-size:20px; }
-.me-menu__label { flex:1; }
-.me-menu__hint { color:#999; font-size:12px; }
-.me-menu__arrow { color:#ccc; font-size:15px; margin-left:8px; }
-.me-menu__badge { background:#EF5189; color:#fff; min-width:20px; height:20px; border-radius:10px; padding:0 5px; font-size:11px; display:flex; align-items:center; justify-content:center; margin-right:6px; }
-.me-logout { text-align:center; padding:15px; }
-.me-logout a { color:#999; font-size:13px; text-decoration:none; }
+/* ============================================================
+ * Me 1:1 还原 (pages/me/me.vue scoped scss, rpx→px 1rpx=0.5px)
+ * ============================================================ */
+.me-body{ min-height: 100vh; background: #F6F6F6; padding: 0 0 54px; box-sizing: border-box; }
+
+/* ---- 顶部 nav(紫渐变 + 装饰圆球)---- */
+.me-nav{
+    position: relative; width: 100%;
+    background: linear-gradient(to bottom, #afa7ef, #968ae8);
+    padding-top: 44px; overflow: hidden;
+}
+.me-nav::before{
+    content: ''; position: absolute; top: -25px; right: -20px;
+    width: 90px; height: 90px;
+    background: rgba(255,255,255,.1); border-radius: 50%;
+}
+.me-nav .top{
+    padding: 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: relative; z-index: 2;
+}
+.me-nav .top-left{ display: flex; align-items: center; text-decoration: none; }
+.me-nav .ava{
+    width: 48px; height: 48px; padding: 2px;
+    background: #fff; border-radius: 50%; flex-shrink: 0;
+}
+.me-nav .ava img{ width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.me-nav .ava-nologin{ width: 40px; height: 30px; padding: 2px; flex-shrink: 0; }
+.me-nav .ava-nologin img{ width: 100%; height: 100%; object-fit: contain; }
+.me-nav .name{ margin-left: 6px; display: flex; flex-direction: column; justify-content: center; }
+.me-nav .name-top{ font-size: 16px; font-weight: 700; color: #fff; }
+.me-nav .top-right{
+    position: relative; width: 24px; height: 24px; flex-shrink: 0; cursor: pointer;
+    text-decoration: none;
+}
+.me-nav .top-right img{ width: 100%; height: 100%; }
+.me-nav .top-right .dot{
+    position: absolute; top: 0; right: 0; z-index: 9;
+    width: 6px; height: 6px; background: #FF4D4D; border-radius: 50%;
+}
+
+/* ---- 钱包卡片 ---- */
+.wallet-section{ width: calc(100% - 30px); margin: 10px auto; position: relative; z-index: 800; }
+.wallet-card-main{
+    background: #fff; border-radius: 8px;
+    padding: 14px 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    position: relative; overflow: hidden;
+    text-decoration: none; color: inherit;
+}
+.wallet-card-main::before{
+    content: ''; position: absolute; top: -15px; right: -15px;
+    width: 70px; height: 70px;
+    background: rgba(175,167,239,.12); border-radius: 50%;
+}
+.wallet-card-main::after{
+    content: ''; position: absolute; bottom: -20px; left: 30px;
+    width: 50px; height: 50px;
+    background: rgba(175,167,239,.08); border-radius: 50%;
+}
+.wallet-card-left{ display: flex; align-items: center; position: relative; z-index: 1; }
+.wallet-icon-wrapper{
+    width: 36px; height: 36px; margin-right: 10px;
+    display: flex; align-items: center; justify-content: center;
+}
+.wallet-icon-wrapper img{ width: 30px; height: 30px; }
+.wallet-info{ display: flex; align-items: center; }
+.wallet-label{ font-size: 12px; color: #ff7582; font-weight: 400; }
+.wallet-card-right{ display: flex; align-items: center; position: relative; z-index: 1; }
+.wallet-balance{
+    margin-right: 15px; font-size: 18px; font-weight: 700; color: #ff7582;
+    text-shadow: 0 1px 3px rgba(0,0,0,.12); letter-spacing: 0.5px;
+}
+.wallet-card-right .arrow{ color: #ccc; font-size: 18px; }
+
+/* ---- 积分订单 / 积分余额 2 卡 ---- */
+.tab-row{
+    width: calc(100% - 30px); margin: 10px auto;
+    display: flex; gap: 10px;
+}
+.tab-detail{
+    flex: 1; height: 50px;
+    background: #fff; border-radius: 7px;
+    display: flex; justify-content: space-around; align-items: center;
+    padding: 5px; box-sizing: border-box;
+    text-decoration: none; color: inherit;
+}
+.tab-detail .tab-title{ font-size: 13px; color: #1B1B1B; }
+.tab-detail .tab-text{ font-size: 10px; color: #E19588; }
+.tab-detail .tab-blue{ color: #ACB8D7; }
+.tab-detail .tab-right img{ width: 27px; height: 27px; object-fit: contain; }
+
+/* ---- 订单 5 图标 ---- */
+.order-box{ width: calc(100% - 30px); margin: 10px auto; background: #fff; border-radius: 7px; }
+.order-menu{ display: flex; justify-content: space-around; align-items: center; padding: 13px; }
+.order-item{
+    position: relative;
+    display: flex; flex-direction: column; align-items: center;
+    max-width: 20%;
+    text-decoration: none; color: #999;
+}
+.order-item img{ width: 28px; height: 28px; }
+.order-item .label{
+    margin-top: 5px; font-size: 11px; color: #999;
+    text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.order-item .badge{
+    position: absolute; top: -8px; left: 28px;
+    background: #FF4D4D; color: #fff;
+    min-width: 16px; height: 16px; line-height: 16px;
+    border-radius: 8px; padding: 0 4px;
+    font-size: 10px; font-weight: 500; text-align: center;
+    z-index: 1;
+}
+
+/* ---- 列表选型 ---- */
+.list{
+    width: calc(100% - 30px); margin: 10px auto 15px;
+    background: #fff; border-radius: 7px;
+    padding: 0 15px; box-sizing: border-box;
+}
+.list-detail{
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid #F5F5F5; padding: 16px 0;
+    text-decoration: none; color: inherit;
+}
+.list-detail:last-child{ border-bottom: 0; }
+.list-detail .list-left{
+    display: flex; align-items: center;
+    font-size: 14px; color: #333; font-weight: 600;
+}
+.list-detail .list-left img{ width: 21px; height: 21px; margin-right: 10px; }
+.list-detail .list-right{ display: flex; align-items: center; }
+.list-detail .list-right .right-info{ color: #9a9a9a; font-size: 12px; margin-left: 10px; }
+.list-detail .list-right .red-info{
+    color: #9a9a9a; font-size: 12px; margin-left: 10px; position: relative;
+}
+.list-detail .list-right .red-info::after{
+    content: ''; position: absolute; top: -2px; right: -5px;
+    width: 5px; height: 5px; background: #FF4D4D; border-radius: 50%;
+    animation: me-breathe 1.5s infinite;
+}
+.list-detail .list-right .arrow{ color: #ccc; font-size: 18px; margin-left: 6px; }
+@keyframes me-breathe{
+    0%{ transform: scale(1); } 50%{ transform: scale(1.3); } 100%{ transform: scale(1); }
+}
+.list-detail--lang summary{ list-style: none; display: flex; flex: 1; align-items: center; width: 100%; cursor: pointer; }
+.list-detail--lang summary::-webkit-details-marker{ display: none; }
+.list-detail--lang .lang-options{ padding: 8px 0 4px 31px; display: flex; flex-direction: column; gap: 6px; }
+.list-detail--lang .lang-options a{ color: #333; text-decoration: none; padding: 6px 0; font-size: 12px; }
+.list-detail--lang .lang-options a[aria-current="true"]{ color: #fc6290; font-weight: 600; }
 </style>
 {/block}
 
 {block name="content"}
-<div class="me-page">
-    <div class="me-header">
-        <div class="me-user">
-            <img class="me-avatar" src="{$user.avatar|default='/static/icon/default-avatar.png'}" alt="avatar">
-            <div class="me-user__info">
-                <div class="me-user__name">{$user.nickname|default=$user.phone|default='未登录'}</div>
-                <div class="me-user__phone">{$user.phone|default=''}</div>
+<div class="me-body">
+    <!-- 顶部 nav -->
+    <div class="me-nav">
+        <div class="top">
+            {if !empty($user.id)}
+            <a class="top-left" href="/{$lang_seg}/me/profile">
+                <div class="ava"><img src="{$user.avatar|default='/static/icon/default-avatar.png'}" alt=""></div>
+                <div class="name"><div class="name-top">{$user.nickname|default=$user.phone|default=''}</div></div>
+            </a>
+            {else/}
+            <a class="top-left" href="/{$lang_seg}/login">
+                <div class="ava-nologin"><img src="/static/logo.png" alt=""></div>
+                <div class="name"><div class="name-top">{$tt['me.Loginnow']|default='立即登录'}</div></div>
+            </a>
+            {/if}
+            {if !empty($user.id)}
+            <a class="top-right" href="/{$lang_seg}/me/news" aria-label="消息">
+                {if $message > 0}<div class="dot"></div>{/if}
+                <img src="http://beautsgoimg.59w.net/20230911092044/64fe6b6c1f66a.png" alt="">
+            </a>
+            {/if}
+        </div>
+    </div>
+
+    {if $balance > 0}
+    <div class="wallet-section">
+        <a class="wallet-card-main" href="/{$lang_seg}/me/wallet">
+            <div class="wallet-card-left">
+                <div class="wallet-icon-wrapper"><img src="/static/wallet.png" alt="" onerror="this.style.display='none'"></div>
+                <div class="wallet-info"><div class="wallet-label">{$tt['me.AccountBalance']|default='账户余额'}</div></div>
             </div>
-            <a href="/{$lang_seg}/me/profile" style="color:#fff;text-decoration:none;font-size:12px;">编辑 ›</a>
-        </div>
+            <div class="wallet-card-right">
+                <div class="wallet-balance">₩{$balance}</div>
+                <span class="arrow">›</span>
+            </div>
+        </a>
     </div>
-    <div class="me-stats">
-        <div class="me-stat">
-            <div class="me-stat__value">{$points}</div>
-            <div class="me-stat__label">我的积分</div>
-        </div>
-        <div class="me-stat">
-            <div class="me-stat__value">¥{$wallet|number_format=2}</div>
-            <div class="me-stat__label">钱包余额</div>
-        </div>
-        <div class="me-stat">
-            <div class="me-stat__value">{$reminds.unread|default=0}</div>
-            <div class="me-stat__label">未读消息</div>
-        </div>
-    </div>
+    {/if}
 
-    <div class="me-menu">
-        <a class="me-menu__item" href="/{$lang_seg}/me/order">
-            <span class="me-menu__icon">📋</span>
-            <span class="me-menu__label">我的订单</span>
-            <span class="me-menu__arrow">›</span>
+    <!-- 积分订单 + 积分商城 -->
+    <div class="tab-row">
+        <a class="tab-detail" href="/{$lang_seg}/point/shop">
+            <div class="tab-left"><div class="tab-title">{$tt['me.Pointorder']|default='积分订单'}</div></div>
+            <div class="tab-right"><img src="https://beautsgoimg.59w.net/20250306101442/67c90512dd02c.png" alt=""></div>
         </a>
-        <a class="me-menu__item" href="/{$lang_seg}/me/collect">
-            <span class="me-menu__icon">❤</span>
-            <span class="me-menu__label">我的收藏</span>
-            <span class="me-menu__arrow">›</span>
-        </a>
-        <a class="me-menu__item" href="/{$lang_seg}/me/order?status=10">
-            <span class="me-menu__icon">📝</span>
-            <span class="me-menu__label">我的预约</span>
-            <span class="me-menu__arrow">›</span>
+        <a class="tab-detail" href="/{$lang_seg}/point/task">
+            <div class="tab-left">
+                <div class="tab-title">{$tt['index.tabs.point']|default='积分商城'}</div>
+                <div class="tab-text tab-blue">{$point}{$tt['me.Pointunit']|default='分'}</div>
+            </div>
+            <div class="tab-right"><img src="https://beautsgoimg.59w.net/20250310134459/67ce7c5bc62f2.png" alt=""></div>
         </a>
     </div>
 
-    <div class="me-menu">
-        <a class="me-menu__item" href="/{$lang_seg}/point/shop">
-            <span class="me-menu__icon">⭐</span>
-            <span class="me-menu__label">积分商城</span>
-            <span class="me-menu__arrow">›</span>
-        </a>
-        <a class="me-menu__item" href="/{$lang_seg}/about">
-            <span class="me-menu__icon">ℹ</span>
-            <span class="me-menu__label">关于 BeautsGO</span>
-            <span class="me-menu__arrow">›</span>
-        </a>
-        <a class="me-menu__item" href="/{$lang_seg}/qualifications">
-            <span class="me-menu__icon">🛡</span>
-            <span class="me-menu__label">资质规则</span>
-            <span class="me-menu__arrow">›</span>
-        </a>
+    <!-- 订单 5 图标 -->
+    <div class="order-box">
+        <div class="order-menu">
+            <a class="order-item" href="/{$lang_seg}/me/order?status=1">
+                {if $order.pay > 0}<span class="badge">{:$order['pay']>99?'99+':$order['pay']}</span>{/if}
+                <img src="https://beautsgoimg.59w.net/20250306140125/67c93a35405f1.png" alt="">
+                <span class="label">{$tt['me.Pendingpayment']|default='待付款'}</span>
+            </a>
+            <a class="order-item" href="/{$lang_seg}/me/order?status=2">
+                {if $order.booking > 0}<span class="badge">{:$order['booking']>99?'99+':$order['booking']}</span>{/if}
+                <img src="https://beautsgoimg.59w.net/20250630175035/68625deb45050.png" alt="">
+                <span class="label">{$tt['me.Inprogress']|default='进行中'}</span>
+            </a>
+            <a class="order-item" href="/{$lang_seg}/me/order?status=3">
+                {if $order.booked > 0}<span class="badge">{:$order['booked']>99?'99+':$order['booked']}</span>{/if}
+                <img src="https://beautsgoimg.59w.net/20250630175212/68625e4ca2ad7.png" alt="">
+                <span class="label">{$tt['index.common.AlreadyBooked']|default='已预约'}</span>
+            </a>
+            <a class="order-item" href="/{$lang_seg}/me/order?status=5">
+                {if $order.refund > 0}<span class="badge">{:$order['refund']>99?'99+':$order['refund']}</span>{/if}
+                <img src="https://beautsgoimg.59w.net/20250306140125/67c93a3541c83.png" alt="">
+                <span class="label">{$tt['me.Refund']|default='退款'}</span>
+            </a>
+            <a class="order-item" href="/{$lang_seg}/me/order?status=0">
+                <img src="https://beautsgoimg.59w.net/20250306135555/67c938ebc35dd.png" alt="">
+                <span class="label">{$tt['me.Allitem']|default='全部'}</span>
+            </a>
+        </div>
     </div>
 
-    <div class="me-logout">
-        <a href="/{$lang_seg}/logout">退出登录</a>
+    <!-- 列表选型 -->
+    <div class="list">
+        <a class="list-detail" href="/{$lang_seg}/point/task">
+            <div class="list-left">
+                <img src="https://beautsgoimg.59w.net/20250306105258/67c90e0a847fc.png" alt="">
+                {$tt['me.Pointbasedtask']|default='积分任务'}
+            </div>
+            <div class="list-right">
+                {if $jfShow}<span class="red-info">{$tt['me.Pointspendingclaim']|default='待领取'}</span>{/if}
+                <span class="arrow">›</span>
+            </div>
+        </a>
+        <a class="list-detail" href="/{$lang_seg}/point/shop">
+            <div class="list-left">
+                <img src="https://beautsgoimg.59w.net/20250306105322/67c90e224e105.png" alt="">
+                {$tt['me.Pointsredemption']|default='积分兑换'}
+            </div>
+            <div class="list-right">
+                {if $point > 0}<span class="red-info">{$point}{$tt['me.Remainingpoints']|default='可用积分'}</span>{/if}
+                <span class="arrow">›</span>
+            </div>
+        </a>
+        <a class="list-detail" href="/{$lang_seg}/me/record">
+            <div class="list-left">
+                <img src="https://beautsgoimg.59w.net/20250306105342/67c90e36539db.png" alt="">
+                {$tt['me.Browsinghistory']|default='浏览历史'}
+            </div>
+            <div class="list-right"><span class="arrow">›</span></div>
+        </a>
+        <a class="list-detail" href="/{$lang_seg}/me/collect">
+            <div class="list-left">
+                <img src="https://beautsgoimg.59w.net/20250306105357/67c90e4565432.png" alt="">
+                {$tt['me.Mycollections']|default='我的收藏'}
+            </div>
+            <div class="list-right"><span class="arrow">›</span></div>
+        </a>
+        <details class="list-detail list-detail--lang">
+            <summary>
+                <img src="https://beautsgoimg.59w.net/20250623143411/6858f5637ba15.png" alt="">
+                <span style="color:#333;font-weight:600;font-size:14px">{$tt['index.common.SwitchLanguage']|default='切换语言'}</span>
+                <span style="margin-left:auto;display:flex;align-items:center">
+                    <span class="right-info">{:['zh-Hans'=>'简体中文','zh-Hant'=>'繁體中文','en'=>'English','ja'=>'日本語','th'=>'ภาษาไทย'][$lang]??'中文'}</span>
+                    <span class="arrow" style="margin-left:6px">›</span>
+                </span>
+            </summary>
+            <div class="lang-options">
+                <a href="/cn/me" {if $lang == 'zh-Hans'}aria-current="true"{/if}>中文(简体)</a>
+                <a href="/zh/me" {if $lang == 'zh-Hant'}aria-current="true"{/if}>中文(繁體)</a>
+                <a href="/en/me" {if $lang == 'en'}aria-current="true"{/if}>English</a>
+                <a href="/ja/me" {if $lang == 'ja'}aria-current="true"{/if}>日本語</a>
+                <a href="/th/me" {if $lang == 'th'}aria-current="true"{/if}>ภาษาไทย</a>
+            </div>
+        </details>
+        <a class="list-detail" href="/{$lang_seg}/me/settings">
+            <div class="list-left">
+                <img src="https://beautsgoimg.59w.net/20250619091355/68536453d0ecd.png" alt="">
+                {$tt['index.common.setting']|default='设置'}
+            </div>
+            <div class="list-right"><span class="arrow">›</span></div>
+        </a>
     </div>
 
     {include file="components/_tabbar" /}
