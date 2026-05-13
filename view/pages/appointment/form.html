@@ -2,30 +2,106 @@
 
 {block name="extra_head"}
 <style>
-.appt-page { background:#f6f6f6; min-height:100vh; padding-bottom:70px; }
-.page-head { background:#fff; height:44px; display:flex; align-items:center; padding:0 15px; border-bottom:1px solid #f1f1f1; position:sticky; top:0; z-index:20; }
-.page-head .back-btn { width:30px; height:30px; display:flex; align-items:center; justify-content:center; color:#1B1B1B; font-size:22.5px; text-decoration:none; }
-.page-head .page-title { flex:1; margin:0; text-align:center; font-size:16px; font-weight:600; color:#1B1B1B; margin-right:30px; }
-.appt-target { background:#fff; padding:15px 16px; margin-bottom:12px; display:flex; gap:12px; }
-.appt-target img { width:70px; height:70px; border-radius:8px; object-fit:cover; }
-.appt-target__name { font-size:15px; font-weight:600; color:#1B1B1B; margin-bottom:4px; }
-.appt-target__meta { font-size:12px; color:#999; }
-.appt-form { background:#fff; padding:0; }
-.form-row { display:flex; align-items:center; padding:15px 16px; border-bottom:1px solid #f5f5f5; }
-.form-row label { width:80px; font-size:14px; color:#1B1B1B; }
-.form-row input, .form-row textarea { flex:1; min-height:34px; padding:8px 0; border:0; background:transparent; font-size:14px; outline:none; resize:vertical; }
-.form-row textarea { padding:8px 0; }
-.btn-submit { display:block; width:calc(100% - 32px); margin:20px 16px; height:47px; background:#FE739D; color:#fff; border:0; border-radius:24px; font-size:16px; font-weight:600; }
-.appt-msg { padding:8px 16px; font-size:12px; }
-.appt-msg.err { color:#EF5189; }
+/* ============================================================
+ * Appointment Form 1:1 还原 (appointmentInput.vue scoped scss, rpx→px 1rpx=0.5px)
+ * ============================================================ */
+.appt-body{
+    min-height: 100vh; overflow-x: hidden; box-sizing: border-box;
+    background-image: url('https://beautsgoimg.59w.net/20241125104152/6743e3f0305f9.png');
+    background-size: 100% auto; background-repeat: no-repeat; background-color: #f8b8d4;
+    position: relative; padding-bottom: 30px;
+}
+.appt-top{
+    margin: 10px; display: flex; align-items: center;
+}
+.appt-top img{ width: 100px; height: 29px; }
+.appt-title-box{ margin: 0 30px; }
+.appt-title-box .wavy{
+    position: relative; display: flex; justify-content: space-around;
+    -webkit-box-reflect: below -12px linear-gradient(transparent, rgba(0,0,0,0.2));
+}
+.appt-title-box .wavy text{
+    position: relative; display: inline-block;
+    color: #fe739d; font-size: 32px; font-weight: 700;
+    animation: appt-wavy 1s ease-in-out infinite;
+    animation-delay: calc(.1s * var(--i));
+}
+@keyframes appt-wavy{
+    0%   { transform: translateY(0); }
+    20%  { transform: translateY(-24px); }
+    40%, 100% { transform: translateY(0); }
+}
+.appt-title-info{
+    text-align: center; color: #fe739d; font-size: 17px; margin: 15px 0;
+    font-weight: 600;
+}
+.appt-progress-box{ display: flex; align-items: center; }
+.appt-progress-box .pg-label{ margin-right: 10px; color: #fff; font-size: 14px; flex-shrink: 0; }
+.appt-progress-box .pg-bar{
+    flex: 1; height: 8px; background: rgba(255,255,255,.4); border-radius: 4px; overflow: hidden;
+}
+.appt-progress-box .pg-fill{
+    width: 0; height: 100%; background: #fe739d; border-radius: 4px;
+    transition: width 2s ease;
+}
+
+/* 已选目标卡片 */
+.appt-target{
+    margin: 10px 30px; padding: 10px;
+    background: rgba(255,255,255,.7); border-radius: 12px;
+    display: flex; gap: 10px; align-items: center;
+}
+.appt-target img{ width: 50px; height: 50px; border-radius: 6px; object-fit: cover; }
+.appt-target__name{ font-size: 14px; font-weight: 600; color: #1B1B1B; }
+.appt-target__meta{ font-size: 11px; color: #999; margin-top: 3px; }
+
+.appt-detail-bg{
+    background: #fff; border-radius: 15px;
+    margin: 15px; padding: 10px;
+}
+.appt-form-item{
+    display: flex; align-items: center;
+    padding: 12px 6px; border-bottom: 1px solid #f5f5f5;
+}
+.appt-form-item:last-of-type{ border-bottom: 0; }
+.appt-form-item label{
+    flex-shrink: 0; min-width: 90px; font-size: 14px; color: #333;
+}
+.appt-form-item input{
+    flex: 1; border: 0; outline: none; background: transparent;
+    font-size: 16px; color: #333; min-width: 0; padding: 2px 0;
+}
+.appt-form-item input::placeholder{ color: #ccc; font-size: 14px; }
+.appt-form-item .arrow{ color: #ccc; font-size: 16px; flex-shrink: 0; margin-left: 4px; }
+
+.appt-submit{
+    width: 80%; height: 40px; margin: 20px auto; display: block;
+    background: #FF9AC3; border: 0; border-radius: 20px;
+    color: #fff; font-size: 15px;
+    cursor: pointer; box-shadow: 0 6px 16px rgba(255,154,195,.45);
+}
+.appt-msg.err{ color: #fff; background: rgba(239,81,137,.85); border-radius: 6px; padding: 8px 12px; margin: 10px 32px; font-size: 12px; }
 </style>
 {/block}
 
 {block name="content"}
-<div class="appt-page">
-    <div class="page-head">
-        <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
-        <h1 class="page-title">预约面诊</h1>
+<div class="appt-body">
+    <div class="appt-top">
+        <img src="https://beautsgoimg.59w.net/20241125143540/67441abc9f0a9.png" alt="BeautsGO">
+    </div>
+
+    <div class="appt-title-box">
+        <div class="wavy">
+            <text style="--i:1">{$tt['order.yu']|default='预'}</text>
+            <text style="--i:2">{$tt['order.yue']|default='约'}</text>
+            <text style="--i:3">{$tt['order.ti']|default='提'}</text>
+            <text style="--i:4">{$tt['order.su']|default='速'}</text>
+        </div>
+        <div class="appt-title-info">{$tt['order.Expediteappointment']|default='抢先预约·一键提速'}</div>
+        <div class="appt-progress-box">
+            <span class="pg-label">{$tt['order.Speedup']|default='提速进度'}</span>
+            <div class="pg-bar"><div class="pg-fill" id="pgFill"></div></div>
+        </div>
     </div>
 
     {if !empty($hospital)}
@@ -42,7 +118,7 @@
         {if !empty($doctor.cover_url)}<img src="{$doctor.cover_url}" alt="">{/if}
         <div>
             <div class="appt-target__name">{$doctor.name|default=''}</div>
-            <div class="appt-target__meta">{$doctor.job_name|default=''} · {$doctor.hospital.name|default=''}</div>
+            <div class="appt-target__meta">{$doctor.job_name|default=''}</div>
         </div>
     </div>
     {/if}
@@ -51,38 +127,60 @@
         {if !empty($project.cover_url)}<img src="{$project.cover_url}" alt="">{/if}
         <div>
             <div class="appt-target__name">{$project.name|default=''}</div>
-            <div class="appt-target__meta">₩ {$project.korean_won|default=''}{if !empty($project.unit)}/{$project.unit}{/if}</div>
+            <div class="appt-target__meta">₩{$project.korean_won|default=0}</div>
         </div>
     </div>
     {/if}
 
-    {if !empty($error)}<div class="appt-msg err">{$error}</div>{/if}
-
-    <form method="post" action="/{$lang_seg}/appointment" class="appt-form">
+    <form class="appt-detail-bg" method="post" action="/{$lang_seg}/appointment" id="apptForm">
         <input type="hidden" name="h_id" value="{$hospital.id|default=0}">
         <input type="hidden" name="d_id" value="{$doctor.id|default=0}">
         <input type="hidden" name="p_id" value="{$project.id|default=0}">
-        <div class="form-row">
-            <label>姓名</label>
-            <input type="text" name="name" placeholder="您的姓名" value="{$user.nickname|default=''}" required>
+
+        <div class="appt-form-item">
+            <label>{$tt['me.userInfoSet.namePlc']|default='姓名'}</label>
+            <input type="text" name="name" placeholder="{$tt['order.namePlc']|default='请输入您的姓名'}" required>
         </div>
-        <div class="form-row">
-            <label>联系电话</label>
-            <input type="tel" name="phone" placeholder="联系电话" required inputmode="numeric">
+        <div class="appt-form-item">
+            <label>{$tt['me.userInfoSet.phonePlc']|default='手机号'}</label>
+            <input type="tel" name="phone" placeholder="{$tt['order.phonePlc']|default='请输入手机号'}" required>
         </div>
-        <div class="form-row">
-            <label>微信号</label>
-            <input type="text" name="wechat" placeholder="选填,方便顾问联系">
+        <div class="appt-form-item">
+            <label>{$tt['order.wechat']|default='微信号'}</label>
+            <input type="text" name="wechat" placeholder="{$tt['order.wechatPlc']|default='方便客服联系(选填)'}">
         </div>
-        <div class="form-row">
-            <label>意向时间</label>
+        <div class="appt-form-item">
+            <label>{$tt['order.visitDate']|default='预约日期'}</label>
             <input type="date" name="visit_date">
+            <span class="arrow">›</span>
         </div>
-        <div class="form-row" style="align-items:flex-start;">
-            <label style="padding-top:8px;">备注</label>
-            <textarea name="remark" rows="3" placeholder="描述您关心的问题"></textarea>
+        <div class="appt-form-item">
+            <label>{$tt['order.remark']|default='备注'}</label>
+            <input type="text" name="remark" placeholder="{$tt['order.remarkPlc']|default='可填写诉求/需求'}">
         </div>
-        <button class="btn-submit" type="submit">提交预约</button>
+
+        {if !empty($error)}<div class="appt-msg err">{$error}</div>{/if}
+
+        <button class="appt-submit" type="submit">{$tt['order.Requesturgentscheduling']|default='立即预约·插队提速'}</button>
     </form>
 </div>
+
+<script>
+(function(){
+    setTimeout(function(){
+        var f = document.getElementById('pgFill');
+        if(f) f.style.width = '60%';
+    }, 200);
+
+    var form = document.getElementById('apptForm');
+    if(form){
+        form.addEventListener('submit', function(e){
+            var name = form.querySelector('input[name=name]').value.trim();
+            var phone = form.querySelector('input[name=phone]').value.trim();
+            if(!name){ e.preventDefault(); BG.toast('请填写姓名', 'error'); return; }
+            if(!phone || !/^\d{6,15}$/.test(phone)){ e.preventDefault(); BG.toast('请填写正确的手机号', 'error'); return; }
+        });
+    }
+})();
+</script>
 {/block}

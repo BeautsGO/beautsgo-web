@@ -1,42 +1,206 @@
 {extend name="layout/base" /}
-{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+
+{block name="extra_head"}
+<style>
+.cp-body{ min-height: 100vh; background: #f6f6f6; padding-bottom: 30px; }
+.cp-head{
+    position: sticky; top: 0; z-index: 10; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+}
+.cp-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; text-decoration: none; color: #1B1B1B; font-size: 20px; }
+.cp-head .title{ flex: 1; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; margin-right: 30px; }
+
+.cp-subject{ display: flex; align-items: center; gap: 10px; padding: 14px 16px; background: #fff; margin-bottom: 12px; }
+.cp-subject img{ width: 50px; height: 50px; border-radius: 6px; object-fit: cover; }
+.cp-subject .name{ font-size: 14px; font-weight: 600; color: #333; }
+.cp-subject .sub{ font-size: 11px; color: #999; margin-top: 3px; }
+
+.cp-card{ background: #fff; margin-bottom: 12px; padding: 16px; }
+.cp-section-title{ font-size: 14px; color: #333; font-weight: 600; margin-bottom: 10px; }
+
+.cp-rate{ display: inline-flex; flex-direction: row-reverse; gap: 4px; vertical-align: middle; }
+.cp-rate input{ position: absolute; opacity: 0; pointer-events: none; }
+.cp-rate label{ font-size: 36px; line-height: 1; color: #ddd; cursor: pointer; transition: color .15s; }
+.cp-rate input:checked ~ label,
+.cp-rate label:hover,
+.cp-rate label:hover ~ label{ color: #FFB800; }
+.cp-rate-text{ display: inline-block; margin-left: 12px; font-size: 13px; color: #999; vertical-align: middle; }
+
+.cp-tags{ display: flex; flex-wrap: wrap; gap: 8px; }
+.cp-tag{
+    display: inline-block;
+    padding: 6px 12px; border: 1px solid #ddd; border-radius: 14px;
+    font-size: 12px; color: #666; cursor: pointer; user-select: none;
+}
+.cp-tag input{ display: none; }
+.cp-tag.cp-tag--checked{ border-color: #fe739d; background: #fff5fa; color: #fe739d; }
+
+.cp-content{
+    width: 100%; min-height: 120px; padding: 12px;
+    border: 1px solid #f0f0f0; border-radius: 8px;
+    font-size: 14px; line-height: 1.6; color: #333;
+    outline: none; resize: vertical; background: #fafafa;
+    box-sizing: border-box;
+}
+.cp-content:focus{ border-color: #fe739d; background: #fff; }
+.cp-content-count{ text-align: right; font-size: 11px; color: #999; margin-top: 6px; }
+
+.cp-upload{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+.cp-upload__item{
+    aspect-ratio: 1/1; border: 1px dashed #ddd; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; color: #ccc; font-size: 12px;
+    cursor: pointer; position: relative; overflow: hidden; background: #fafafa;
+}
+.cp-upload__item img{ width: 100%; height: 100%; object-fit: cover; }
+.cp-upload__plus{ font-size: 28px; line-height: 1; margin-bottom: 4px; }
+.cp-upload__remove{
+    position: absolute; top: 4px; right: 4px;
+    width: 20px; height: 20px; line-height: 18px; text-align: center;
+    background: rgba(0,0,0,.5); color: #fff; border-radius: 50%;
+    font-size: 14px; cursor: pointer; z-index: 2;
+}
+
+.cp-submit{
+    width: calc(100% - 30px); margin: 20px 15px;
+    height: 44px; background: #fe739d; color: #fff;
+    border: 0; border-radius: 22px; font-size: 15px; font-weight: 600;
+    cursor: pointer; box-shadow: 0 8px 20px rgba(254,115,157,.35);
+}
+
+.cp-msg.ok, .cp-msg.err{ margin: 12px 15px; padding: 10px; border-radius: 6px; text-align: center; font-size: 12px; }
+.cp-msg.ok{ background: #e6fff0; color: #1aac4a; }
+.cp-msg.err{ background: #fff5fa; color: #ef5189; }
+</style>
+{/block}
+
 {block name="content"}
-<div class="user-page">
-    <div class="page-head">
-        <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
-        <h1 class="page-title">写评价</h1>
+<div class="cp-body">
+    <div class="cp-head">
+        <a class="back" href="javascript:history.back()" aria-label="返回">‹</a>
+        <div class="title">{$tt['comment.publish']|default='写评价'}</div>
     </div>
+
     {if !empty($subjectName)}
-    <div style="padding:12px 16px;background:#fff;font-size:14px;color:#1B1B1B;">
-        评价对象:<strong>{$subjectName}</strong>
+    <div class="cp-subject">
+        {if !empty($subjectCover)}<img src="{$subjectCover}" alt="">{/if}
+        <div>
+            <div class="name">{$subjectName}</div>
+            <div class="sub">{$tt['comment.evaluateTip']|default='评价您的就诊体验'}</div>
+        </div>
     </div>
     {/if}
-    {if $saved}<div class="msg-ok">评价已发布,感谢您的反馈</div>{/if}
-    {if !empty($error)}<div class="msg-err">{$error}</div>{/if}
 
-    <form method="post" action="/{$lang_seg}/comment/publish?type={$type}&with_id={$with_id}">
+    {if $saved}<div class="cp-msg ok">{$tt['comment.published']|default='评价已发布,感谢您的反馈'}</div>{/if}
+    {if !empty($error)}<div class="cp-msg err">{$error}</div>{/if}
+
+    <form method="post" action="/{$lang_seg}/comment/publish?type={$type}&with_id={$with_id}" enctype="multipart/form-data" id="cpForm">
         <input type="hidden" name="type" value="{$type}">
         <input type="hidden" name="with_id" value="{$with_id}">
-        <div class="u-form-card">
-            <div class="u-form-row">
-                <div class="u-form-row__label">评分</div>
-                <div class="u-form-row__field">
-                    <div class="u-rate">
-                        <input id="r5" type="radio" name="rating" value="5" checked><label for="r5">★</label>
-                        <input id="r4" type="radio" name="rating" value="4"><label for="r4">★</label>
-                        <input id="r3" type="radio" name="rating" value="3"><label for="r3">★</label>
-                        <input id="r2" type="radio" name="rating" value="2"><label for="r2">★</label>
-                        <input id="r1" type="radio" name="rating" value="1"><label for="r1">★</label>
-                    </div>
+
+        <div class="cp-card">
+            <div class="cp-section-title">{$tt['comment.rate']|default='整体评分'}</div>
+            <div>
+                <div class="cp-rate">
+                    <input id="r5" type="radio" name="rating" value="5" checked><label for="r5">★</label>
+                    <input id="r4" type="radio" name="rating" value="4"><label for="r4">★</label>
+                    <input id="r3" type="radio" name="rating" value="3"><label for="r3">★</label>
+                    <input id="r2" type="radio" name="rating" value="2"><label for="r2">★</label>
+                    <input id="r1" type="radio" name="rating" value="1"><label for="r1">★</label>
                 </div>
-            </div>
-            <div class="u-form-row">
-                <div class="u-form-row__label">评价内容</div>
-                <div class="u-form-row__field"><textarea name="content" rows="5" placeholder="分享您的真实就医体验,帮助其他求美者做更明智的决策" required></textarea></div>
+                <span class="cp-rate-text" id="rateText">{$tt['comment.rate5']|default='非常满意'}</span>
             </div>
         </div>
-        <button class="u-btn-primary" type="submit">发布评价</button>
+
+        {if !empty($tagOptions)}
+        <div class="cp-card">
+            <div class="cp-section-title">{$tt['comment.tags']|default='推荐标签'}</div>
+            <div class="cp-tags">
+                {foreach $tagOptions as $tag}
+                <label class="cp-tag">
+                    <input type="checkbox" name="tags[]" value="{$tag.id|default=$tag}">
+                    {$tag.name|default=$tag}
+                </label>
+                {/foreach}
+            </div>
+        </div>
+        {/if}
+
+        <div class="cp-card">
+            <div class="cp-section-title">{$tt['comment.content']|default='评价内容'}</div>
+            <textarea class="cp-content" name="content" id="cpContent" maxlength="500"
+                placeholder="{$tt['comment.contentPlc']|default='分享您的真实就医体验,帮助其他求美者做更明智的决策(10 字以上)'}"></textarea>
+            <div class="cp-content-count"><span id="cpCount">0</span>/500</div>
+
+            <div class="cp-upload" id="cpUpload">
+                <label class="cp-upload__item" id="cpUploadAdd">
+                    <input type="file" name="images[]" accept="image/*" multiple style="display:none" id="cpFile">
+                    <span class="cp-upload__plus">+</span>
+                    <span>{$tt['comment.uploadImg']|default='添加图片'}</span>
+                </label>
+            </div>
+        </div>
+
+        <button class="cp-submit" type="submit">{$tt['comment.publishBtn']|default='发布评价'}</button>
     </form>
-    {include file="components/_tabbar" /}
 </div>
+
+<script>
+(function(){
+    var rateText = document.getElementById('rateText');
+    var rateTexts = {'1':'非常不满', '2':'不满意', '3':'一般', '4':'满意', '5':'非常满意'};
+    document.querySelectorAll('input[name=rating]').forEach(function(r){
+        r.addEventListener('change', function(){
+            if(r.checked) rateText.textContent = rateTexts[r.value] || '';
+        });
+    });
+
+    var content = document.getElementById('cpContent');
+    var count = document.getElementById('cpCount');
+    if(content){
+        content.addEventListener('input', function(){ count.textContent = content.value.length; });
+    }
+
+    document.querySelectorAll('.cp-tag').forEach(function(t){
+        var input = t.querySelector('input');
+        if(!input) return;
+        t.addEventListener('click', function(){
+            setTimeout(function(){ t.classList.toggle('cp-tag--checked', input.checked); }, 0);
+        });
+    });
+
+    var fileInput = document.getElementById('cpFile');
+    var upload = document.getElementById('cpUpload');
+    var addBtn = document.getElementById('cpUploadAdd');
+    var maxImgs = 8;
+    if(fileInput){
+        fileInput.addEventListener('change', function(){
+            var files = Array.from(fileInput.files);
+            var current = upload.querySelectorAll('.cp-upload__item').length - 1;
+            files.slice(0, maxImgs - current).forEach(function(f){
+                var reader = new FileReader();
+                reader.onload = function(ev){
+                    var item = document.createElement('div');
+                    item.className = 'cp-upload__item';
+                    item.innerHTML = '<img src="' + ev.target.result + '" alt=""><span class="cp-upload__remove">×</span>';
+                    item.querySelector('.cp-upload__remove').addEventListener('click', function(evt){
+                        evt.stopPropagation();
+                        item.remove();
+                    });
+                    upload.insertBefore(item, addBtn);
+                };
+                reader.readAsDataURL(f);
+            });
+        });
+    }
+
+    document.getElementById('cpForm').addEventListener('submit', function(e){
+        if(content.value.trim().length < 10){
+            e.preventDefault();
+            BG.toast('请至少填写 10 个字', 'error');
+        }
+    });
+})();
+</script>
 {/block}

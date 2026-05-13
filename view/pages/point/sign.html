@@ -1,30 +1,101 @@
 {extend name="layout/base" /}
-{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+
+{block name="extra_head"}
+<style>
+.point-body{ min-height: 100vh; background: linear-gradient(180deg,#afa7ef 0%,#f6f6f6 320px); padding-bottom: 70px; }
+.point-head{ padding: 44px 20px 20px; color: #fff; text-align: center; }
+.point-head .label{ font-size: 12px; opacity: .85; margin-bottom: 6px; }
+.point-head .num{ font-size: 40px; font-weight: 700; line-height: 1; }
+.point-head .tip{ font-size: 12px; opacity: .8; margin-top: 8px; }
+
+.point-tabs{ display: flex; gap: 10px; margin: 0 15px 15px; }
+.point-tabs a{
+    flex: 1; height: 36px; line-height: 36px; text-align: center;
+    background: rgba(255,255,255,.85); border-radius: 18px;
+    font-size: 13px; color: #555; text-decoration: none;
+}
+.point-tabs a.active{ background: #fff; color: #fe739d; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+
+.sign-card{ background: #fff; border-radius: 12px; margin: 0 15px 15px; padding: 16px; }
+.sign-card .qd-top{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.sign-card .qd-top .title{ font-size: 15px; font-weight: 600; color: #333; }
+.sign-card .qd-top .day-text{ display: block; font-size: 11px; color: #999; margin-top: 4px; }
+.sign-card .qd-top .day-active{ color: #fe739d; font-weight: 600; }
+.sign-card .qd-top button{
+    padding: 8px 16px; background: #fe739d; color: #fff;
+    border: 0; border-radius: 18px; font-size: 13px; cursor: pointer;
+}
+.sign-card .qd-top button:disabled{ background: #ccc; cursor: not-allowed; }
+
+.sign-days{ display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.sign-day{ display: flex; flex-direction: column; align-items: center; text-align: center; }
+.sign-day .day-icon{
+    position: relative; width: 36px; height: 36px; border-radius: 50%;
+    background: #f3f3f7;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 5px;
+}
+.sign-day .day-icon.signed{ background: linear-gradient(135deg,#fe739d,#ff9ac3); color: #fff; }
+.sign-day .day-icon.signed::after{ content: '✓'; color: #fff; font-size: 14px; font-weight: 700; }
+.sign-day .day-icon.bounce{ animation: sign-bounce 1.2s infinite; }
+.sign-day .day-icon .jf{
+    position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+    font-size: 10px; color: #fe739d; font-weight: 700; white-space: nowrap;
+}
+.sign-day .day-num{ font-size: 10px; color: #999; }
+
+@keyframes sign-bounce{ 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-4px); } }
+
+.point-msg{ margin: 10px 15px; padding: 8px 12px; border-radius: 6px; font-size: 12px; text-align: center; }
+.point-msg.ok{ background: #e6fff0; color: #1aac4a; }
+.point-msg.err{ background: #fff5fa; color: #ef5189; }
+</style>
+{/block}
+
 {block name="content"}
-<div class="user-page">
-    <div class="page-head">
-        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
-        <h1 class="page-title">每日签到</h1>
+<div class="point-body">
+    <div class="point-head">
+        <div class="label">{$tt['point.MyPoints']|default='我的积分'}</div>
+        <div class="num">{$point}</div>
+        <div class="tip">{$tt['point.PointsExplanation']|default='每日签到领积分,可兑换体验金 / 护肤品 / 礼品卡'}</div>
     </div>
 
-    {if !empty($error)}<div class="msg-err">{$error}</div>{/if}
-    {if $signed}<div class="msg-ok">签到成功 🎉</div>{/if}
-
-    <div style="background:linear-gradient(135deg,#afa7ef,#FE739D); color:#fff; padding:30px 20px; margin:12px 16px 0; border-radius:15px;">
-        <div style="font-size:13px; opacity:.85; margin-bottom:6px;">我的积分</div>
-        <div style="font-size:40px; font-weight:700;">{$point}</div>
-        <div style="font-size:12px; opacity:.85; margin-top:10px;">每日签到可领积分,可在积分商城兑换体验金、护肤品等</div>
+    <div class="point-tabs">
+        <a href="/{$lang_seg}/point/sign" class="active">{$tt['point.SignInForPoints']|default='签到'}</a>
+        <a href="/{$lang_seg}/point/task">{$tt['point.CompleteTasksToEarnPoints']|default='做任务'}</a>
+        <a href="/{$lang_seg}/point/shop">{$tt['point.PointsMall']|default='积分商城'}</a>
     </div>
 
-    <form method="post" action="/{$lang_seg}/point/sign">
-        <button class="u-btn-primary" type="submit" {if $signed}disabled{/if}>
-            {if $signed}今日已签到{else}立即签到{/if}
-        </button>
+    {if !empty($error)}<div class="point-msg err">{$error}</div>{/if}
+    {if $signed}<div class="point-msg ok">{$tt['point.SignInSuccessful']|default='签到成功'} 🎉</div>{/if}
+
+    {php}
+        $days = (int) ($continuousDays ?? 0);
+        $signPts = [10,10,15,15,20,20,50];
+    {/php}
+    <form class="sign-card" method="post" action="/{$lang_seg}/point/sign">
+        <div class="qd-top">
+            <div>
+                <div class="title">{$tt['point.SignInForPoints']|default='签到领积分'}</div>
+                <span class="day-text">{$tt['point.SignedIn']|default='已连签'}<span class="day-active">{$days}</span>/{$tt['point.Sevendays']|default='7天'}</span>
+            </div>
+            <button type="submit" {if $signed}disabled{/if}>
+                {if $signed}{$tt['point.SignInSuccessful']|default='已签到'}{else/}{$tt['point.SignInNow']|default='立即签到'}{/if}
+            </button>
+        </div>
+        <div class="sign-days">
+            {foreach $signPts as $k => $pts}
+            {php}$dayNo = $k + 1;{/php}
+            <div class="sign-day">
+                <div class="day-icon{if $dayNo <= $days} signed{/if}{if !$signed && $dayNo == $days + 1} bounce{/if}">
+                    {if $dayNo > $days}<div class="jf">+{$pts}</div>{/if}
+                </div>
+                <div class="day-num">{$tt['point.No']|default='第'}{$dayNo}{$tt['point.day']|default='天'}</div>
+            </div>
+            {/foreach}
+        </div>
     </form>
 
-    <div style="text-align:center; margin-top:15px;">
-        <a href="/{$lang_seg}/point/task" style="color:#FE739D; font-size:13px; text-decoration:none;">查看积分任务 ›</a>
-    </div>
     {include file="components/_tabbar" /}
 </div>
 {/block}

@@ -14,7 +14,7 @@
     <div class="case-detail__images">
         {foreach $case.pictures as $pic}
         {if !empty($pic.url)}
-        <img src="{$pic.url}" alt="case picture" loading="lazy">
+        <img src="{$pic.url}" alt="case picture" loading="lazy" data-preview="{$pic.url}" data-preview-group="case-pics">
         {/if}
         {/foreach}
     </div>

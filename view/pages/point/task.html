@@ -1,30 +1,92 @@
 {extend name="layout/base" /}
-{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+
+{block name="extra_head"}
+<style>
+.point-body{ min-height: 100vh; background: linear-gradient(180deg,#afa7ef 0%,#f6f6f6 320px); padding-bottom: 70px; }
+.point-head{ padding: 44px 20px 20px; color: #fff; text-align: center; }
+.point-head .label{ font-size: 12px; opacity: .85; margin-bottom: 6px; }
+.point-head .num{ font-size: 40px; font-weight: 700; line-height: 1; }
+.point-head .tip{ font-size: 12px; opacity: .8; margin-top: 8px; }
+
+.point-tabs{ display: flex; gap: 10px; margin: 0 15px 15px; }
+.point-tabs a{
+    flex: 1; height: 36px; line-height: 36px; text-align: center;
+    background: rgba(255,255,255,.85); border-radius: 18px;
+    font-size: 13px; color: #555; text-decoration: none;
+}
+.point-tabs a.active{ background: #fff; color: #fe739d; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+
+.task-card{ background: #fff; border-radius: 12px; margin: 0 15px 15px; padding: 14px 16px; }
+.task-card .title{ font-size: 15px; font-weight: 600; color: #333; margin-bottom: 12px; }
+
+.rw-item{
+    display: flex; align-items: center;
+    padding: 12px 0; border-bottom: 1px solid #f5f5f5;
+    text-decoration: none; color: inherit;
+}
+.rw-item:last-child{ border-bottom: 0; }
+.rw-item__icon{
+    width: 38px; height: 38px; border-radius: 8px;
+    background: linear-gradient(135deg,#fff5fa,#ffe8f0);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-right: 12px;
+    color: #fe739d; font-size: 18px;
+}
+.rw-item__body{ flex: 1; min-width: 0; }
+.rw-item__name{ font-size: 14px; color: #333; font-weight: 500; }
+.rw-item__desc{ font-size: 11px; color: #999; margin-top: 4px; }
+.rw-item__points{ font-size: 11px; color: #fe739d; margin-top: 3px; }
+.rw-item__btn{
+    flex-shrink: 0; padding: 6px 14px;
+    background: #fe739d; color: #fff; border-radius: 14px;
+    font-size: 12px; font-weight: 500;
+}
+.rw-item__btn--done{ background: #f3f3f7; color: #999; }
+
+.empty{ text-align: center; padding: 40px 0; color: #999; font-size: 12px; }
+</style>
+{/block}
+
 {block name="content"}
-<div class="user-page">
-    <div class="page-head">
-        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
-        <h1 class="page-title">积分任务</h1>
+<div class="point-body">
+    <div class="point-head">
+        <div class="label">{$tt['point.MyPoints']|default='我的积分'}</div>
+        <div class="num">{:isset($user['point']) ? $user['point'] : 0}</div>
+        <div class="tip">{$tt['point.CompleteTasksToEarnPoints']|default='完成任务赚积分,兑换福利不停歇'}</div>
     </div>
-    {if empty($tasks)}<div class="empty">{$tt['point.Empty']|default='暂无任务'}</div>{/if}
-    <div class="u-list">
-    {foreach $tasks as $t}
-        <div class="u-list-item">
-            <div class="u-list-item__body">
-                <div class="u-list-item__title">{$t.title|default=$t.name|default='任务'}</div>
-                <div class="u-list-item__meta">{$t.description|default=$t.intro|default=''}</div>
-                <div class="u-list-item__time">+{$t.point|default=$t.reward|default=0} 积分</div>
-            </div>
-            <div style="display:flex; align-items:center;">
-                {if !empty($t.done) || !empty($t.is_done)}
-                <span style="color:#999; font-size:12px;">已完成</span>
-                {else}
-                <span style="color:#FE739D; font-size:12px;">去完成 ›</span>
-                {/if}
-            </div>
-        </div>
-    {/foreach}
+
+    <div class="point-tabs">
+        <a href="/{$lang_seg}/point/sign">{$tt['point.SignInForPoints']|default='签到'}</a>
+        <a href="/{$lang_seg}/point/task" class="active">{$tt['point.CompleteTasksToEarnPoints']|default='做任务'}</a>
+        <a href="/{$lang_seg}/point/shop">{$tt['point.PointsMall']|default='积分商城'}</a>
     </div>
+
+    <div class="task-card">
+        <div class="title">{$tt['point.ViewMoreTasks']|default='可领取的任务'}</div>
+        {if empty($tasks)}
+        <div class="empty">{$tt['point.Empty']|default='暂无任务'}</div>
+        {else/}
+            {foreach $tasks as $t}
+            {php}$done = !empty($t['done']) || !empty($t['is_done']);{/php}
+            <a class="rw-item" href="{$t.path|default='javascript:'}">
+                <div class="rw-item__icon">
+                    {if !empty($t['icon'])}<img src="{$t.icon}" style="width:100%;height:100%;border-radius:8px;object-fit:cover" alt="">{else/}✦{/if}
+                </div>
+                <div class="rw-item__body">
+                    <div class="rw-item__name">{$t.title|default=$t.name|default='任务'}</div>
+                    {if !empty($t.description) || !empty($t.intro)}
+                    <div class="rw-item__desc">{$t.description|default=$t.intro|default=''}</div>
+                    {/if}
+                    <div class="rw-item__points">+{$t.point|default=$t.reward|default=0} {$tt['me.Pointunit']|default='分'}</div>
+                </div>
+                <span class="rw-item__btn{if $done} rw-item__btn--done{/if}">
+                    {if $done}{$tt['point.Done']|default='已完成'}{else/}{$tt['point.Goto']|default='去完成'}{/if}
+                </span>
+            </a>
+            {/foreach}
+        {/if}
+    </div>
+
     {include file="components/_tabbar" /}
 </div>
 {/block}
