@@ -149,7 +149,7 @@
     {if !empty($cases)}
     <div class="head">
         <div class="head-left"><div></div>{$tt['index.common.FeaturedCases']|default='精选案例'}</div>
-        <div class="head-right">{$tt['index.common.ViewAll']|default='查看全部'}<img src="/static/icon/right.png" alt="more"></div>
+        <a class="head-right" href="/{$lang_seg}/case?type=3&with_id={$project.id|default=0}" style="text-decoration:none;color:inherit">{$tt['index.common.ViewAll']|default='查看全部'}<img src="/static/icon/right.png" alt="more"></a>
     </div>
     <div class="case">
         <div class="case-list">
@@ -184,7 +184,7 @@
     <div class="feedback-list-component">
         <div class="head">
             <div class="head-left"><div></div>{$tt['hospitalDetails.Userfeedback']|default='用户反馈'}</div>
-            <div class="head-right">{$tt['index.common.ViewAll']|default='查看全部'}<img src="/static/icon/right.png" alt="more"></div>
+            <a class="head-right" href="/{$lang_seg}/comment/3/{$project.id|default=0}" style="text-decoration:none;color:inherit">{$tt['index.common.ViewAll']|default='查看全部'}<img src="/static/icon/right.png" alt="more"></a>
         </div>
         <div class="user-feedback">
             {if !empty($tags)}

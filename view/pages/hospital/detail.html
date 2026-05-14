@@ -181,10 +181,10 @@
             <div></div>
             {$tt['index.common.FeaturedCases']|default='精选案例'}
         </div>
-        <div class="head-right">
+        <a class="head-right" href="/{$lang_seg}/case?type=1&with_id={$hospital.id|default=0}" style="text-decoration:none;color:inherit">
             {$tt['index.common.ViewAll']|default='查看全部'}
             <img src="/static/icon/right.png" alt="more">
-        </div>
+        </a>
     </div>
     <div class="case">
         <div class="case-list">
@@ -224,10 +224,10 @@
                 <div></div>
                 {$tt['hospitalDetails.Userfeedback']|default='用户反馈'}
             </div>
-            <div class="head-right">
+            <a class="head-right" href="/{$lang_seg}/comment/1/{$hospital.id|default=0}" style="text-decoration:none;color:inherit">
                 {$tt['index.common.ViewAll']|default='查看全部'}
                 <img src="/static/icon/right.png" alt="more">
-            </div>
+            </a>
         </div>
         <div class="user-feedback">
             {if !empty($tags)}
@@ -296,10 +296,10 @@
             {$hospital.tag_project|default='特色项目'}
         </div>
         {if !empty($projects)}
-        <div class="head-right">
+        <a class="head-right" href="/{$lang_seg}/project" style="text-decoration:none;color:inherit">
             {$tt['index.common.ViewAll']|default='查看全部'}
             <img src="/static/icon/right.png" alt="more">
-        </div>
+        </a>
         {/if}
     </div>
     {if !empty($projects)}
