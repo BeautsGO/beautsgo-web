@@ -272,7 +272,7 @@
     </div>
     <div class="project">
         {foreach $projects as $pj}
-        <a class="project-detail" href="/{$lang_seg}/project/{$pj.en_name|default=$pj.id}">
+        <a class="project-detail" href="/{$lang_seg}/project/{$pj.slug|default=$pj.id}">
             {if !empty($pj.cover_url)}
             <img src="{$pj.cover_url}" alt="{$pj.name}" loading="lazy">
             {/if}

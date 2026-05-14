@@ -295,7 +295,7 @@
     <div class="project">
         {foreach $projects as $p_idx=>$p}
         <div class="{if $p_idx > 1}project-top {/if}project-detail">
-            <a href="/{$lang_seg}/project/{$p.en_name|default=$p.id}" style="color:inherit;text-decoration:none;">
+            <a href="/{$lang_seg}/project/{$p.slug|default=$p.id}" style="color:inherit;text-decoration:none;">
                 {if !empty($p.cover_url)}
                 <img src="{$p.cover_url}" alt="{$p.name}" loading="lazy">
                 {/if}
@@ -323,7 +323,7 @@
     <div class="expert">
         {foreach $experts as $d}
         <div class="expert-detail">
-            <a href="/{$lang_seg}/doctor/{$d.en_name|default=$d.d_id}" style="color:inherit;text-decoration:none;">
+            <a href="/{$lang_seg}/doctor/{$d.slug|default=$d.d_id}" style="color:inherit;text-decoration:none;">
                 <div class="expert-img">
                     {if !empty($d.cover_url)}
                     <img src="{$d.cover_url}" alt="{$d.name}" loading="lazy">
@@ -471,7 +471,7 @@
     <div class="more">
         {foreach $recommend as $r}
         <div class="list">
-            <a href="/{$lang_seg}/hospital/{$r.en_name|default=$r.id}" style="color:inherit;text-decoration:none;display:block;">
+            <a href="/{$lang_seg}/hospital/{$r.slug|default=$r.id}" style="color:inherit;text-decoration:none;display:block;">
                 <div class="list-img">
                     {if !empty($r.cover_url)}
                     <div class="list-img-left">

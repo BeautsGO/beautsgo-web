@@ -436,6 +436,7 @@ class HospitalRepository
             $r['rightCover'] = $rightCoverByHid[$r['id']] ?? [];
             $r['tag']        = $tagByHid[$r['id']] ?? [];
             if ($r['tag']) $r['tag'] = array_values(array_slice(array_unique($r['tag']), 0, 4));
+            $r['slug'] = $this->normalizeSlug((string) ($r['en_name'] ?? '')) ?: (string) $r['id'];
             unset($r['cover_detail']);
         }
         return $rows;
@@ -612,6 +613,8 @@ class HospitalRepository
             if (empty($r['job_name'])) {
                 $r['job_name'] = $r['job_en_name'] ?? '-';
             }
+            // URL slug(en_name 规范化,失败回落 id)
+            $r['slug'] = $this->normalizeSlug((string) ($r['en_name'] ?? '')) ?: (string) $r['d_id'];
             unset($r['cover_detail'], $r['job_en_name']);
         }
         return $rows;
@@ -642,6 +645,7 @@ class HospitalRepository
         foreach ($rows as &$r) {
             $r['cover']     = $this->processCover($r['cover_detail'] ?? '');
             $r['cover_url'] = $r['cover'][0]['url'] ?? '';
+            $r['slug'] = $this->normalizeSlug((string) ($r['en_name'] ?? '')) ?: (string) $r['id'];
             unset($r['cover_detail']);
         }
         return $rows;

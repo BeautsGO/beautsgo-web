@@ -262,6 +262,7 @@ class DoctorRepository
             $r['cover']     = $cov;
             $r['cover_url'] = $cov[0]['url'] ?? '';
             $r['korean_won'] = $this->formatKrPrice($r['korean_won']);
+            $r['slug'] = $this->normalizeSlug((string) ($r['en_name'] ?? '')) ?: (string) $r['id'];
             unset($r['cover_detail']);
         }
         return $rows;
