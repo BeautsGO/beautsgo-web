@@ -248,7 +248,9 @@
                 <img src="/static/detail/android-icon.png" alt="download">
                 <span class="h5-app-text">下载</span>
             </a>
-            <a class="btns-img" href="javascript:BG.toast('请登录后收藏','info')" data-collect="project:{$project.id|default=0}">
+            <a class="btns-img {if !empty($project.is_collect)}is-collected{/if}"
+               href="javascript:" data-collect-toggle data-collect-type="3"
+               data-collect-id="{$project.id|default=0}" data-lang-seg="{$lang_seg}">
                 <img src="/static/detail/btns3.svg" alt="favorite">
                 <span>{$tt['index.common.Favorites']|default='收藏'}</span>
             </a>

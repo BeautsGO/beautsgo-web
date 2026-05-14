@@ -385,3 +385,7 @@ body { background: #fff; }
     display: flex; align-items: center; justify-content: center;
     font-size: 18px; font-weight: 700;
 }
+
+/* 收藏态:激活时粉色 + 图标变化提示 */
+.btns-img.is-collected img { filter: hue-rotate(330deg) saturate(2); }
+.btns-img.is-collected span { color: #fe739d; font-weight: 600; }

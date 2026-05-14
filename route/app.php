@@ -83,6 +83,8 @@ Route::group(':lang', function () use ($slugPattern) {
     // 项目分类列表 (id 老链接) + slug 新链接 /{lang}/projects/category/{slug}
     Route::get('project/cate/:id',          'Listing/projectList')->pattern(['id' => '\d+']);
     Route::get('projects/category/:slug',   'Listing/projectByCategory')->pattern($slugPattern);
+    // 收藏代理(AJAX,静默 token 已写入 cookie)
+    Route::post('collect',                  'Collect/toggle');
     // 案例
     Route::get('case',      'Cases/listing');
     Route::get('case/:id',  'Cases/detail')->pattern(['id' => '\d+']);

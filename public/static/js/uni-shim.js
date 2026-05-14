@@ -111,6 +111,37 @@
     // -------------------- 拨号 --------------------
     BG.call = function (phone) { if (phone) location.href = 'tel:' + phone; };
 
+    // -------------------- 收藏(POST /{lang}/collect)--------------------
+    // 1:1 对齐 detail.vue collection():type=1/2/3 with_id is_collect
+    BG.toggleCollect = function (btn) {
+        var type = parseInt(btn.dataset.collectType || '0', 10);
+        var id   = parseInt(btn.dataset.collectId || '0', 10);
+        if (!type || !id) { BG.toast('参数缺失', 'error'); return; }
+        var isCollect = btn.classList.contains('is-collected') ? 0 : 1;
+        var seg = btn.dataset.langSeg || (document.documentElement.dataset.langSeg || 'cn');
+
+        var form = new URLSearchParams();
+        form.append('type', type); form.append('with_id', id); form.append('is_collect', isCollect);
+        fetch('/' + seg + '/collect', {
+            method: 'POST', body: form, credentials: 'same-origin',
+            headers: {'X-Requested-With': 'fetch'},
+        }).then(function (r) { return r.json(); }).then(function (j) {
+            if (j.ok) {
+                btn.classList.toggle('is-collected', isCollect === 1);
+                BG.toast(j.msg || (isCollect ? '已收藏' : '已取消'), 'success');
+            } else {
+                BG.toast(j.msg || '操作失败', 'error');
+            }
+        }).catch(function () { BG.toast('网络错误', 'error'); });
+    };
+    BG.bindCollect = function (root) {
+        root = root || document;
+        root.querySelectorAll('[data-collect-toggle]').forEach(function (el) {
+            if (el.__bgBound) return; el.__bgBound = true;
+            el.addEventListener('click', function (e) { e.preventDefault(); BG.toggleCollect(el); });
+        });
+    };
+
     // -------------------- 倒计时(用于验证码按钮)--------------------
     BG.countdown = function (btn, sec, label) {
         sec = sec || 60;
@@ -128,7 +159,7 @@
     };
 
     // -------------------- 初始化:DOM ready 后绑定 --------------------
-    function init() { BG.bindPreviews(); BG.bindCopy(); }
+    function init() { BG.bindPreviews(); BG.bindCopy(); BG.bindCollect(); }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();
 })();
