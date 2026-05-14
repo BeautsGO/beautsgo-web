@@ -49,15 +49,11 @@ class Auth extends BaseController
         if ($phone === '') {
             return json(['ok' => false, 'msg' => '请输入手机号']);
         }
-        // 基础校验:6-15 位数字
         if (!preg_match('/^\d{6,15}$/', $phone)) {
             return json(['ok' => false, 'msg' => '手机号格式不正确']);
         }
 
-        $resp = (new AuthService())->call('POST', '/common/getSmsCode', [
-            'phone'      => $phone,
-            'country_id' => $countryId,
-        ]);
+        $resp = (new AuthService())->sendSmsCode($phone, $countryId);
         return json([
             'ok'  => $resp['ok'],
             'msg' => $resp['msg'] ?: ($resp['ok'] ? '验证码已发送' : '发送失败'),
@@ -65,9 +61,9 @@ class Auth extends BaseController
     }
 
     /**
-     * 手机号 + 验证码登录
-     *   后端:POST /api/login/appBindPhone  (兼容旧版,直传 phone+code+country_id)
-     *   utm/share 由 AuthService::call 自动从 cookie 注入
+     * 手机号 + 验证码登录(对齐 login.vue:1007 appLogin)
+     *   POST /api/login/bindPhone  body: phone, code, country_id, utm_*, shareId, shareType
+     *   utm/share 由 AuthService 自动从 cookie 注入(命中 /login/bindPhone)
      */
     public function submitLogin()
     {
@@ -83,27 +79,20 @@ class Auth extends BaseController
             ]);
         }
 
+        // utm/share 5 字段从 cookie 取(login.vue 原是从 Storage 取,SSR 端等价从 Cookie)
+        $attribution = [];
+        foreach (['utm_source', 'utm_medium', 'utm_campaign', 'shareId', 'shareType'] as $k) {
+            $v = (string) ($_COOKIE[$k] ?? '');
+            if ($v !== '') $attribution[$k] = $v;
+        }
+
         $auth = new AuthService();
-        $resp = $auth->call('POST', '/login/appBindPhone', [
-            'phone'      => $phone,
-            'code'       => $code,
-            'country_id' => $countryId,
-        ]);
+        $resp = $auth->phoneLogin($phone, $code, $countryId, $attribution);
 
         if (!$resp['ok']) {
             return $this->render('pages/auth/login', [
                 'back'  => $back, 'phone' => $phone,
                 'error' => $resp['msg'] ?: '登录失败',
-            ]);
-        }
-        // 拿到 token 写 cookie
-        $token = (string) ($resp['data']['ApiUniAuth'] ?? $resp['data']['token'] ?? '');
-        if ($token !== '') {
-            Cookie::set('beauts_token', $token, [
-                'expire'   => 86400 * 7,
-                'path'     => '/',
-                'httponly' => true,
-                'samesite' => 'Lax',
             ]);
         }
         return redirect($back ?: '/' . $this->langSeg() . '/me');

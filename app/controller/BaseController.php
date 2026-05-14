@@ -66,6 +66,57 @@ abstract class BaseController
 
         // UTM / share 归因:URL 上有就写 Cookie(Last-Click,30 天)
         $this->captureAttribution();
+
+        // 静默登录(对齐 App.vue:73 appLogin):无 token 即调 /login/appLogin
+        // 拿游客身份 → 让埋点/收藏/聊天等业务接口能带 token
+        $this->ensureSilentLogin();
+    }
+
+    /**
+     * 静默登录 — 对齐 beauts_app App.vue 的 appLogin()。
+     * 用户首次访问、没 beauts_token cookie 时,POST /login/appLogin 拿游客 token。
+     * device_id 用持久化 cookie(没有则生成 UUID),让同浏览器多次访问视为同一游客。
+     */
+    private function ensureSilentLogin(): void
+    {
+        // 已登录就不动
+        if (!empty($_COOKIE['beauts_token'])) return;
+
+        // 不在文档型请求里跑(AJAX/资源不需要)— 简单按 sec-fetch-dest 区分
+        $dest = (string) $this->request->header('sec-fetch-dest', 'document');
+        if ($dest !== 'document' && $dest !== '') return;
+
+        // device_id 持久化 cookie(1 年)
+        $deviceId = (string) ($_COOKIE['bg_device_id'] ?? '');
+        if ($deviceId === '') {
+            $deviceId = $this->generateDeviceId();
+            \think\facade\Cookie::set('bg_device_id', $deviceId, [
+                'expire' => 86400 * 365, 'path' => '/', 'samesite' => 'Lax',
+                'secure' => $this->request->isSsl(), 'httponly' => false,
+            ]);
+            $_COOKIE['bg_device_id'] = $deviceId;
+        }
+
+        // utm/share 5 件套(从 cookie 取,login.vue:1011 同源逻辑)
+        $attribution = [];
+        foreach (['utm_source', 'utm_medium', 'utm_campaign', 'shareId', 'shareType'] as $k) {
+            $v = (string) ($_COOKIE[$k] ?? '');
+            if ($v !== '') $attribution[$k] = $v;
+        }
+
+        // fire-and-forget;失败不阻塞页面渲染(2 秒短超时)
+        try {
+            (new \app\service\AuthService())->silentLogin($deviceId, $attribution);
+        } catch (\Throwable $e) {
+            \think\facade\Log::warning('[silentLogin] ' . $e->getMessage());
+        }
+    }
+
+    private function generateDeviceId(): string
+    {
+        // 32 hex,与 web 端 UUID 等价的标识(不需要严格 UUID 格式,后端只当字符串)
+        try { return bin2hex(random_bytes(16)); }
+        catch (\Throwable $e) { return md5(uniqid('bg', true) . microtime(true)); }
     }
 
     /**

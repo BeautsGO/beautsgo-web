@@ -21,6 +21,8 @@ class AuthService
     private const COOKIE_NAME    = 'beauts_token';
     private const COOKIE_LIFETIME = 86400 * 7;  // 7 天
     private const CACHE_KEY_USER  = 'user_info:';
+    // 1:1 来源:beauts_app/pages/login/login.vue:986 sendVerificationCode 用的 secret
+    private const SMS_SIGN_KEY    = 'NwRxcB9yhzTlU3R6qR1f9Yv2JG';
 
     /** @var string */
     private $baseUrl;
@@ -28,6 +30,107 @@ class AuthService
     public function __construct()
     {
         $this->baseUrl = rtrim((string) config('api.base_url'), '/');
+    }
+
+    /* ============================================================
+     *  短信验证码(对齐 beauts_app login.vue:976 sendVerificationCode)
+     *    POST /common/getSmsCode  body: phone, country_id, sign, timestamp, from_source
+     * ============================================================ */
+    public function sendSmsCode(string $phone, int $countryId): array
+    {
+        $timestamp = time();
+        $params = [
+            'phone'       => $phone,
+            'country_id'  => $countryId,
+            'timestamp'   => $timestamp,
+            'from_source' => self::fromSource(),
+        ];
+        $params['sign'] = self::md5SignEncrypt($params, self::SMS_SIGN_KEY);
+        return $this->request('POST', '/common/getSmsCode', $params);
+    }
+
+    /* ============================================================
+     *  手机号 + 验证码登录(对齐 login.vue:1007 appLogin)
+     *    POST /login/bindPhone
+     * ============================================================ */
+    public function phoneLogin(string $phone, string $code, int $countryId, array $attribution = []): array
+    {
+        $payload = array_merge([
+            'phone'      => $phone,
+            'code'       => $code,
+            'country_id' => $countryId,
+        ], $attribution);
+        $resp = $this->request('POST', '/login/bindPhone', $payload);
+        if ($resp['ok']) {
+            $token = (string) ($resp['data']['ApiUniAuth'] ?? $resp['data']['token'] ?? '');
+            if ($token !== '') {
+                $this->setToken($token);
+                $user = (array) ($resp['data']['user'] ?? []);
+                if ($user) Cache::set(self::CACHE_KEY_USER . $token, $user, 300);
+            }
+        }
+        return $resp;
+    }
+
+    /* ============================================================
+     *  静默登录(游客 token)— 对齐 App.vue appLogin
+     *    POST /login/appLogin
+     *    用于:用户进站时分配游客身份,登录前也能浏览/埋点
+     * ============================================================ */
+    public function silentLogin(string $deviceId, array $attribution = []): array
+    {
+        $payload = array_merge([
+            'device_id'     => $deviceId,
+            'push_clientid' => '',
+        ], $attribution);
+        $resp = $this->request('POST', '/login/appLogin', $payload);
+        if ($resp['ok']) {
+            $token = (string) ($resp['data']['ApiUniAuth'] ?? '');
+            if ($token !== '') {
+                $this->setToken($token);
+            }
+        }
+        return $resp;
+    }
+
+    /* ============================================================
+     *  MD5 签名(1:1 移植 utils/base.js:166 md5_encrypt_sign)
+     *    1. 过滤 sign / 空字符串 / 数组
+     *    2. key 字典序排序
+     *    3. 拼接 key=val&key=val...
+     *    4. HTML 实体转义(& → &amp; 等)
+     *    5. md5(arg + appKey)
+     * ============================================================ */
+    public static function md5SignEncrypt(array $params, string $appKey = ''): string
+    {
+        $filter = [];
+        foreach ($params as $k => $v) {
+            if ($k === 'sign') continue;
+            if (is_array($v)) continue;
+            if ($v === '' || $v === null) continue;
+            if (is_int($v) || is_float($v)) $v = (string) $v;
+            $filter[$k] = $v;
+        }
+        ksort($filter);
+        $arg = '';
+        foreach ($filter as $k => $v) $arg .= $k . '=' . $v . '&';
+        $arg = rtrim($arg, '&');
+        // 与 JS 端逐次链式 replace 等价(& 必须最先转,否则后续 &lt; 会被二次转)
+        $arg = str_replace('&', '&amp;', $arg);
+        $arg = str_replace('<', '&lt;',  $arg);
+        $arg = str_replace('>', '&gt;',  $arg);
+        $arg = str_replace('"', '&quot;', $arg);
+        $arg = str_replace("'", '&#039;', $arg);
+        return md5($arg . $appKey);
+    }
+
+    /**
+     * from_source(对齐 utils/base.js:129)
+     * SSR 端固定 'web'(浏览器,非微信内嵌)
+     */
+    public static function fromSource(): string
+    {
+        return 'web';
     }
 
     /* ============================================================
@@ -170,6 +273,10 @@ class AuthService
         $headers = [
             'Accept: application/json',
             'X-Client: beautsgo-ssr',
+            // 后端 BaseApi 用 source-type header 判断登录源
+            // (utils/base.js fromSource() 浏览器返回 'web')
+            'source-type: web',
+            'platform: web',
             'User-Agent: BeautsGO-SSR/1.0',
         ];
         if ($token) {

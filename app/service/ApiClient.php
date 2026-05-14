@@ -37,6 +37,9 @@ class ApiClient
             'Accept: application/json',
             'X-Client: beautsgo-ssr',
             'User-Agent: BeautsGO-SSR/1.0',
+            // 后端 BaseApi 用 source-type header 判断登录源(utils/base.js fromSource() 浏览器返回 'web')
+            'source-type: web',
+            'platform: web',
         ];
     }
 
