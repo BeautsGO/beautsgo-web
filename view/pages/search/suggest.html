@@ -1,0 +1,118 @@
+{extend name="layout/base" /}
+
+{block name="extra_head"}
+<style>
+/* ============================================================
+ * Search Suggest (1:1 还原 pages/search/search.vue)
+ * ============================================================ */
+.ss-body{ min-height: 100vh; background: #f6f6f6; padding-bottom: 30px; }
+.ss-bar{
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; background: #fff;
+    position: sticky; top: 0; z-index: 10;
+}
+.ss-bar .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; flex-shrink: 0; }
+.ss-bar form{ flex: 1; display: flex; align-items: center; background: #f3f3f7; border-radius: 18px; padding: 0 14px; height: 36px; }
+.ss-bar form svg{ flex-shrink: 0; }
+.ss-bar input{
+    flex: 1; height: 100%; padding: 0 8px;
+    border: 0; background: transparent; font-size: 14px; outline: none;
+}
+.ss-bar .submit{ padding: 0 14px; color: #fe739d; font-size: 14px; font-weight: 600; background: transparent; border: 0; cursor: pointer; flex-shrink: 0; }
+
+.ss-section{ margin: 12px 16px; }
+.ss-section__head{
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+}
+.ss-section__title{ font-size: 14px; color: #333; font-weight: 600; }
+.ss-section__clear{
+    display: flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; background: transparent; border: 0;
+    cursor: pointer; color: #999;
+}
+.ss-tags{ display: flex; flex-wrap: wrap; gap: 8px; }
+.ss-tag{
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 6px 12px; border-radius: 14px;
+    background: #fff; color: #333; font-size: 13px;
+    text-decoration: none; border: 1px solid #f0f0f0;
+}
+.ss-tag:active{ background: #fff5fa; border-color: #fe739d; color: #fe739d; }
+.ss-tag .hot-icon{ width: 13px; height: 13px; }
+.ss-empty{ padding: 14px 0; color: #ccc; font-size: 12px; }
+</style>
+{/block}
+
+{block name="content"}
+<div class="ss-body">
+    <div class="ss-bar">
+        <a class="back" href="javascript:history.back()" aria-label="返回">‹</a>
+        <form method="get" action="" id="ssForm">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#909399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+            <input type="search" name="q" placeholder="{$tt['search.placeholder']|default='搜索机构、医生、项目'}" autocomplete="off" autofocus>
+            <button type="submit" class="submit">{$tt['search.Searchtext']|default='搜索'}</button>
+        </form>
+    </div>
+
+    <!-- 搜索历史 -->
+    <section class="ss-section">
+        <div class="ss-section__head">
+            <div class="ss-section__title">{$tt['search.Searchhistory']|default='搜索历史'}</div>
+            <button class="ss-section__clear" id="ssClear" aria-label="清空历史">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            </button>
+        </div>
+        <div class="ss-tags" id="ssHistory">
+            <div class="ss-empty">{$tt['search.noHistory']|default='暂无搜索历史'}</div>
+        </div>
+    </section>
+
+    <!-- 热门搜索 -->
+    {if !empty($hotList)}
+    <section class="ss-section">
+        <div class="ss-section__head">
+            <div class="ss-section__title">{$tt['search.Hotsearch']|default='热门搜索'}</div>
+        </div>
+        <div class="ss-tags">
+            {foreach $hotList as $i => $kw}
+            <a class="ss-tag" href="?q={$kw|urlencode|raw}">
+                {if $i < 5}<svg class="hot-icon" viewBox="0 0 24 24" fill="#fe739d" stroke="none"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>{/if}
+                {$kw}
+            </a>
+            {/foreach}
+        </div>
+    </section>
+    {/if}
+</div>
+
+<script>
+(function(){
+    // 历史:localStorage 维护(最多 20 条)
+    var KEY = 'bg_search_history';
+    function load(){ try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch(e){ return []; } }
+    function save(arr){ localStorage.setItem(KEY, JSON.stringify(arr.slice(0, 20))); }
+    function render(){
+        var arr = load();
+        var box = document.getElementById('ssHistory');
+        if(!arr.length){ box.innerHTML = '<div class="ss-empty">{$tt["search.noHistory"]|default="暂无搜索历史"}</div>'; return; }
+        box.innerHTML = arr.map(function(kw){
+            return '<a class="ss-tag" href="?q=' + encodeURIComponent(kw) + '">' + kw.replace(/</g, '&lt;') + '</a>';
+        }).join('');
+    }
+    // 清空
+    document.getElementById('ssClear').addEventListener('click', function(){
+        localStorage.removeItem(KEY); render();
+    });
+    // 提交时写历史
+    document.getElementById('ssForm').addEventListener('submit', function(){
+        var kw = this.querySelector('input[name=q]').value.trim();
+        if(!kw) return;
+        var arr = load().filter(function(x){ return x !== kw; });
+        arr.unshift(kw);
+        save(arr);
+    });
+    render();
+})();
+</script>
+{/block}
