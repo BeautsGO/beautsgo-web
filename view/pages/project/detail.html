@@ -13,7 +13,8 @@
             <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
         <div class="detail-nav__title">{$project.name|default=''}</div>
-        <a class="detail-nav__share" href="#share-popup" aria-label="分享">
+        <a class="detail-nav__share" href="#share-popup" aria-label="分享"
+           data-share-report data-share-type="3" data-share-id="{$project.id|default=0}" data-lang-seg="{$lang_seg}">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
         </a>
     </div>
@@ -37,6 +38,14 @@
                 <a class="share-popup__item" href="javascript:BG.copy(location.href,'链接已复制')">
                     <span class="share-popup__icon" style="background:#eee;color:#333">⌘</span><span>{$tt['share.copyLink']|default='复制链接'}</span>
                 </a>
+                <a class="share-popup__item" href="javascript:" data-contrast-toggle data-contrast-type="3"
+                   data-contrast-id="{$project.id|default=0}" data-contrast-name="{$project.name|default=''}"
+                   data-contrast-cover="{$project.cover_url|default=''}">
+                    <span class="share-popup__icon" style="background:#9791F6;color:#fff">⚖</span><span>{$tt['index.common.contrast']|default='加入对比'}</span>
+                </a>
+                <a class="share-popup__item" href="/{$lang_seg}/compare?type=3">
+                    <span class="share-popup__icon" style="background:#fe739d;color:#fff">→</span><span>{$tt['index.common.viewContrast']|default='查看对比'}</span>
+                </a>
             </div>
         </div>
     </div>
@@ -49,7 +58,7 @@
                 {foreach $project.banner as $idx=>$bn}
                 <div class="swiper-item">
                     {if !empty($bn.is_mp4) && !empty($bn.url)}
-                    <a class="swiper-play" href="{$bn.url}" target="_blank" aria-label="播放视频"><img src="/static/detail/play.png" alt="play"></a>
+                    <a class="swiper-play" href="javascript:" data-video-url="{$bn.url}" data-video-poster="{$bn.cover}" aria-label="播放视频"><img src="/static/detail/play.png" alt="play"></a>
                     {/if}
                     <img class="swiper-img" src="{$bn.cover|default=$bn.url}"
                         data-preview="{$bn.cover|default=$bn.url}" data-preview-group="banner"

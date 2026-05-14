@@ -85,6 +85,8 @@ Route::group(':lang', function () use ($slugPattern) {
     Route::get('projects/category/:slug',   'Listing/projectByCategory')->pattern($slugPattern);
     // 收藏代理(AJAX,静默 token 已写入 cookie)
     Route::post('collect',                  'Collect/toggle');
+    // 分享行为上报代理
+    Route::post('share/save',               'Share/save');
     // 案例
     Route::get('case',      'Cases/listing');
     Route::get('case/:id',  'Cases/detail')->pattern(['id' => '\d+']);

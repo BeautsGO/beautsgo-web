@@ -111,6 +111,106 @@
     // -------------------- 拨号 --------------------
     BG.call = function (phone) { if (phone) location.href = 'tel:' + phone; };
 
+    // -------------------- 加入对比池(localStorage,对齐 detail.vue contrast)--------------------
+    // type=1 医院 / 2 医生 / 3 项目;最多 4 个
+    BG.toggleContrast = function (btn) {
+        var type = parseInt(btn.dataset.contrastType || '0', 10);
+        var id   = parseInt(btn.dataset.contrastId   || '0', 10);
+        var name = btn.dataset.contrastName || '';
+        var cover= btn.dataset.contrastCover || '';
+        if (!type || !id) { BG.toast('参数缺失', 'error'); return; }
+        var key = 'cmp_pool_' + type;
+        var pool;
+        try { pool = JSON.parse(localStorage.getItem(key)) || []; } catch (e) { pool = []; }
+        var i = pool.findIndex(function (x) { return x.id === id; });
+        if (i >= 0) {
+            pool.splice(i, 1);
+            btn.classList.remove('is-contrasted');
+            BG.toast('已从对比清单移除', 'info');
+        } else if (pool.length >= 4) {
+            BG.toast('对比最多 4 个,请先移除', 'error'); return;
+        } else {
+            pool.push({ id: id, name: name, cover: cover });
+            btn.classList.add('is-contrasted');
+            BG.toast('已加入对比 (' + pool.length + '/4)', 'success');
+        }
+        localStorage.setItem(key, JSON.stringify(pool));
+    };
+    BG.bindContrast = function (root) {
+        root = root || document;
+        root.querySelectorAll('[data-contrast-toggle]').forEach(function (el) {
+            if (el.__bgBound) return; el.__bgBound = true;
+            // 进入页面时如果已在对比池里,加 active class
+            var type = parseInt(el.dataset.contrastType || '0', 10);
+            var id   = parseInt(el.dataset.contrastId   || '0', 10);
+            try {
+                var pool = JSON.parse(localStorage.getItem('cmp_pool_' + type)) || [];
+                if (pool.some(function (x) { return x.id === id; })) el.classList.add('is-contrasted');
+            } catch (e) {}
+            el.addEventListener('click', function (e) { e.preventDefault(); BG.toggleContrast(el); });
+        });
+    };
+
+    // -------------------- 视频播放(banner is_mp4 → lightbox 视频弹层)--------------------
+    BG.playVideo = function (url, poster) {
+        if (!url) return;
+        var mask = document.createElement('div');
+        mask.className = 'bg-lightbox';
+        mask.innerHTML =
+            '<div class="bg-lightbox__close" aria-label="关闭">×</div>' +
+            '<video class="bg-lightbox__video" src="' + url + '" controls autoplay playsinline' +
+            (poster ? ' poster="' + poster + '"' : '') + '></video>';
+        function close() {
+            document.removeEventListener('keydown', onKey);
+            mask.parentNode && mask.parentNode.removeChild(mask);
+        }
+        function onKey(e) { if (e.key === 'Escape') close(); }
+        mask.querySelector('.bg-lightbox__close').onclick = close;
+        mask.onclick = function (e) { if (e.target === mask) close(); };
+        document.addEventListener('keydown', onKey);
+        document.body.appendChild(mask);
+    };
+    BG.bindVideoPlay = function (root) {
+        root = root || document;
+        root.querySelectorAll('[data-video-url]').forEach(function (el) {
+            if (el.__bgBound) return; el.__bgBound = true;
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', function (e) {
+                e.preventDefault();
+                BG.playVideo(el.dataset.videoUrl, el.dataset.videoPoster);
+            });
+        });
+    };
+
+    // -------------------- 分享上报(POST /{lang}/share/save)--------------------
+    // 用户点分享按钮触发(打开浮层时一并 fire-and-forget 上报)
+    BG.reportShare = function (type, id, seg) {
+        if (!type || !id) return;
+        seg = seg || (document.documentElement.dataset.langSeg || 'cn');
+        try {
+            var form = new URLSearchParams();
+            form.append('type', type); form.append('with_id', id);
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon('/' + seg + '/share/save', form);
+            } else {
+                fetch('/' + seg + '/share/save', {
+                    method: 'POST', body: form, credentials: 'same-origin', keepalive: true,
+                });
+            }
+        } catch (e) { /* 静默 */ }
+    };
+    BG.bindShareReport = function (root) {
+        root = root || document;
+        root.querySelectorAll('[data-share-report]').forEach(function (el) {
+            if (el.__bgBound) return; el.__bgBound = true;
+            el.addEventListener('click', function () {
+                BG.reportShare(parseInt(el.dataset.shareType || '0', 10),
+                               parseInt(el.dataset.shareId   || '0', 10),
+                               el.dataset.langSeg);
+            });
+        });
+    };
+
     // -------------------- 收藏(POST /{lang}/collect)--------------------
     // 1:1 对齐 detail.vue collection():type=1/2/3 with_id is_collect
     BG.toggleCollect = function (btn) {
@@ -159,7 +259,10 @@
     };
 
     // -------------------- 初始化:DOM ready 后绑定 --------------------
-    function init() { BG.bindPreviews(); BG.bindCopy(); BG.bindCollect(); }
+    function init() {
+        BG.bindPreviews(); BG.bindCopy(); BG.bindCollect();
+        BG.bindShareReport(); BG.bindContrast(); BG.bindVideoPlay();
+    }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();
 })();

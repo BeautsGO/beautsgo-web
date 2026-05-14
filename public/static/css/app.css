@@ -389,3 +389,9 @@ body { background: #fff; }
 /* 收藏态:激活时粉色 + 图标变化提示 */
 .btns-img.is-collected img { filter: hue-rotate(330deg) saturate(2); }
 .btns-img.is-collected span { color: #fe739d; font-weight: 600; }
+
+/* lightbox 内嵌视频 */
+.bg-lightbox__video { max-width: 92vw; max-height: 88vh; background: #000; }
+/* 已加入对比的态(分享浮层里的"加入对比") */
+.share-popup__item.is-contrasted .share-popup__icon { background: #fe739d !important; }
+.share-popup__item.is-contrasted span:last-child { color: #fe739d; font-weight: 600; }
