@@ -395,3 +395,19 @@ body { background: #fff; }
 /* 已加入对比的态(分享浮层里的"加入对比") */
 .share-popup__item.is-contrasted .share-popup__icon { background: #fe739d !important; }
 .share-popup__item.is-contrasted span:last-child { color: #fe739d; font-weight: 600; }
+
+/* 返回顶部按钮(对齐 detail.vue .scroll-top,SSR 用 fixed) */
+.bg-scroll-top{
+    position: fixed; right: 12px; bottom: 120px; z-index: 99;
+    width: 35px; height: 35px; border-radius: 50%;
+    background: rgba(255,255,255,.92); color: #555;
+    display: none; align-items: center; justify-content: center;
+    text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,.12);
+    cursor: pointer; transition: opacity .2s;
+}
+.bg-scroll-top--show{ display: flex; }
+.bg-scroll-top:active{ background: #f3f3f7; }
+@media (min-width: 640px){
+    /* 桌面态下挂靠在 page-main 容器右侧 */
+    .bg-scroll-top{ right: max(12px, calc((100% - 640px) / 2 + 12px)); }
+}

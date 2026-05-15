@@ -35,7 +35,13 @@
 
     <!-- 列表区 -->
     <div class="view-list">
-        {if empty($list)}
+        {if $isSearch && empty($list) && !empty($keyword)}
+        <!-- 无结果推荐提示(对齐 index.vue:98 .recommend-tip)-->
+        <div class="recommend-tip">
+            <div class="recommend-tip-line1">{$tt['index.common.NoResults']|default='抱歉,未找到相关结果'}</div>
+            <div class="recommend-tip-line2">{$tt['index.common.RecommendBelow']|default='为您推荐以下内容'}</div>
+        </div>
+        {elseif empty($list)}
         <div class="empty">{$tt['point.Empty']|default='暂无数据'}</div>
         {/if}
 

@@ -513,3 +513,16 @@
     border: 1px solid #eee;
 }
 .index-body .pagination__info { color: #999; font-size:12px; }
+
+/* 无结果推荐提示(对齐 index.vue .recommend-tip)*/
+.index-body .recommend-tip{
+    padding: 24px 12px 12px;
+    text-align: center;
+    color: #999;
+}
+.index-body .recommend-tip-line1{
+    font-size: 14px; color: #666; margin-bottom: 6px;
+}
+.index-body .recommend-tip-line2{
+    font-size: 12px; color: #999;
+}

@@ -258,10 +258,29 @@
         }, 1000);
     };
 
+    // -------------------- 返回顶部按钮(对齐 detail.vue .scroll-top)--------------------
+    BG.installScrollTop = function () {
+        if (document.getElementById('bgScrollTop')) return;
+        var btn = document.createElement('a');
+        btn.id = 'bgScrollTop';
+        btn.href = 'javascript:';
+        btn.className = 'bg-scroll-top';
+        btn.setAttribute('aria-label', '返回顶部');
+        btn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>';
+        btn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+        document.body.appendChild(btn);
+        function onScroll() {
+            btn.classList.toggle('bg-scroll-top--show', window.scrollY > 300);
+        }
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+    };
+
     // -------------------- 初始化:DOM ready 后绑定 --------------------
     function init() {
         BG.bindPreviews(); BG.bindCopy(); BG.bindCollect();
         BG.bindShareReport(); BG.bindContrast(); BG.bindVideoPlay();
+        BG.installScrollTop();
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();
