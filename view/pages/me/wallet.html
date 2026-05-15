@@ -1,39 +1,136 @@
 {extend name="layout/base" /}
-{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+
+{block name="extra_head"}
+<style>
+/* Wallet 1:1 还原 wallet.vue scoped scss(rpx→px 0.5x)*/
+.wallet-page{ min-height: 100vh; background: #f7f7f9; padding-bottom: 70px; }
+.wallet-head{
+    position: sticky; top: 0; z-index: 20; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+}
+.wallet-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.wallet-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+
+/* 余额卡片 */
+.wallet-balance-card{
+    margin: 16px 16px 12px; padding: 18px 18px;
+    border-radius: 12px;
+    background: linear-gradient(135deg,#fe739d,#afa7ef);
+    color: #fff; position: relative;
+    box-shadow: 0 8px 24px rgba(254,115,157,.25);
+}
+.balance-label{ font-size: 13px; opacity: .9; margin-bottom: 6px; }
+.balance-amount .amount-number{ font-size: 28px; font-weight: 700; letter-spacing: .5px; }
+.balance-amount .amount-unit{ font-size: 14px; margin-left: 6px; opacity: .9; }
+
+/* 余额明细标题 */
+.detail-title{ padding: 8px 16px; font-size: 15px; font-weight: 600; color: #333; }
+
+/* 筛选 tabs(对齐 wallet.vue:filter-tabs)*/
+.filter-tabs{
+    display: flex; justify-content: center; align-items: center;
+    gap: 40px; padding: 4px 16px 12px;
+}
+.filter-tab{
+    position: relative; padding-bottom: 6px;
+    text-decoration: none;
+}
+.filter-tab span{ font-size: 14px; color: #999; font-weight: 400; }
+.filter-tab.active span{ color: #333; font-weight: 500; }
+.filter-tab .active-line{
+    position: absolute; bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 28px; height: 3px; border-radius: 1.5px;
+    background: #fe739d;
+}
+
+/* 明细列表 */
+.balance-list{ background: #fff; }
+.balance-item{
+    padding: 14px 16px; border-bottom: 1px solid #f5f5f5;
+}
+.balance-item .item-content{ display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.balance-item .item-left{ flex: 1; min-width: 0; }
+.balance-item .transaction-type{
+    display: block; font-size: 14px; color: #333; font-weight: 500;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.balance-item .transaction-time{
+    display: block; font-size: 11px; color: #999; margin-top: 4px;
+}
+.balance-item .amount-text{
+    font-size: 16px; font-weight: 600;
+    color: #333;
+}
+.balance-item .amount-text.positive{ color: #4CD964; }
+.balance-item .amount-text.negative{ color: #fe739d; }
+.empty{ text-align: center; padding: 60px 0; color: #999; font-size: 13px; }
+</style>
+{/block}
+
 {block name="content"}
-<div class="user-page">
-    <div class="page-head">
-        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
-        <h1 class="page-title">我的钱包</h1>
+<div class="wallet-page">
+    <div class="wallet-head">
+        <a class="back" href="/{$lang_seg}/me" aria-label="返回">‹</a>
+        <div class="title">{$tt['me.MyWallet']|default='我的钱包'}</div>
     </div>
 
-    <div style="background:linear-gradient(135deg,#FE739D,#afa7ef); color:#fff; padding:30px 20px; margin:12px 16px; border-radius:15px;">
-        <div style="font-size:13px; opacity:.85; margin-bottom:6px;">账户余额(¥)</div>
-        <div style="font-size:40px; font-weight:700;">¥{$balance|number_format=2}</div>
+    <!-- 余额卡片 -->
+    <div class="wallet-balance-card">
+        <div class="balance-label">{$tt['me.AccountBalance']|default='账户余额'}</div>
+        <div class="balance-amount">
+            <span class="amount-number">{:number_format((float)$balance, 0)}</span>
+            <span class="amount-unit">{$tt['me.Krw']|default='韩元'}</span>
+        </div>
     </div>
 
-    <div class="u-tabs-bar">
-        <a class="{if $type == 0}active{/if}" href="?type=0">全部</a>
-        <a class="{if $type == 1}active{/if}" href="?type=1">收入</a>
-        <a class="{if $type == 2}active{/if}" href="?type=2">支出</a>
+    <!-- 余额明细标题 -->
+    <div class="detail-title">{$tt['me.WalletDetail']|default='余额明细'}</div>
+
+    <!-- 筛选 tabs(全部/收入/支出)-->
+    <div class="filter-tabs">
+        <a class="filter-tab{if $type == 0} active{/if}" href="?type=0">
+            <span>{$tt['point.All']|default='全部'}</span>
+            {if $type == 0}<span class="active-line"></span>{/if}
+        </a>
+        <a class="filter-tab{if $type == 1} active{/if}" href="?type=1">
+            <span>{$tt['wallet.Income']|default='收入'}</span>
+            {if $type == 1}<span class="active-line"></span>{/if}
+        </a>
+        <a class="filter-tab{if $type == 2} active{/if}" href="?type=2">
+            <span>{$tt['wallet.Expense']|default='支出'}</span>
+            {if $type == 2}<span class="active-line"></span>{/if}
+        </a>
     </div>
 
-    {if empty($list)}<div class="empty">{$tt['point.Empty']|default='暂无明细'}</div>{/if}
-
-    <div class="u-list">
-    {foreach $list as $r}
-        <div class="u-list-item">
-            <div class="u-list-item__body">
-                <div class="u-list-item__title">{:!empty($r['title'])?$r['title']:(!empty($r['name'])?$r['name']:'账户变动')}</div>
-                <div class="u-list-item__time">{if !empty($r.create_time)}{:is_numeric($r.create_time)?date('Y-m-d H:i',$r.create_time):$r.create_time}{/if}</div>
-            </div>
-            {php}$amt = (float) (isset($r['amount']) ? $r['amount'] : (isset($r['price']) ? $r['price'] : 0));{/php}
-            <div style="display:flex; align-items:center; font-size:15px; font-weight:700; color:{:$amt>0?'#4CD964':'#EF5189'};">
-                {if $amt>0}+{/if}{$amt}
+    <!-- 明细列表 -->
+    {if empty($list)}
+    <div class="empty">{$tt['point.Empty']|default='暂无明细'}</div>
+    {else/}
+    <div class="balance-list">
+        {foreach $list as $item}
+        {php}
+            $amt = (float) (isset($item['change_amount']) ? $item['change_amount']
+                : (isset($item['amount']) ? $item['amount'] : (isset($item['price']) ? $item['price'] : 0)));
+            $ct  = (int) ($item['change_type'] ?? ($amt >= 0 ? 1 : 2));
+            $cls = $ct == 1 ? 'positive' : 'negative';
+            $remark = (string) ($item['remark'] ?? $item['title'] ?? $item['name'] ?? '账户变动');
+        {/php}
+        <div class="balance-item">
+            <div class="item-content">
+                <div class="item-left">
+                    <span class="transaction-type">{$remark}</span>
+                    <span class="transaction-time">{if !empty($item.create_time)}{:is_numeric($item['create_time'])?date('Y-m-d H:i',(int)$item['create_time']):$item['create_time']}{/if}</span>
+                </div>
+                <div>
+                    <span class="amount-text {$cls}">{if $amt > 0}+{/if}{:number_format(abs($amt), 0)}</span>
+                </div>
             </div>
         </div>
-    {/foreach}
+        {/foreach}
     </div>
+    {/if}
     {include file="components/_pagination" /}
     {include file="components/_tabbar" /}
 </div>
