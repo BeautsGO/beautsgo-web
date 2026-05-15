@@ -55,7 +55,8 @@ class Appointment extends BaseController
         if ($payload['name'] === '' || $payload['phone'] === '') {
             return redirect($this->request->url() . '?error=' . urlencode('请填写姓名与联系方式'));
         }
-        $resp = $auth->call('POST', '/appointment/create', $payload);
+        // 对齐 appointmentInput.vue:186 POST Appointment/saveForm
+        $resp = $auth->call('POST', '/Appointment/saveForm', $payload);
         if ($resp['ok']) {
             return $this->render('pages/appointment/success', [
                 'message' => $resp['data']['msg'] ?? '预约提交成功,工作人员会尽快联系您',

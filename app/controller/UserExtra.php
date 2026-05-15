@@ -126,7 +126,8 @@ class UserExtra extends BaseController
             if ($payload['content'] === '') {
                 $error = '请填写内容';
             } else {
-                $resp = $auth->call('POST', '/HospitalCase/publish', $payload);
+                // 对齐 userCase.vue:120 POST Cases/publish
+                $resp = $auth->call('POST', '/Cases/publish', $payload);
                 if ($resp['ok']) $saved = true;
                 else $error = $resp['msg'] ?: '发布失败';
             }
