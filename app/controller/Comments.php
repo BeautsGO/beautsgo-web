@@ -112,23 +112,43 @@ class Comments extends BaseController
         $error = '';
         $saved = false;
         if ($this->request->isPost()) {
+            // 标签(checkbox 多选)
+            $tagIds = (array) $this->request->param('tags', []);
+            $tagIds = array_values(array_filter(array_map('intval', $tagIds)));
+
             $payload = [
                 'type'    => $type,
                 'with_id' => $withId,
                 'rating'  => max(1, min(5, (int) $this->request->param('rating', 5))),
                 'content' => trim((string) $this->request->param('content', '')),
                 'apt_id'  => (int) $this->request->param('apt_id', 0),
+                'tag_id'  => $tagIds,
+                // mediaList 字段后端期望数组,SSR 暂未做 OSS 上传,传空
+                'mediaList' => [],
             ];
             if ($payload['content'] === '') {
                 $error = '请填写评价内容';
             } else {
-                $resp = $auth->call('POST', '/comment/publish', $payload);
+                // 大写 C(对齐 userComment.vue:198 POST `Comment/publish`)
+                $resp = $auth->call('POST', '/Comment/publish', $payload);
                 if ($resp['ok']) $saved = true;
                 else $error = $resp['msg'] ?: '发布失败';
             }
         }
 
         $subjectName = $this->fetchSubjectName($type, $withId);
+
+        // 推荐标签(对齐 commentList.vue:251 comment/tagList)
+        $tagResp = $auth->call('POST', '/comment/tagList', [
+            'type' => $type, 'with_id' => $withId,
+        ]);
+        $tagOptions = (array) ($tagResp['data'] ?? []);
+        // 转标准结构 [{id, name}]
+        $tagOptions = array_map(function ($t) {
+            if (is_array($t)) return ['id' => (int) ($t['id'] ?? 0), 'name' => (string) ($t['name'] ?? '')];
+            return ['id' => 0, 'name' => (string) $t];
+        }, $tagOptions);
+
         $this->seo->setTdk('写评价 - ' . $subjectName . ' - BeautsGO', '写评价', '写评价')->buildOrganization();
 
         return $this->render('pages/comment/publish', [
@@ -136,9 +156,25 @@ class Comments extends BaseController
             'type'        => $type,
             'with_id'     => $withId,
             'subjectName' => $subjectName,
+            'subjectCover'=> $this->fetchSubjectCover($type, $withId),
+            'tagOptions'  => $tagOptions,
             'error'       => $error,
             'saved'       => $saved,
         ]);
+    }
+
+    private function fetchSubjectCover(int $type, int $withId): string
+    {
+        if ($withId <= 0) return '';
+        try {
+            $table = ['', 'hospital', 'doctors', 'project'][$type] ?? '';
+            if ($table === '') return '';
+            $row = \think\facade\Db::name($table)->where('id', $withId)
+                ->field(['cover_detail'])->find();
+            if (!$row) return '';
+            $cov = json_decode((string) ($row['cover_detail'] ?? ''), true) ?: [];
+            return is_array($cov) ? (string) ($cov[0]['url'] ?? '') : '';
+        } catch (\Throwable $e) { return ''; }
     }
 
     private function langPrefix(): string
