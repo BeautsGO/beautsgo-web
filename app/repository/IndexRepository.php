@@ -142,6 +142,11 @@ class IndexRepository
         $where  = [['h.status', '=', 1]];
         if (!empty($filters['level']))  $where[] = ['l.id', '=', (int) $filters['level']];
         if (!empty($filters['area']))   $where[] = ['h.trading_area_id', '=', (int) $filters['area']];
+        // 关键词搜索(多列 LIKE,对齐 projectList 同款写法)
+        if (!empty($filters['kw'])) {
+            $kw = '%' . trim((string) $filters['kw']) . '%';
+            $where[] = ['h.name|h.en_name|h.zh_cn_address', 'like', $kw];
+        }
 
         // 主查询(去掉 LEFT JOIN appointment 的 GROUP COUNT，单独再查 — 简化避免 GROUP BY 复杂度)
         $base = Db::name('hospital')->alias('h')
@@ -303,6 +308,10 @@ class IndexRepository
         $offset = max(0, ($page - 1) * $size);
         $where = [['d.status', '=', 1], ['h.status', '=', 1]];
         if (!empty($filters['area'])) $where[] = ['h.trading_area_id', '=', (int) $filters['area']];
+        if (!empty($filters['kw'])) {
+            $kw = '%' . trim((string) $filters['kw']) . '%';
+            $where[] = ['d.name|d.en_name|h.name|h.en_name', 'like', $kw];
+        }
 
         $base = Db::name('doctors')->alias('d')
             ->leftJoin('hospital h', 'h.id=d.h_id')
