@@ -2,62 +2,245 @@
 
 {block name="extra_head"}
 <style>
-.order-page { background:#f6f6f6; min-height:100vh; padding-bottom:70px; }
-.page-head { background:#fff; height:44px; display:flex; align-items:center; padding:0 15px; border-bottom:1px solid #f1f1f1; position:sticky; top:0; z-index:20; }
-.page-head .back-btn { width:30px; height:30px; display:flex; align-items:center; justify-content:center; color:#1B1B1B; font-size:22.5px; text-decoration:none; }
-.page-head .page-title { flex:1; margin:0; text-align:center; font-size:16px; font-weight:600; color:#1B1B1B; margin-right:30px; }
-.order-tabs { display:flex; background:#fff; padding:10px 0 0; border-bottom:1px solid #f5f5f5; overflow-x:auto; scrollbar-width:none; }
-.order-tabs::-webkit-scrollbar { display:none; }
-.order-tabs a { flex:0 0 auto; min-width:70px; text-align:center; padding:12px 15px 10px; color:#666; text-decoration:none; font-size:14px; position:relative; white-space:nowrap; }
-.order-tabs a.active { color:#1B1B1B; font-weight:600; }
-.order-tabs a.active::after { content:''; position:absolute; left:50%; bottom:0; width:30px; height:3px; background:#9791F6; border-radius:1.5px; transform:translateX(-50%); }
-.order-card { background:#fff; border-radius:8px; margin:10px 16px; padding:15px; }
-.order-card__hd { display:flex; justify-content:space-between; margin-bottom:10px; font-size:12px; color:#999; }
-.order-card__status { color:#FE739D; font-weight:600; }
-.order-card__body { display:flex; gap:10px; }
-.order-card__img { flex:0 0 80px; height:80px; border-radius:6px; overflow:hidden; background:#f5f5f5; }
-.order-card__img img { width:100%; height:100%; object-fit:cover; }
-.order-card__info { flex:1; display:flex; flex-direction:column; gap:4px; }
-.order-card__name { font-size:14px; font-weight:600; color:#1B1B1B; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; }
-.order-card__hospital { font-size:12px; color:#666; }
-.order-card__price { font-size:15px; color:#EF5189; font-weight:700; margin-top:auto; }
-.empty { text-align:center; padding:40px 0; color:#999; font-size:13px; }
+/* Order 1:1 还原 subPackages_sub/order/order.vue */
+.u-page{ min-height: 100vh; background: #f6f6f6; padding-bottom: 70px; }
+.order-head{
+    position: sticky; top: 0; z-index: 20; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+}
+.order-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.order-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+
+/* tab 区(对齐 u-tabs lineColor #fe739d)*/
+.tab-box{
+    background: #fff; position: sticky; top: 44px; z-index: 19;
+    border-bottom: 1px solid #f5f5f5;
+}
+.tab-box .tabs{
+    display: flex; padding: 0 10px;
+    overflow-x: auto; scrollbar-width: none;
+}
+.tab-box .tabs::-webkit-scrollbar{ display: none; }
+.tab-box .tab{
+    flex: 0 0 auto; min-width: 70px;
+    padding: 12px 12px 10px; text-align: center;
+    font-size: 14px; color: #333;
+    text-decoration: none; position: relative;
+    white-space: nowrap;
+}
+.tab-box .tab.active{ color: #fe739d; transform: scale(1.05); font-weight: 600; }
+.tab-box .tab.active::after{
+    content: ''; position: absolute; left: 50%; bottom: 0;
+    width: 18px; height: 3px; background: #fe739d; border-radius: 1.5px;
+    transform: translateX(-50%);
+}
+
+/* 订单卡(对齐 .order-list / .order-item / .order-center)*/
+.order-list{
+    background: #fff; margin: 10px 12px; border-radius: 10px;
+    padding: 14px 14px 10px; box-shadow: 0 1px 3px rgba(0,0,0,.03);
+}
+.order-item{
+    display: flex; justify-content: space-between; align-items: center;
+    padding-bottom: 10px;
+}
+.order-item .order-h-name{ font-size: 16px; font-weight: bold; color: #1B1B1B; }
+.order-item .order-status{ font-size: 13px; color: #fe739d; font-weight: 600; }
+
+.order-center{ display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid #f5f5f5; }
+.order-center > img{
+    width: 70px; height: 70px; border-radius: 6px;
+    object-fit: cover; background: #f3f3f7; flex-shrink: 0;
+}
+.order-center-flex{ flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.order-center-flex-info{
+    display: flex; gap: 4px;
+    font-size: 12px; color: #666;
+    overflow: hidden;
+}
+.order-center-flex-info .item-left{ color: #999; flex-shrink: 0; }
+.order-center-flex-info .them-color{ color: #fe739d; font-weight: 600; }
+.order-center-flex-info .copy-btn{
+    display: inline-block; padding: 0 6px; line-height: 18px;
+    border: 1px solid #fe739d; color: #fe739d; border-radius: 4px;
+    font-size: 10px; margin-left: 4px;
+}
+.order-center-flex-info .ellipsis{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.order-center-flex-express{
+    display: flex; gap: 4px; align-items: center; font-size: 12px; color: #666;
+    flex-wrap: wrap;
+}
+
+/* 底部操作按钮(对齐 .order-item-bottom .order-bottom-right)*/
+.order-item-bottom{
+    display: flex; justify-content: flex-end;
+    padding-top: 10px; border-top: 1px solid #f5f5f5;
+    gap: 8px; flex-wrap: wrap;
+}
+.cancel-btn{
+    display: inline-block; padding: 5px 14px;
+    border: 1px solid #ddd; border-radius: 15px;
+    font-size: 12px; color: #666; cursor: pointer;
+    text-decoration: none; white-space: nowrap;
+}
+.cancel-btn:hover{ background: #fff5fa; }
+.cancel-btn.iwts{
+    border-color: #fe739d; color: #fe739d;
+    background: linear-gradient(90deg,#fff5fa,#fff);
+}
+.empty{ text-align: center; padding: 60px 0; color: #999; font-size: 13px; }
 </style>
 {/block}
 
 {block name="content"}
-<div class="order-page">
-    <div class="page-head">
-        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
-        <h1 class="page-title">我的订单</h1>
+<div class="u-page">
+    <div class="order-head">
+        <a class="back" href="/{$lang_seg}/me" aria-label="返回">‹</a>
+        <div class="title">{$tt['me.MyOrder']|default='我的订单'}</div>
     </div>
-    <div class="order-tabs">
-        <a class="{if $status == 0}active{/if}" href="?status=0">全部</a>
-        <a class="{if $status == 1}active{/if}" href="?status=1">待付款</a>
-        <a class="{if $status == 2}active{/if}" href="?status=2">待面诊</a>
-        <a class="{if $status == 3}active{/if}" href="?status=3">已完成</a>
-        <a class="{if $status == -1}active{/if}" href="?status=-1">已取消</a>
+
+    <!-- tab(全部/待付款/进行中/已预约/退款) -->
+    <div class="tab-box">
+        <div class="tabs">
+            <a class="tab{if $status == 0} active{/if}" href="?status=0">{$tt['point.All']|default='全部'}</a>
+            <a class="tab{if $status == 1} active{/if}" href="?status=1">{$tt['me.Pendingpayment']|default='待付款'}</a>
+            <a class="tab{if $status == 2} active{/if}" href="?status=2">{$tt['me.Inprogress']|default='进行中'}</a>
+            <a class="tab{if $status == 3} active{/if}" href="?status=3">{$tt['index.common.AlreadyBooked']|default='已预约'}</a>
+            <a class="tab{if $status == 5} active{/if}" href="?status=5">{$tt['me.Refund']|default='退款'}</a>
+        </div>
     </div>
 
     {if empty($list)}
     <div class="empty">{$tt['point.Empty']|default='暂无订单'}</div>
     {/if}
 
-    {foreach $list as $od}
-    <div class="order-card">
-        <div class="order-card__hd">
-            <span>订单号: {$od.order_no|default=$od.id}</span>
-            <span class="order-card__status">{:!empty($od["status_text"])?$od["status_text"]:(!empty($od["status_name"])?$od["status_name"]:'')}</span>
+    <!-- 订单卡(对齐 order.vue:34-130 .order-list 完整字段)-->
+    {foreach $list as $item}
+    {php}
+        // 头图字段优先级(对齐 order.vue:43-49):p_id → project.cover[0].url
+        //                                       d_id → doctor.cover[0].url
+        //                                       否则 → hospital.cover[0].url
+        $coverUrl = '';
+        if (!empty($item['p_id']) && !empty($item['project']['cover'][0]['url'])) {
+            $coverUrl = $item['project']['cover'][0]['url'];
+        } elseif (!empty($item['d_id']) && !empty($item['doctor']['cover'][0]['url'])) {
+            $coverUrl = $item['doctor']['cover'][0]['url'];
+        } elseif (!empty($item['hospital']['cover'][0]['url'])) {
+            $coverUrl = $item['hospital']['cover'][0]['url'];
+        }
+        $payUnit = (string) ($item['pay_unit'] ?? '₩');
+        $statusMap = [
+            -1 => '已取消', 1 => '待付款', 2 => '已付款·待面诊',
+             3 => '已预约', 4 => '已完成', 5 => '已退款',
+        ];
+        $statusText = (string) ($item['status_text'] ?? $statusMap[(int)($item['status'] ?? 0)] ?? '');
+    {/php}
+    <div class="order-list">
+        <!-- 头部:医院名 + 状态 -->
+        <a class="order-item" href="/{$lang_seg}/me/order/{$item.id|default=0}">
+            <span class="order-h-name">{$item.hospital.name|default=''}</span>
+            <span class="order-status">{$statusText}</span>
+        </a>
+
+        <!-- 中部:图片 + 信息块 -->
+        <div class="order-center">
+            {if !empty($coverUrl)}<img src="{$coverUrl}" alt="">{/if}
+            <div class="order-center-flex">
+                <div class="order-center-flex-info">
+                    <span class="item-left">{$tt['order.Ordernum']|default='订单号'}</span>:
+                    <span class="ellipsis">{$item.refer_no|default=$item.id|default=''}</span>
+                    {if !empty($item.refer_no)}
+                    <a class="copy-btn" href="javascript:" data-copy="{$item.refer_no}" data-copy-msg="订单号已复制">{$tt['point.copy']|default='复制'}</a>
+                    {/if}
+                </div>
+                {if !empty($item.d_id) && !empty($item.doctor)}
+                <div class="order-center-flex-info">
+                    <span class="item-left">{$tt['index.common.doctor']|default='医生'}</span>:
+                    <span>{$item.doctor.name|default=''}</span>
+                </div>
+                {/if}
+                {if !empty($item.p_id) && !empty($item.project)}
+                <div class="order-center-flex-info">
+                    <span class="item-left">{$tt['make.Bookitem']|default='预约项目'}</span>:
+                    <span class="ellipsis">{$item.project.name|default=''}</span>
+                </div>
+                {/if}
+                {if !empty($item.service_fee) && $item.service_fee > 0}
+                <div class="order-center-flex-info">
+                    <span class="item-left">{$tt['order.Servicefee']|default='服务费'}</span>:
+                    <span class="them-color">{$payUnit}{$item.service_fee}</span>
+                </div>
+                {/if}
+                {if !empty($item.clinic_fee) && $item.clinic_fee > 0}
+                <div class="order-center-flex-info">
+                    <span class="item-left">{$tt['index.common.ConsultationFee']|default='面诊费'}</span>:
+                    <span class="them-color">{$payUnit}{$item.clinic_fee}</span>
+                </div>
+                {/if}
+                <div class="order-center-flex-info">
+                    <span class="item-left">{$tt['order.Paidnum']|default='已支付'}</span>:
+                    <span class="them-color">{$payUnit}{$item.pay_price|default=0}</span>
+                </div>
+                {if !empty($item.refund_price) && $item.refund_price != '0.00'}
+                <div class="order-center-flex-info">
+                    <span class="item-left">{$tt['order.Refundfound']|default='退款金额'}</span>:
+                    <span>{$payUnit}{$item.refund_price}</span>
+                </div>
+                {/if}
+                {if !empty($item.confirm_expected_time)}
+                <div class="order-center-flex-info">
+                    <span class="item-left">{$tt['order.Timebooks']|default='预约时间'}</span>:
+                    <span>{$item.confirm_expected_time}</span>
+                </div>
+                {/if}
+                {if !empty($item.create_time)}
+                <div class="order-center-flex-info">
+                    <span class="item-left">{$tt['order.Ordertime']|default='下单时间'}</span>:
+                    <span>{$item.create_time}</span>
+                </div>
+                {/if}
+                {if !empty($item.form_status_desc)}
+                <div class="order-center-flex-express">
+                    <span class="item-left">{$tt['point.ProductStatus']|default='发货状态'}</span>:
+                    <span>{$item.form_status_desc}</span>
+                </div>
+                {/if}
+                {if !empty($item.express)}
+                <a class="order-center-flex-express" href="/{$lang_seg}/me/express/{$item.id|default=0}">
+                    <span class="item-left">{$tt['point.Logisticsinfo']|default='物流信息'}</span>:
+                    <span class="ellipsis">{$item.express.theLastMessage|default=$tt['order.Nocontent']|default='暂无物流'}</span>
+                    <span class="them-color">{$tt['point.ViewDetails']|default='查看'}</span>
+                </a>
+                {/if}
+                {if !empty($item.express_order_no)}
+                <div class="order-center-flex-info">
+                    <span class="item-left">{$tt['point.TrackingNumber']|default='物流单号'}</span>:
+                    <span class="ellipsis">{$item.express_order_no}</span>
+                    <a class="copy-btn" href="javascript:" data-copy="{$item.express_order_no}">{$tt['point.copy']|default='复制'}</a>
+                </div>
+                {/if}
+            </div>
         </div>
-        <div class="order-card__body">
-            <div class="order-card__img">
-                {if !empty($od.cover)}<img src="{$od.cover}" alt="" loading="lazy">{/if}
-            </div>
-            <div class="order-card__info">
-                <div class="order-card__name">{:!empty($od["project_name"])?$od["project_name"]:(!empty($od["title"])?$od["title"]:'')}</div>
-                <div class="order-card__hospital">{$od.hospital_name|default=''}</div>
-                <div class="order-card__price">₩{:!empty($od["korean_won"])?$od["korean_won"]:(!empty($od["price"])?$od["price"]:'0')}</div>
-            </div>
+
+        <!-- 底部操作按钮(对齐 order.vue:120-148 各状态按钮)-->
+        <div class="order-item-bottom">
+            {if $item.status == 1 || $item.status == -1}
+            <a class="cancel-btn" href="/{$lang_seg}/me/order/{$item.id|default=0}">{$tt['order.Paynow']|default='立即支付'}</a>
+            {/if}
+            {if !empty($item.can_activate)}
+            <a class="cancel-btn" href="/{$lang_seg}/me/order/{$item.id|default=0}">{$tt['order.Activatenow']|default='激活'}</a>
+            {/if}
+            {if !empty($item.can_comment)}
+            <a class="cancel-btn iwts" href="/{$lang_seg}/comment/publish?type=1&with_id={$item.h_id|default=$item.hospital.id|default=0}&apt_id={$item.id|default=0}">{$tt['order.Iwantsay']|default='写评价'}</a>
+            <a class="cancel-btn" href="/{$lang_seg}/me/cases/new?apt_id={$item.id|default=0}">{$tt['order.Sentfeel']|default='晒案例'}</a>
+            {/if}
+            {if !empty($item.show_form)}
+            <a class="cancel-btn" href="/{$lang_seg}/appointment?h_id={$item.h_id|default=0}">{$tt['order.Prioritybooking']|default='优先预约'}</a>
+            {/if}
+            {if ($item.status == 2 || $item.status == 3) && !empty($item.balance) && $item.balance != '0.00'}
+            <a class="cancel-btn" href="/{$lang_seg}/me/order/{$item.id|default=0}">{if $item.status == 2}{$tt['order.Instantrefund']|default='立即退款'}{else/}{$tt['order.Iwantrefund']|default='我要退款'}{/if}</a>
+            {/if}
         </div>
     </div>
     {/foreach}
