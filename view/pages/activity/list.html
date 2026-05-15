@@ -33,7 +33,7 @@
         <a class="act-item" href="/{$lang_seg}/activity/{$a.id|default=0}">
             {if !empty($a.cover)}<img class="cover" src="{$a.cover}" alt="{$a.title|default=''}" loading="lazy">{else/}<div class="cover"></div>{/if}
             <div class="meta">
-                <div class="name">{$a.title|default=$a.name|default=''}</div>
+                <div class="name">{:!empty($a["title"])?$a["title"]:(!empty($a["name"])?$a["name"]:'')}</div>
                 {if !empty($a.desc)}<div>{$a.desc}</div>{/if}
                 {if !empty($a.pay_price_str)}<div class="price">{$a.pay_price_str}</div>{/if}
                 {if !empty($a.sale_num)}<div style="color:#999;font-size:12px">{$tt['activity.sold']|default='已售'} {$a.sale_num}</div>{/if}

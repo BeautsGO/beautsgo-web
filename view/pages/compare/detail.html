@@ -52,7 +52,7 @@
                 <tr><th>毕业院校</th>{foreach $list as $i}<td>{$i.school|default='-'}</td>{/foreach}</tr>
                 <tr><th>擅长</th>{foreach $list as $i}<td>{if !empty($i.tag)}{:is_array($i['tag'])?implode('、',$i['tag']):$i['tag']}{else}-{/if}</td>{/foreach}</tr>
             {else}
-                <tr><th>价格</th>{foreach $list as $i}<td>₩{$i.korean_won|default=$i.price|default='-'}{if !empty($i.unit)}/{$i.unit}{/if}</td>{/foreach}</tr>
+                <tr><th>价格</th>{foreach $list as $i}<td>₩{:!empty($i["korean_won"])?$i["korean_won"]:(!empty($i["price"])?$i["price"]:'-')}{if !empty($i.unit)}/{$i.unit}{/if}</td>{/foreach}</tr>
                 <tr><th>销量</th>{foreach $list as $i}<td>{$i.sale_nums|default='0'}</td>{/foreach}</tr>
                 <tr><th>所属医院</th>{foreach $list as $i}<td>{$i.hospital_name|default=$i.hospital.name|default='-'}</td>{/foreach}</tr>
                 <tr><th>医生</th>{foreach $list as $i}<td>{$i.doctor_name|default=$i.doctor.name|default='-'}</td>{/foreach}</tr>

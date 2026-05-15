@@ -24,11 +24,12 @@
     {foreach $list as $r}
         <div class="u-list-item">
             <div class="u-list-item__body">
-                <div class="u-list-item__title">{$r.title|default=$r.name|default='账户变动'}</div>
+                <div class="u-list-item__title">{:!empty($r['title'])?$r['title']:(!empty($r['name'])?$r['name']:'账户变动')}</div>
                 <div class="u-list-item__time">{if !empty($r.create_time)}{:is_numeric($r.create_time)?date('Y-m-d H:i',$r.create_time):$r.create_time}{/if}</div>
             </div>
-            <div style="display:flex; align-items:center; font-size:15px; font-weight:700; color:{:$r['amount']>0?'#4CD964':'#EF5189'};">
-                {if $r['amount']>0}+{/if}{$r.amount|default=$r.price|default='0'}
+            {php}$amt = (float) (isset($r['amount']) ? $r['amount'] : (isset($r['price']) ? $r['price'] : 0));{/php}
+            <div style="display:flex; align-items:center; font-size:15px; font-weight:700; color:{:$amt>0?'#4CD964':'#EF5189'};">
+                {if $amt>0}+{/if}{$amt}
             </div>
         </div>
     {/foreach}

@@ -52,7 +52,7 @@
     {else/}
     <div class="cl-list">
         {foreach $list as $c}
-        <a class="cl-item" href="/{$lang_seg}/chat/{$c.h_id|default=$c.hospital_id|default=0}">
+        <a class="cl-item" href="/{$lang_seg}/chat/{:!empty($c["h_id"])?$c["h_id"]:(!empty($c["hospital_id"])?$c["hospital_id"]:0)}">
             <div class="cl-item__avatar">
                 {if !empty($c.cover_url) || !empty($c.cover)}
                 <img src="{$c.cover_url|default=$c.cover}" alt="" loading="lazy">
@@ -62,11 +62,11 @@
             </div>
             <div class="cl-item__body">
                 <div class="cl-item__row1">
-                    <div class="cl-item__name">{$c.hospital_name|default=$c.name|default='客服'}</div>
+                    <div class="cl-item__name">{:!empty($c["hospital_name"])?$c["hospital_name"]:(!empty($c["name"])?$c["name"]:'客服')}</div>
                     <div class="cl-item__time">{if !empty($c.last_time)}{if is_numeric($c.last_time)}{:date('m-d H:i', (int)$c.last_time)}{else/}{$c.last_time}{/if}{/if}</div>
                 </div>
                 <div class="cl-item__row2">
-                    <div class="cl-item__msg">{$c.last_message|default=$c.content|default=''}</div>
+                    <div class="cl-item__msg">{:!empty($c["last_message"])?$c["last_message"]:(!empty($c["content"])?$c["content"]:'')}</div>
                     {if !empty($c.unread_count)}<span class="cl-item__badge">{:$c['unread_count']>99?'99+':$c['unread_count']}</span>{/if}
                 </div>
             </div>

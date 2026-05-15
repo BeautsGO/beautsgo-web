@@ -19,7 +19,7 @@
         {if !empty($item.name_cn) || !empty($item.name_en)}
         <a class="item" href="?dial={$item.dial|default=''}">
             <div>
-                <span class="name">{$item.name_cn|default=$item.name|default=''}</span>
+                <span class="name">{:!empty($item["name_cn"])?$item["name_cn"]:(!empty($item["name"])?$item["name"]:'')}</span>
                 <span class="code">({$item.name_en|default=''})</span>
             </div>
             <span class="code">+{$item.dial|default=''}</span>

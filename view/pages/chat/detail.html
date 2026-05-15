@@ -94,7 +94,7 @@
                 <div class="ava">
                     {if $isMe && !empty($user.avatar)}<img src="{$user.avatar}" alt="">{elseif !$isMe && !empty($hospital.cover_url)}<img src="{$hospital.cover_url}" alt="">{/if}
                 </div>
-                <div class="body">{$msg.content|default=$msg.message|default=''}</div>
+                <div class="body">{:!empty($msg["content"])?$msg["content"]:(!empty($msg["message"])?$msg["message"]:'')}</div>
             </div>
             {/foreach}
         {/if}

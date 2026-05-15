@@ -24,7 +24,7 @@
 <section class="adp">
     {if !empty($cover)}<div class="banner"><img src="{$cover}" alt="{$info.name|default=''}"></div>{/if}
     <div class="hd">
-        <div class="name">{$info.name|default=$info.title|default=''}</div>
+        <div class="name">{:!empty($info["name"])?$info["name"]:(!empty($info["title"])?$info["title"]:'')}</div>
         {if !empty($info.sale_nums)}<div class="sale">{$tt['activity.sold']|default='已售'} {$info.sale_nums}</div>{/if}
     </div>
     {if !empty($info.korean_won) || !empty($info.price)}
@@ -47,7 +47,7 @@
             {foreach $related as $r}
             <a href="/{$lang_seg}/activity/{$r.id|default=0}">
                 {if !empty($r.cover)}<img src="{$r.cover}" alt="" loading="lazy">{/if}
-                <div class="t">{$r.title|default=$r.name|default=''}</div>
+                <div class="t">{:!empty($r["title"])?$r["title"]:(!empty($r["name"])?$r["name"]:'')}</div>
             </a>
             {/foreach}
         </div>

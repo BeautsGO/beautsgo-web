@@ -11,8 +11,8 @@
     {foreach $list as $m}
         <a class="u-list-item" href="#">
             <div class="u-list-item__body">
-                <div class="u-list-item__title">{$m.title|default=$m.name|default='系统消息'}</div>
-                <div class="u-list-item__meta">{$m.content|default=$m.intro|default=''}</div>
+                <div class="u-list-item__title">{:!empty($m["title"])?$m["title"]:(!empty($m["name"])?$m["name"]:'系统消息')}</div>
+                <div class="u-list-item__meta">{:!empty($m["content"])?$m["content"]:(!empty($m["intro"])?$m["intro"]:'')}</div>
                 <div class="u-list-item__time">{if !empty($m.create_time)}{:is_numeric($m.create_time)?date('Y-m-d H:i',$m.create_time):$m.create_time}{/if}</div>
             </div>
         </a>

@@ -42,7 +42,7 @@
             <div class="index-popup__swiper" id="popSwiper" data-autoplay="5000">
                 <div class="index-popup__track">
                     {foreach $popList as $idx=>$p}
-                    <a class="index-popup__item" href="{$p.path|default=$p.url|default='#'}">
+                    <a class="index-popup__item" href="{:!empty($p["path"])?$p["path"]:(!empty($p["url"])?$p["url"]:'#')}">
                         {if !empty($p.advertise)}<img src="{$p.advertise}" alt="{$p.title|default=''}">{/if}
                     </a>
                     {/foreach}

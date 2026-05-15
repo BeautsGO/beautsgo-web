@@ -151,7 +151,7 @@
                     <span class="clinic-fee">{$tt['index.common.ConsultationFee']|default='面诊费'}:₩{$hospital.clinic_fee}</span>
                     {/if}
                 </div>
-                <div class="mechanism-detail-down">{$hospital.address|default=$hospital.zh_cn_address|default=''}</div>
+                <div class="mechanism-detail-down">{:!empty($hospital["address"])?$hospital["address"]:(!empty($hospital["zh_cn_address"])?$hospital["zh_cn_address"]:'')}</div>
                 {if !empty($hospital.response_time)}
                 <div class="mechanism-response">
                     {$tt['index.common.BookingResponseTime']|default='预约响应时长'}:<span style="color:#fc6290d1">{$hospital.response_time} {$tt['index.common.Hour']|default='小时'}</span>

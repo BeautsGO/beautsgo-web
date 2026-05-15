@@ -46,7 +46,7 @@
             <div class="meta">
                 <div class="name">{$h.name|default=''}</div>
                 <div class="sub">{$h.level_name|default=''}{if !empty($h.doctors_count)} · {$tt['index.common.doctor']|default='医生'} {$h.doctors_count}{/if}</div>
-                <div class="addr">{$h.zh_cn_address|default=$h.address|default=''}</div>
+                <div class="addr">{:!empty($h["zh_cn_address"])?$h["zh_cn_address"]:(!empty($h["address"])?$h["address"]:'')}</div>
             </div>
         </a>
         {/foreach}

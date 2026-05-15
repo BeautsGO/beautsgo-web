@@ -164,7 +164,7 @@
             {if !empty($user.id)}
             <a class="top-left" href="/{$lang_seg}/me/profile">
                 <div class="ava"><img src="{$user.avatar|default='/static/icon/default-avatar.png'}" alt=""></div>
-                <div class="name"><div class="name-top">{$user.nickname|default=$user.phone|default=''}</div></div>
+                <div class="name"><div class="name-top">{:!empty($user["nickname"])?$user["nickname"]:(!empty($user["phone"])?$user["phone"]:'')}</div></div>
             </a>
             {else/}
             <a class="top-left" href="/{$lang_seg}/login">

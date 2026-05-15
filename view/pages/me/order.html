@@ -47,16 +47,16 @@
     <div class="order-card">
         <div class="order-card__hd">
             <span>订单号: {$od.order_no|default=$od.id}</span>
-            <span class="order-card__status">{$od.status_text|default=$od.status_name|default=''}</span>
+            <span class="order-card__status">{:!empty($od["status_text"])?$od["status_text"]:(!empty($od["status_name"])?$od["status_name"]:'')}</span>
         </div>
         <div class="order-card__body">
             <div class="order-card__img">
                 {if !empty($od.cover)}<img src="{$od.cover}" alt="" loading="lazy">{/if}
             </div>
             <div class="order-card__info">
-                <div class="order-card__name">{$od.project_name|default=$od.title|default=''}</div>
+                <div class="order-card__name">{:!empty($od["project_name"])?$od["project_name"]:(!empty($od["title"])?$od["title"]:'')}</div>
                 <div class="order-card__hospital">{$od.hospital_name|default=''}</div>
-                <div class="order-card__price">₩{$od.korean_won|default=$od.price|default='0'}</div>
+                <div class="order-card__price">₩{:!empty($od["korean_won"])?$od["korean_won"]:(!empty($od["price"])?$od["price"]:'0')}</div>
             </div>
         </div>
     </div>

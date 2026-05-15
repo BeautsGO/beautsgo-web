@@ -73,11 +73,11 @@
                     {if !empty($t['icon'])}<img src="{$t.icon}" style="width:100%;height:100%;border-radius:8px;object-fit:cover" alt="">{else/}✦{/if}
                 </div>
                 <div class="rw-item__body">
-                    <div class="rw-item__name">{$t.title|default=$t.name|default='任务'}</div>
+                    <div class="rw-item__name">{:!empty($t["title"])?$t["title"]:(!empty($t["name"])?$t["name"]:'任务')}</div>
                     {if !empty($t.description) || !empty($t.intro)}
-                    <div class="rw-item__desc">{$t.description|default=$t.intro|default=''}</div>
+                    <div class="rw-item__desc">{:!empty($t['description'])?$t['description']:(!empty($t['intro'])?$t['intro']:'')}</div>
                     {/if}
-                    <div class="rw-item__points">+{$t.point|default=$t.reward|default=0} {$tt['me.Pointunit']|default='分'}</div>
+                    <div class="rw-item__points">+{:!empty($t['point'])?$t['point']:(!empty($t['reward'])?$t['reward']:0)} {$tt['me.Pointunit']|default='分'}</div>
                 </div>
                 <span class="rw-item__btn{if $done} rw-item__btn--done{/if}">
                     {if $done}{$tt['point.Done']|default='已完成'}{else/}{$tt['point.Goto']|default='去完成'}{/if}
