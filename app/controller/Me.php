@@ -148,7 +148,8 @@ class Me extends BaseController
         $status = (int) $this->request->param('status', 0);
         $page   = max(1, (int) $this->request->param('page', 1));
 
-        $resp = $auth->call('GET', '/Order/pageList', [
+        // 对齐 subPackages_sub/order/order.vue:743 GET Appointment/getList
+        $resp = $auth->call('GET', '/Appointment/getList', [
             'status' => $status,
             'page'   => $page,
             'limit'  => 10,
@@ -174,7 +175,8 @@ class Me extends BaseController
     {
         $auth = new AuthService();
         $page = max(1, (int) $this->request->param('page', 1));
-        $resp = $auth->call('GET', '/message/myMessage', ['page' => $page, 'limit' => 20]);
+        // 对齐 me/news.vue Message/myMessage(大写 M)
+        $resp = $auth->call('GET', '/Message/myMessage', ['page' => $page, 'limit' => 20]);
         $list  = (array) ($resp['data']['list'] ?? $resp['data'] ?? []);
         $total = (int) ($resp['data']['count'] ?? count($list));
 

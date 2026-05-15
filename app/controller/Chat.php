@@ -45,11 +45,13 @@ class Chat extends BaseController
             if ($content === '') {
                 $error = '请输入消息内容';
             } else {
+                // 1:1 对齐 chat.vue sendMessage payload
+                // content 保留换行(原 vue:replace(/\r\n|\r/g, '\n'))
+                $content = str_replace(["\r\n", "\r"], "\n", $content);
                 $resp = $auth->call('POST', '/Chat/sendMessage', [
-                    'h_id'    => $hid,
-                    'content' => $content,
                     'chat_gid' => $chatGid,
                     'chat_uid' => $chatUid,
+                    'content'  => $content,
                 ]);
                 if ($resp['ok']) $sent = true;
                 else $error = $resp['msg'] ?: '发送失败';
