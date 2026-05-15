@@ -50,30 +50,68 @@ class Me extends BaseController
         ]);
     }
 
+    /**
+     * 个人资料(对齐 subPackages_lightningRod/me/user.vue)
+     *   GET  /user/baseInfo  → user + form_info(动态字段:生日/性别等)
+     *   POST /user/save      → user + form_info 合并保存
+     */
     public function profile()
     {
         $auth = new AuthService();
-        $user = $auth->getCurrentUser();
+
+        // 拉 baseInfo:user 基础信息 + form_info 动态字段
+        $base = $auth->call('GET', '/user/baseInfo');
+        $user = (array) ($base['data']['user'] ?? $auth->getCurrentUser());
+        $initForm = (array) ($base['data']['form_info'] ?? []);
 
         $error = '';
         $saved = false;
         if ($this->request->isPost()) {
+            // user 基础字段
             $payload = [
                 'nickname' => trim((string) $this->request->param('nickname', '')),
                 'avatar'   => (string) $this->request->param('avatar', $user['avatar'] ?? ''),
                 'sex'      => (int) $this->request->param('sex', $user['sex'] ?? 0),
             ];
+            // 动态字段(initForm 项 form[key]=value)
+            $extra = (array) $this->request->param('form', []);
+            foreach ($extra as $k => $v) {
+                if (!is_string($k) || $k === '') continue;
+                $payload[$k] = is_array($v) ? '' : (string) $v;
+            }
             $resp = $auth->call('POST', '/user/save', $payload);
             if ($resp['ok']) {
                 $saved = true;
                 $user = array_merge((array) $user, $payload);
+                // 把新值回填 initForm 显示
+                foreach ($initForm as &$it) {
+                    $k = $it['key'] ?? '';
+                    if ($k && isset($payload[$k])) $it['value'] = $payload[$k];
+                }
             } else {
                 $error = $resp['msg'] ?: '保存失败';
             }
         }
 
         $this->seo->setTdk('个人资料 - BeautsGO', '个人资料', '我的,资料')->buildOrganization();
-        return $this->render('pages/me/profile', compact('user', 'error', 'saved'));
+        return $this->render('pages/me/profile', [
+            'user'        => $user,
+            'initForm'    => $initForm,
+            'maskedPhone' => $this->maskPhone((string) ($user['phone'] ?? '')),
+            'error'       => $error,
+            'saved'       => $saved,
+        ]);
+    }
+
+    /**
+     * 手机号掩码(对齐 user.vue maskPhoneNumber)
+     */
+    private function maskPhone(string $phone): string
+    {
+        if ($phone === '') return '';
+        if (strlen($phone) >= 11) return preg_replace('/^(\d{3})\d{4}(\d{4})/', '$1****$2', $phone);
+        if (strlen($phone) >= 7)  return preg_replace('/^(\d{3})\d+(\d{2})$/', '$1***$2', $phone);
+        return $phone;
     }
 
     public function collect()

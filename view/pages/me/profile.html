@@ -2,72 +2,143 @@
 
 {block name="extra_head"}
 <style>
-.profile-page { background:#f6f6f6; min-height:100vh; padding-bottom:70px; }
-.page-head { background:#fff; height:44px; display:flex; align-items:center; padding:0 15px; border-bottom:1px solid #f1f1f1; position:sticky; top:0; z-index:20; }
-.page-head .back-btn { width:30px; height:30px; display:flex; align-items:center; justify-content:center; color:#1B1B1B; font-size:22.5px; text-decoration:none; }
-.page-head .page-title { flex:1; margin:0; text-align:center; font-size:16px; font-weight:600; color:#1B1B1B; margin-right:30px; }
-.profile-card { background:#fff; margin:12px 16px; border-radius:12px; overflow:hidden; }
-.profile-row { display:flex; align-items:center; padding:16px 16px; border-bottom:1px solid #f5f5f5; }
-.profile-row:last-child { border-bottom:0; }
-.profile-row__label { width:90px; font-size:14px; color:#1B1B1B; }
-.profile-row__field { flex:1; }
-.profile-row__field input,
-.profile-row__field select { width:100%; height:34px; padding:0 10px; border:1px solid #eee; border-radius:6px; background:#f8f8f8; font-size:14px; outline:none; }
-.profile-row__field input:focus,
-.profile-row__field select:focus { border-color:#FD83AB; background:#fff; }
-.profile-row__avatar { width:55px; height:55px; border-radius:50%; object-fit:cover; }
-.btn-save { display:block; width:calc(100% - 32px); margin:20px 16px; height:47px; background:#FE739D; color:#fff; border:0; border-radius:24px; font-size:16px; font-weight:600; }
-.profile-msg { padding:8px 16px; font-size:12px; }
-.profile-msg.ok { color:#4CD964; }
-.profile-msg.err { color:#EF5189; }
+/* 个人资料 1:1 对齐 subPackages_lightningRod/me/user.vue */
+.pf-body{ background: #f6f6f6; min-height: 100vh; padding-bottom: 30px; }
+.pf-head{ position: sticky; top: 0; z-index: 20; height: 44px; display: flex; align-items: center; padding: 0 15px; background: #fff; border-bottom: 1px solid #f1f1f1; }
+.pf-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.pf-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+
+.pf-detail{ margin: 12px 16px; background: #fff; border-radius: 10px; overflow: hidden; }
+.pf-list{
+    display: flex; align-items: center; min-height: 50px;
+    padding: 12px 16px; border-bottom: 1px solid #f5f5f5;
+}
+.pf-list:last-child{ border-bottom: 0; }
+.pf-list-left{ width: 90px; font-size: 14px; color: #333; flex-shrink: 0; }
+.pf-list-right{ flex: 1; display: flex; align-items: center; justify-content: flex-end; min-width: 0; }
+.pf-list-right input,
+.pf-list-right select{
+    flex: 1; border: 0; outline: none; font-size: 14px; color: #333;
+    text-align: right; background: transparent; padding: 6px 0;
+}
+.pf-list-right input::placeholder{ color: #ccc; }
+.pf-list-right select{ -webkit-appearance: none; appearance: none; }
+.pf-list-right .arrow{ color: #ccc; font-size: 16px; margin-left: 6px; }
+
+.pf-avatar-row .pf-list-right{ justify-content: flex-end; }
+.pf-avatar-row .ava{ width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: #f3f3f7; }
+.pf-avatar-row label{ display: inline-flex; align-items: center; cursor: pointer; }
+.pf-avatar-row input[type=file]{ display: none; }
+
+.pf-phone-row .masked{ font-size: 14px; color: #333; margin-right: 12px; max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pf-phone-row .change{
+    color: #fe739d; font-size: 13px;
+    text-decoration: none; flex-shrink: 0;
+}
+
+.pf-sub{ padding: 30px 16px 12px; }
+.pf-sub button{
+    width: 100%; height: 44px; background: #fe739d; color: #fff;
+    border: 0; border-radius: 22px;
+    font-size: 16px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 8px 20px rgba(254,115,157,.35);
+}
+
+.pf-msg.ok{ margin: 10px 16px; padding: 8px 12px; background: #e6fff0; color: #1aac4a; border-radius: 6px; text-align: center; font-size: 12px; }
+.pf-msg.err{ margin: 10px 16px; padding: 8px 12px; background: #fff5fa; color: #ef5189; border-radius: 6px; text-align: center; font-size: 12px; }
 </style>
 {/block}
 
 {block name="content"}
-<div class="profile-page">
-    <div class="page-head">
-        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
-        <h1 class="page-title">个人资料</h1>
+<div class="pf-body">
+    <div class="pf-head">
+        <a class="back" href="/{$lang_seg}/me" aria-label="返回">‹</a>
+        <div class="title">{$tt['me.PersonalInfo']|default='个人资料'}</div>
     </div>
 
-    {if $saved}<div class="profile-msg ok">资料已保存</div>{/if}
-    {if !empty($error)}<div class="profile-msg err">{$error}</div>{/if}
+    {if $saved}<div class="pf-msg ok">{$tt['index.common.saveSucess']|default='资料已保存'}</div>{/if}
+    {if !empty($error)}<div class="pf-msg err">{$error}</div>{/if}
 
-    <form method="post" action="/{$lang_seg}/me/profile">
-        <div class="profile-card">
-            <div class="profile-row">
-                <div class="profile-row__label">头像</div>
-                <div class="profile-row__field">
-                    <img class="profile-row__avatar" src="{$user.avatar|default='/static/icon/default-avatar.png'}" alt="avatar">
+    <form method="post" action="/{$lang_seg}/me/profile" enctype="multipart/form-data">
+        <div class="pf-detail">
+            <!-- 头像 -->
+            <div class="pf-list pf-avatar-row">
+                <div class="pf-list-left">{$tt['me.Avatar']|default='头像'}</div>
+                <div class="pf-list-right">
+                    <label>
+                        <img class="ava" src="{$user.avatar|default='http://beautsgoimg.59w.net/20230908113801/64fa97191e12c.png'}" alt="avatar">
+                        <input type="file" name="avatar_file" accept="image/*" id="avatarFile">
+                        <span class="arrow">›</span>
+                    </label>
                 </div>
             </div>
-            <div class="profile-row">
-                <div class="profile-row__label">昵称</div>
-                <div class="profile-row__field">
-                    <input type="text" name="nickname" value="{$user.nickname|default=''}" maxlength="20" placeholder="请输入昵称">
+            <!-- 昵称 -->
+            <div class="pf-list">
+                <div class="pf-list-left">{$tt['me.Nickname']|default='昵称'}</div>
+                <div class="pf-list-right">
+                    <input type="text" name="nickname" value="{$user.nickname|default=''}" maxlength="20" placeholder="{$tt['me.user.infosetPlcNickName']|default='请输入昵称'}">
                 </div>
             </div>
-            <div class="profile-row">
-                <div class="profile-row__label">性别</div>
-                <div class="profile-row__field">
+            <!-- 性别 -->
+            <div class="pf-list">
+                <div class="pf-list-left">{$tt['me.Sex']|default='性别'}</div>
+                <div class="pf-list-right">
                     <select name="sex">
-                        <option value="0" {if empty($user.sex) || $user.sex == 0}selected{/if}>保密</option>
-                        <option value="1" {if !empty($user.sex) && $user.sex == 1}selected{/if}>男</option>
-                        <option value="2" {if !empty($user.sex) && $user.sex == 2}selected{/if}>女</option>
+                        <option value="0" {if empty($user.sex)}selected{/if}>{$tt['me.Confidential']|default='保密'}</option>
+                        <option value="1" {if !empty($user.sex) && $user.sex == 1}selected{/if}>{$tt['me.Male']|default='男'}</option>
+                        <option value="2" {if !empty($user.sex) && $user.sex == 2}selected{/if}>{$tt['me.Female']|default='女'}</option>
                     </select>
+                    <span class="arrow">›</span>
                 </div>
             </div>
-            <div class="profile-row">
-                <div class="profile-row__label">邮箱</div>
-                <div class="profile-row__field">
-                    <input type="email" value="{$user.phone|default=''}" disabled style="background:#f5f5f5;color:#999;">
+
+            <!-- 动态字段(form_info,1:1 对齐 user.vue initForm 循环)-->
+            {if !empty($initForm)}
+                {foreach $initForm as $idx => $item}
+                <div class="pf-list">
+                    <div class="pf-list-left">{$item.label|default=''}</div>
+                    <div class="pf-list-right">
+                        {if $item.type == 'date'}
+                        <input type="date" name="form[{$item.key|default=$idx}]" value="{$item.value|default=''}">
+                        {else/}
+                        <input type="text" name="form[{$item.key|default=$idx}]" value="{$item.value|default=''}" placeholder="{$item.placeholder|default=''}">
+                        {/if}
+                    </div>
+                </div>
+                {/foreach}
+            {/if}
+
+            <!-- 手机号(只读 + 跳改手机)-->
+            <div class="pf-list pf-phone-row">
+                <div class="pf-list-left">{$tt['me.Phoneinfo']|default='手机号'}</div>
+                <div class="pf-list-right">
+                    <span class="masked">{$maskedPhone|default=''}</span>
+                    <a class="change" href="/{$lang_seg}/me/change-phone">{$tt['me.Phonechange']|default='修改'}</a>
                 </div>
             </div>
         </div>
 
-        <button class="btn-save" type="submit">保存</button>
+        <div class="pf-sub">
+            <button type="submit">{$tt['projectDetails.Savetext']|default='保存'}</button>
+        </div>
     </form>
-
-    {include file="components/_tabbar" /}
 </div>
+
+<script>
+// 头像选择后预览(实际上传待 OSS 端点接入)
+(function(){
+    var input = document.getElementById('avatarFile');
+    if(!input) return;
+    input.addEventListener('change', function(){
+        var f = input.files[0]; if(!f) return;
+        var reader = new FileReader();
+        reader.onload = function(ev){
+            var img = input.parentNode.querySelector('img.ava');
+            if(img) img.src = ev.target.result;
+        };
+        reader.readAsDataURL(f);
+        BG.toast('已选择头像,保存后生效', 'info');
+    });
+})();
+</script>
 {/block}
