@@ -33,9 +33,27 @@ class Compare extends BaseController
         }
 
         $auth = new AuthService();
+        // 1:1 对齐 contrast.vue getData():$http.get('Compared/hospital'|'doctor'|'project', {ids})
         $endpoint = ['', '/Compared/hospital', '/Compared/doctor', '/Compared/project'][$type];
+        $dataKey  = ['', 'hospital', 'doctor', 'project'][$type];
         $resp = $auth->call('GET', $endpoint, ['ids' => implode(',', $idArr)]);
-        $list = (array) ($resp['data']['list'] ?? $resp['data'] ?? []);
+        $data = (array) ($resp['data'] ?? []);
+
+        $list = (array) ($data[$dataKey] ?? $data['list'] ?? []);
+        $fieldExplain = (array) ($data['fieldExplain'] ?? []);
+
+        // 归一化封面 url 与名称(API 返回 cover 可能是 [{url:...}] 或 {url:...})
+        foreach ($list as &$item) {
+            $cover = $item['cover'] ?? ($item['cover_detail'] ?? '');
+            if (is_array($cover)) {
+                $first = $cover[0] ?? $cover;
+                $item['cover_url'] = $first['url'] ?? ($first['cover'] ?? '');
+            } else {
+                $item['cover_url'] = (string) $cover;
+            }
+            if (empty($item['slug'])) $item['slug'] = (string) ($item['id'] ?? '');
+        }
+        unset($item);
 
         $typeName = ['', '机构', '医生', '项目'][$type];
         $this->seo->setTdk($typeName . '对比 - BeautsGO', $typeName . '横向对比', '对比')
@@ -43,11 +61,35 @@ class Compare extends BaseController
             ->buildBreadcrumb([['name' => '首页', 'url' => '/'], ['name' => $typeName . '对比', 'url' => '/compare?type=' . $type]]);
 
         return $this->render('pages/compare/detail', [
-            'user'     => $auth->getCurrentUser(),
-            'type'     => $type,
-            'typeName' => $typeName,
-            'ids'      => $idArr,
-            'list'     => $list,
+            'user'         => $auth->getCurrentUser(),
+            'type'         => $type,
+            'typeName'     => $typeName,
+            'ids'          => $idArr,
+            'list'         => $list,
+            'fieldExplain' => $fieldExplain,
+            'showLogin'    => empty($auth->getCurrentUser()['phone'] ?? ''),
+        ]);
+    }
+
+    /**
+     * 生成对比图(对齐 contrast.vue saveImg → GET /compared/downImgUrl)
+     */
+    public function saveImage()
+    {
+        $type = max(1, min(3, (int) $this->request->param('type', 1)));
+        $ids  = trim((string) $this->request->param('ids', ''));
+        $idArr = array_values(array_filter(array_map('intval', explode(',', $ids))));
+        if (empty($idArr)) return json(['ok' => false, 'msg' => 'ids required']);
+
+        $auth = new AuthService();
+        $resp = $auth->call('GET', '/compared/downImgUrl', [
+            'ids'  => implode(',', $idArr),
+            'type' => $type,
+        ]);
+        return json([
+            'ok'     => (bool) $resp['ok'],
+            'msg'    => $resp['msg'] ?? '',
+            'imgUrl' => (string) ($resp['data']['imgUrl'] ?? ''),
         ]);
     }
 

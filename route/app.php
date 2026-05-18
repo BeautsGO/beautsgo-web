@@ -62,6 +62,7 @@ Route::group(':lang', function () {
     Route::post('point/confirm',     'UserExtra/pointConfirm');
     Route::get('compare/select',     'Compare/select');
     Route::get('compare/add',        'Compare/add');
+    Route::get('compare/save-image', 'Compare/saveImage');
     Route::get('compare',            'Compare/detail');
     Route::any('comment/publish',    'Comments/publish');
     Route::get('chat',               'Chat/index');

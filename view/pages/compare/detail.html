@@ -1,65 +1,264 @@
 {extend name="layout/base" /}
+
 {block name="extra_head"}
-<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">
 <style>
-.compare-table { background:#fff; margin:12px 0; padding:0; overflow-x:auto; }
-.compare-table table { width:100%; border-collapse:collapse; min-width:100%; }
-.compare-table th, .compare-table td { padding:12px 10px; border:1px solid #f1f1f1; font-size:13px; vertical-align:top; }
-.compare-table th { background:#fafafa; color:#666; font-weight:500; min-width:70px; white-space:nowrap; text-align:left; }
-.compare-table td { color:#1B1B1B; min-width:120px; }
-.compare-table .cover { width:90px; height:90px; object-fit:cover; border-radius:6px; }
-.compare-table .name { font-weight:600; font-size:15px; margin-top:5px; }
+/* ============================================================
+ * compare detail 1:1 还原 contrast/contrast.vue scoped scss
+ *   - 顶部背景图 + LOGO
+ *   - .detail-bg 容器(白色卡片 + 圆角)
+ *   - .top-img 横向缩略图 + 居中 PK 图标
+ *   - .detail 行(odd 灰底)+ sticky 左列 + 等高 detail-view
+ *   - 字段循环来自 fieldExplain;type=1 文本,type=2 图集
+ *   - 未登录时显示 .login-overlay 渐变蒙层
+ * ============================================================ */
+.cmp-body{
+    min-height: 100vh;
+    background: url('https://beautsgoimg.59w.net/20241125104152/6743e3f0305f9.png') no-repeat top center;
+    background-size: 100% auto; background-color: #f8b8d4;
+    padding-bottom: 30px;
+}
+.cmp-top{ display: flex; align-items: center; margin: 15px; }
+.cmp-top img{ width: 100px; height: 29px; }
+
+.cmp-detail-bg{
+    background: #fff; border-radius: 15px;
+    margin: 15px; overflow: hidden; position: relative;
+    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+}
+
+/* 顶部缩略图(对齐 .top-img margin-left:204rpx=102px)*/
+.cmp-top-img{
+    display: flex; flex-direction: row; justify-content: space-around;
+    margin: 15px 15px 15px 102px; position: relative; gap: 8px;
+}
+.cmp-top-detail{
+    border-radius: 5px; border: 1px solid #ccc; overflow: hidden;
+    width: 40px; height: 40px; flex-shrink: 0;
+}
+.cmp-top-detail img{ width: 100%; height: 100%; object-fit: cover; }
+.cmp-pk{
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px; height: 24px; z-index: 2;
+}
+
+/* 行(.detail)对齐 vue:奇数行白底,偶数行 #f9f9f9 */
+.cmp-detail{ display: flex; }
+.cmp-detail:nth-child(odd){ background: #f9f9f9; }
+.cmp-detail .detail-view{
+    min-height: 52px; padding: 9px 7px;
+    display: flex; align-items: center; justify-content: center;
+    border-right: 1px solid #f3f3f3;
+    color: #666; font-size: 12px; line-height: 1.4;
+    flex-shrink: 0; box-sizing: border-box;
+}
+.cmp-detail .detail-title{
+    position: sticky; left: 0; z-index: 1;
+    width: 89px; flex-shrink: 0;
+    font-size: 12px; color: #0d0d0d; font-weight: 700;
+    text-align: center;
+    background: inherit;
+}
+.cmp-detail .detail-box{
+    flex: 1; min-width: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+}
+.cmp-detail .detail-box .imgs{
+    display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+}
+.cmp-detail .detail-box .imgs img{
+    width: 50px; height: 80px; object-fit: cover; border-radius: 4px;
+    cursor: zoom-in;
+}
+
+/* 未登录蒙层 */
+.cmp-login-overlay{
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 70%; z-index: 10;
+    background: linear-gradient(to top, #ffffff 50%, rgba(255,255,255,.3));
+    display: flex; justify-content: center; align-items: flex-start;
+}
+.cmp-login-message{
+    color: #565656; font-size: 14px;
+    display: flex; flex-direction: column; align-items: center;
+    margin-top: 40px;
+}
+.cmp-login-message .btn{
+    color: #EF5189; font-size: 14px;
+    background: #FEEBF2; padding: 8px 12px;
+    margin-top: 10px; border-radius: 6px;
+    text-decoration: none;
+}
+
+/* 右侧悬浮保存按钮 */
+.cmp-save-btn{
+    position: fixed; right: 16px; top: 50%; transform: translateY(-50%);
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #fff url('https://beautsgoimg.59w.net/20250320103907/67dbcd1b5fa64.png') no-repeat center/60%;
+    border: 0; box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    z-index: 50; cursor: pointer;
+}
+
+.cmp-page-head{
+    position: sticky; top: 0; z-index: 20; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: rgba(255,255,255,.85); backdrop-filter: blur(8px);
+}
+.cmp-page-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.cmp-page-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+
+.cmp-empty{ background:#fff; margin: 15px; padding: 30px; text-align: center; border-radius: 12px; color: #888; }
+
+/* 图片预览 lightbox(对齐 zwy-popup)*/
+.cmp-lightbox{
+    position: fixed; inset: 0; background: rgba(0,0,0,.86);
+    z-index: 999; display: none;
+    align-items: center; justify-content: center;
+}
+.cmp-lightbox.open{ display: flex; }
+.cmp-lightbox img{ max-width: 92%; max-height: 80vh; border-radius: 6px; }
+.cmp-lightbox .close{
+    position: absolute; top: 30px; right: 20px;
+    width: 36px; height: 36px; line-height: 36px; text-align: center;
+    background: rgba(0,0,0,.4); color: #fff; border-radius: 50%;
+    cursor: pointer; border: 1px solid #fff;
+}
+.cmp-lightbox .hint{ position: absolute; bottom: 30px; left: 0; right: 0; text-align: center; color: #fff; font-size: 12px; }
 </style>
 {/block}
+
 {block name="content"}
-<div class="user-page">
-    <div class="page-head">
-        <a class="back-btn" href="/{$lang_seg}/compare/select?type={$type}" aria-label="返回">‹</a>
-        <h1 class="page-title">{$typeName}对比</h1>
+<div class="cmp-body">
+    <div class="cmp-page-head">
+        <a class="back" href="/{$lang_seg}/compare/select?type={$type}" aria-label="返回">‹</a>
+        <h1 class="title">{$typeName}对比</h1>
+    </div>
+
+    <div class="cmp-top">
+        <img src="https://beautsgoimg.59w.net/20241125143540/67441abc9f0a9.png" alt="BeautsGO">
     </div>
 
     {if empty($list)}
-    <div class="empty">未找到对比数据,请检查 ID 是否有效</div>
-    {else}
-    <div class="compare-table">
-        <table>
-            <tr>
-                <th></th>
-                {foreach $list as $item}
-                <td>
-                    {if !empty($item.cover_url) || !empty($item.cover) || !empty($item.thumb)}
-                    <img class="cover" src="{$item.cover_url|default=$item.cover[0]['url']|default=$item.thumb[0]['url']|default=''}" alt="">
-                    {/if}
-                    <div class="name">
-                        <a href="/{$lang_seg}/{if $type == 1}hospital{elseif $type == 2}doctor{else}project{/if}/{$item.slug|default=$item.id}" style="color:inherit; text-decoration:none;">
-                            {$item.name|default=''}
-                        </a>
-                    </div>
-                </td>
-                {/foreach}
-            </tr>
-            {if $type == 1}
-                <tr><th>等级</th>{foreach $list as $i}<td>{$i.level_name|default='-'}</td>{/foreach}</tr>
-                <tr><th>商圈</th>{foreach $list as $i}<td>{$i.trading_area_name|default='-'}</td>{/foreach}</tr>
-                <tr><th>地址</th>{foreach $list as $i}<td>{$i.zh_cn_address|default='-'}</td>{/foreach}</tr>
-                <tr><th>医生数</th>{foreach $list as $i}<td>{$i.doctors_count|default='-'}</td>{/foreach}</tr>
-                <tr><th>响应时长</th>{foreach $list as $i}<td>{$i.response_time_str|default=$i.response_time}小时</td>{/foreach}</tr>
-                <tr><th>面诊费</th>{foreach $list as $i}<td>{if !empty($i.clinic_fee)}₩{$i.clinic_fee}{else}-{/if}</td>{/foreach}</tr>
-            {elseif $type == 2}
-                <tr><th>职位</th>{foreach $list as $i}<td>{$i.job_name|default='-'}</td>{/foreach}</tr>
-                <tr><th>所属医院</th>{foreach $list as $i}<td>{$i.hospital_name|default=$i.hospital.name|default='-'}</td>{/foreach}</tr>
-                <tr><th>学历</th>{foreach $list as $i}<td>{$i.education|default='-'}</td>{/foreach}</tr>
-                <tr><th>毕业院校</th>{foreach $list as $i}<td>{$i.school|default='-'}</td>{/foreach}</tr>
-                <tr><th>擅长</th>{foreach $list as $i}<td>{if !empty($i.tag)}{:is_array($i['tag'])?implode('、',$i['tag']):$i['tag']}{else}-{/if}</td>{/foreach}</tr>
-            {else}
-                <tr><th>价格</th>{foreach $list as $i}<td>₩{:!empty($i["korean_won"])?$i["korean_won"]:(!empty($i["price"])?$i["price"]:'-')}{if !empty($i.unit)}/{$i.unit}{/if}</td>{/foreach}</tr>
-                <tr><th>销量</th>{foreach $list as $i}<td>{$i.sale_nums|default='0'}</td>{/foreach}</tr>
-                <tr><th>所属医院</th>{foreach $list as $i}<td>{$i.hospital_name|default=$i.hospital.name|default='-'}</td>{/foreach}</tr>
-                <tr><th>医生</th>{foreach $list as $i}<td>{$i.doctor_name|default=$i.doctor.name|default='-'}</td>{/foreach}</tr>
+    <div class="cmp-empty">{$tt['contrasttwice.empty']|default='未找到对比数据,请检查 ID 是否有效'}</div>
+    {else/}
+    <div class="cmp-detail-bg">
+        <!-- 顶部缩略图行(对齐 .top-img)-->
+        <div class="cmp-top-img">
+            {foreach $list as $item}
+            <div class="cmp-top-detail">
+                <img src="{$item.cover_url|default=''}" alt="{$item.name|default=''}" loading="lazy">
+            </div>
+            {/foreach}
+            {if count($list) < 3}
+            <img class="cmp-pk" src="https://beautsgoimg.59w.net/20241211153538/675911ea30f86.png" alt="VS">
             {/if}
-        </table>
+        </div>
+
+        <!-- 名称行(对齐 vue 第一行机构名)-->
+        {php}
+            if ($type == 1) $nameLabel = !empty($tt['hospitalDetails.Institutionalname']) ? $tt['hospitalDetails.Institutionalname'] : '机构名';
+            elseif ($type == 2) $nameLabel = !empty($tt['doctorDetails.name']) ? $tt['doctorDetails.name'] : '医生名';
+            else $nameLabel = !empty($tt['projectDetails.name']) ? $tt['projectDetails.name'] : '项目名';
+        {/php}
+        <div class="cmp-detail">
+            <div class="detail-view detail-title">{$nameLabel}</div>
+            {foreach $list as $item}
+            <div class="detail-view detail-box">
+                <a href="/{$lang_seg}/{if $type==1}hospital{elseif $type==2}doctor{else/}project{/if}/{$item.slug|default=$item.id}" style="color:#1B1B1B; text-decoration:none; font-weight:600;">
+                    {$item.name|default=''}
+                </a>
+            </div>
+            {/foreach}
+        </div>
+
+        <!-- 动态字段循环(对齐 v-for keyItem in text)-->
+        {foreach $fieldExplain as $key => $meta}
+        <div class="cmp-detail">
+            <div class="detail-view detail-title">{$meta.name|default=$key}</div>
+            {foreach $list as $item}
+            <div class="detail-view detail-box">
+                {if $meta.type == 2}
+                    {php}
+                        $imgs = $item[$key] ?? [];
+                        if (!is_array($imgs)) $imgs = [];
+                    {/php}
+                    {if !empty($imgs)}
+                    <div class="imgs">
+                        {foreach $imgs as $u}
+                        {php}$src = is_array($u) ? ($u['url'] ?? ($u['cover'] ?? '')) : (string) $u;{/php}
+                        {if !empty($src)}<img src="{$src}" alt="" loading="lazy" data-preview="{$src}">{/if}
+                        {/foreach}
+                    </div>
+                    {else/}
+                    -
+                    {/if}
+                {else/}
+                    {!empty($item[$key])?(is_array($item[$key])?implode('、',$item[$key]):$item[$key]):'-'}
+                {/if}
+            </div>
+            {/foreach}
+        </div>
+        {/foreach}
+
+        {if $showLogin}
+        <div class="cmp-login-overlay">
+            <div class="cmp-login-message">
+                <a class="btn" href="/{$lang_seg}/login">{$tt['doctorDetails.Loginfulldetails']|default='登录查看完整对比详情'}</a>
+            </div>
+        </div>
+        {/if}
     </div>
+
+    {if !$showLogin}
+    <button class="cmp-save-btn" id="cmpSaveBtn" title="{$tt['projectDetails.Savetext']|default='保存对比图'}"></button>
     {/if}
+    {/if}
+
+    <!-- 图片预览 lightbox -->
+    <div class="cmp-lightbox" id="cmpLightbox">
+        <span class="close" id="cmpLightboxClose">×</span>
+        <img id="cmpLightboxImg" src="" alt="">
+        <div class="hint">{$tt['doctorDetails.Holdtosave']|default='长按图片保存'}</div>
+    </div>
+
     {include file="components/_tabbar" /}
 </div>
+
+<script>
+(function(){
+    /* 图片点击预览(对齐 showImag → previewImage)*/
+    var lb = document.getElementById('cmpLightbox');
+    var lbImg = document.getElementById('cmpLightboxImg');
+    if(lb){
+        document.querySelectorAll('[data-preview]').forEach(function(el){
+            el.addEventListener('click', function(){
+                lbImg.src = el.dataset.preview;
+                lb.classList.add('open');
+            });
+        });
+        document.getElementById('cmpLightboxClose').addEventListener('click', function(){ lb.classList.remove('open'); });
+        lb.addEventListener('click', function(e){ if(e.target === lb) lb.classList.remove('open'); });
+    }
+
+    /* 保存按钮(对齐 saveImg → GET /compared/downImgUrl)*/
+    var saveBtn = document.getElementById('cmpSaveBtn');
+    if(saveBtn){
+        saveBtn.addEventListener('click', function(){
+            BG.toast && BG.toast('图片生成中…', 'loading');
+            var ids = '{:implode(',', $ids)}';
+            fetch('/{$lang_seg}/compare/save-image?type={$type}&ids=' + encodeURIComponent(ids), {credentials:'same-origin'})
+                .then(function(r){ return r.json(); })
+                .then(function(j){
+                    if(j.ok && j.imgUrl){
+                        lbImg.src = j.imgUrl;
+                        lb.classList.add('open');
+                    } else {
+                        BG.toast && BG.toast(j.msg || '生成失败', 'error');
+                    }
+                }).catch(function(){ BG.toast && BG.toast('网络错误', 'error'); });
+        });
+    }
+})();
+</script>
 {/block}
