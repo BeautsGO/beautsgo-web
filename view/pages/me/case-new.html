@@ -1,40 +1,180 @@
 {extend name="layout/base" /}
-{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+
+{block name="extra_head"}
+<style>
+/* 写案例 1:1 还原 subPackages_lightningRod/userCase/userCase.vue */
+.uc-body{ min-height: 100vh; background: #f6f6f6; padding: 12px; padding-bottom: 90px; box-sizing: border-box; }
+.uc-head{
+    position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 640px;
+    z-index: 20; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+}
+.uc-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.uc-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+
+.uc-body{ padding-top: 56px; }
+
+/* 顶部"对比效果"上传区(对齐 userCase.vue 顶部 view)*/
+.uc-compare{
+    background: #fff; border-radius: 10px;
+    padding: 14px; margin-bottom: 10px;
+}
+.uc-compare__title{
+    color: #FC6290; font-size: 14px; margin-bottom: 12px; font-weight: 600;
+}
+.uc-media-upload{ display: flex; gap: 10px; flex-wrap: wrap; }
+.uc-media-item{
+    position: relative;
+    width: calc(50% - 5px); aspect-ratio: 1/1;
+    background: #f3f3f7; border-radius: 8px;
+    overflow: hidden; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: #999;
+}
+.uc-media-item img{ width: 100%; height: 100%; object-fit: cover; }
+.uc-media-item input[type=file]{ display: none; }
+.uc-media-item .add-icon{
+    font-size: 36px; line-height: 1; color: #ccc; margin-bottom: 6px;
+}
+.uc-media-item .add-text{ font-size: 12px; color: #999; }
+.uc-media-item .del{
+    position: absolute; top: 4px; right: 4px;
+    width: 22px; height: 22px; line-height: 20px; text-align: center;
+    background: rgba(0,0,0,.55); color: #fff; border-radius: 50%;
+    font-size: 16px; cursor: pointer; z-index: 2;
+}
+
+/* 我想说 textarea */
+.uc-input{
+    background: #fff; border-radius: 10px;
+    padding: 14px; margin-bottom: 10px;
+}
+.uc-input textarea{
+    width: 100%; min-height: 120px;
+    border: 0; outline: none; resize: vertical;
+    font-size: 14px; color: #333; box-sizing: border-box;
+    font-family: inherit;
+}
+.uc-input textarea::placeholder{ color: #ccc; }
+
+/* 关联类型 select */
+.uc-link{
+    background: #fff; border-radius: 10px;
+    padding: 14px; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 12px;
+}
+.uc-link label{ font-size: 14px; color: #666; }
+.uc-link select{
+    flex: 1; height: 32px; padding: 0 10px;
+    border: 1px solid #eee; border-radius: 6px;
+    font-size: 14px; background: #fafafa;
+}
+.uc-link input[type=number]{
+    width: 90px; height: 32px; padding: 0 10px;
+    border: 1px solid #eee; border-radius: 6px;
+    font-size: 14px; background: #fafafa; -moz-appearance: textfield;
+}
+
+/* 提交按钮 */
+.uc-submit{
+    position: fixed; left: 50%; transform: translateX(-50%); bottom: 12px;
+    width: calc(100% - 30px); max-width: 610px;
+    height: 44px; background: #fe739d;
+    color: #fff; border: 0; border-radius: 22px;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 8px 20px rgba(254,115,157,.35); z-index: 90;
+}
+
+.uc-msg.ok{ margin: 0 0 10px; padding: 10px; background: #e6fff0; color: #1aac4a; border-radius: 6px; text-align: center; font-size: 12px; }
+.uc-msg.err{ margin: 0 0 10px; padding: 10px; background: #fff5fa; color: #ef5189; border-radius: 6px; text-align: center; font-size: 12px; }
+</style>
+{/block}
+
 {block name="content"}
-<div class="user-page">
-    <div class="page-head">
-        <a class="back-btn" href="/{$lang_seg}/me/cases" aria-label="返回">‹</a>
-        <h1 class="page-title">写案例</h1>
-    </div>
-    {if $saved}<div class="msg-ok">案例已发布,等待审核</div>{/if}
-    {if !empty($error)}<div class="msg-err">{$error}</div>{/if}
-    <form method="post" action="/{$lang_seg}/me/cases/new">
-        <div class="u-form-card">
-            <div class="u-form-row">
-                <div class="u-form-row__label">关联类型</div>
-                <div class="u-form-row__field">
-                    <select name="type">
-                        <option value="1">机构</option>
-                        <option value="2">医生</option>
-                        <option value="3">项目</option>
-                    </select>
-                </div>
-            </div>
-            <div class="u-form-row">
-                <div class="u-form-row__label">关联 ID</div>
-                <div class="u-form-row__field"><input type="number" name="with_id" placeholder="机构/医生/项目 ID" required></div>
-            </div>
-            <div class="u-form-row">
-                <div class="u-form-row__label">分享内容</div>
-                <div class="u-form-row__field"><textarea name="content" rows="6" placeholder="描述您的就医体验、效果、心得…" required></textarea></div>
-            </div>
-            <div class="u-form-row">
-                <div class="u-form-row__label">图片 JSON</div>
-                <div class="u-form-row__field"><textarea name="pictures" rows="3" placeholder='[{"url":"https://..."}]'></textarea></div>
-            </div>
-        </div>
-        <button class="u-btn-primary" type="submit">发布</button>
-    </form>
-    {include file="components/_tabbar" /}
+<div class="uc-head">
+    <a class="back" href="/{$lang_seg}/me/cases" aria-label="返回">‹</a>
+    <div class="title">{$tt['case.publish']|default='发布案例'}</div>
 </div>
+
+<form class="uc-body" method="post" action="/{$lang_seg}/me/cases/new" enctype="multipart/form-data" id="ucForm">
+    {if $saved}<div class="uc-msg ok">{$tt['case.published']|default='案例已发布,等待审核'}</div>{/if}
+    {if !empty($error)}<div class="uc-msg err">{$error}</div>{/if}
+
+    <!-- 对比效果(上限 2 张前后对比图)-->
+    <div class="uc-compare">
+        <div class="uc-compare__title">{$tt['case.Comparisoneffect']|default='对比效果(前后照,最多 2 张)'}</div>
+        <div class="uc-media-upload" id="ucMedia">
+            <label class="uc-media-item" id="ucAddSlot">
+                <input type="file" name="pictures[]" accept="image/*" multiple>
+                <span class="add-icon">+</span>
+                <span class="add-text">{$tt['case.Addpicture']|default='添加图片'}</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- 关联类型 / ID(用户在订单完成后跳来,通常已带 apt_id)-->
+    <div class="uc-link">
+        <label>{$tt['case.link']|default='关联'}</label>
+        <select name="type">
+            <option value="1">{$tt['index.common.hospital']|default='机构'}</option>
+            <option value="2">{$tt['index.common.doctor']|default='医生'}</option>
+            <option value="3">{$tt['index.common.project']|default='项目'}</option>
+        </select>
+        <input type="number" name="with_id" value="{$Request.param.with_id|default=''}" placeholder="ID">
+    </div>
+
+    <!-- 我想说 -->
+    <div class="uc-input">
+        <textarea name="content" placeholder="{$tt['case.textPlc']|default='请输入你的就医体验、效果、心得…'}" maxlength="2000" required></textarea>
+    </div>
+
+    {if !empty($Request.param.apt_id)}
+    <input type="hidden" name="apt_id" value="{$Request.param.apt_id}">
+    {/if}
+
+    <button class="uc-submit" type="submit">{$tt['index.common.submit']|default='提交'}</button>
+</form>
+
+<script>
+(function(){
+    var media = document.getElementById('ucMedia');
+    var addSlot = document.getElementById('ucAddSlot');
+    var fileInput = addSlot.querySelector('input[type=file]');
+    var MAX = 2;
+    fileInput.addEventListener('change', function(){
+        var files = Array.from(fileInput.files);
+        var current = media.querySelectorAll('.uc-media-item').length - 1;
+        files.slice(0, MAX - current).forEach(function(f){
+            var reader = new FileReader();
+            reader.onload = function(ev){
+                var item = document.createElement('div');
+                item.className = 'uc-media-item';
+                item.innerHTML = '<img src="' + ev.target.result + '" alt=""><span class="del">×</span>';
+                item.querySelector('.del').addEventListener('click', function(e){
+                    e.stopPropagation();
+                    item.remove();
+                    if(media.querySelectorAll('.uc-media-item').length - 1 < MAX){
+                        addSlot.style.display = '';
+                    }
+                });
+                media.insertBefore(item, addSlot);
+                if(media.querySelectorAll('.uc-media-item').length - 1 >= MAX){
+                    addSlot.style.display = 'none';
+                }
+            };
+            reader.readAsDataURL(f);
+        });
+    });
+
+    document.getElementById('ucForm').addEventListener('submit', function(e){
+        var content = document.querySelector('textarea[name=content]').value.trim();
+        if(content.length < 5){
+            e.preventDefault();
+            BG.toast('请至少填写 5 个字', 'error');
+        }
+    });
+})();
+</script>
 {/block}
