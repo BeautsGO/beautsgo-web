@@ -23,6 +23,11 @@ class Points extends BaseController
         $data = $repo->fetchPointList(['category' => $catId], $page, self::PAGE_SIZE);
         $totalPages = max(1, (int) ceil($data['total'] / self::PAGE_SIZE));
 
+        // 我的积分(对齐 pointShop.vue:6 显示 point)
+        $auth = new \app\service\AuthService();
+        $pResp = $auth->call('GET', '/user/getPoint');
+        $point = (int) ($pResp['data']['point'] ?? $pResp['data'] ?? 0);
+
         $title = '积分商城 - BeautsGO';
         $desc  = '使用积分兑换医美项目、体验金、护肤品等。';
         $langSeg = (string) (config('seo.lang_path_map')[$this->lang] ?? 'cn');
@@ -40,6 +45,7 @@ class Points extends BaseController
             'integralCls'  => $integralCls,
             'filterParams' => ['category' => $catId, 'area' => 0, 'level' => 0],
             'tab'          => 3,
+            'point'        => $point,
         ]);
     }
 

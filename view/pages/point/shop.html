@@ -2,6 +2,26 @@
 
 {block name="extra_head"}
 <link rel="stylesheet" href="/static/css/pages/index.css?v={$assets.css_ver}">
+<style>
+/* 顶部"我的积分"卡(对齐 pointShop.vue .my-points)*/
+.my-points{
+    margin: 12px; padding: 16px 18px;
+    background: linear-gradient(135deg,#fe739d,#ffabc7);
+    color: #fff; border-radius: 12px;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 8px 24px rgba(254,115,157,.25);
+}
+.my-points .points-info{ display: flex; align-items: baseline; gap: 6px; }
+.my-points .point-num{ font-size: 30px; font-weight: 700; letter-spacing: .5px; }
+.my-points .points-title{ font-size: 14px; opacity: .9; }
+.my-points .exchange-button{
+    background: rgba(255,255,255,.22); padding: 8px 14px;
+    border-radius: 999px; font-size: 13px;
+    text-decoration: none; color: #fff; display: inline-flex; align-items: center; gap: 4px;
+    backdrop-filter: blur(6px);
+}
+.my-points .arrow{ font-size: 14px; opacity: .8; }
+</style>
 {/block}
 
 {block name="content"}
@@ -9,6 +29,18 @@
     <div class="page-head">
         <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
         <h1 class="page-title">{$tt['index.tabs.point']|default='积分商城'}</h1>
+    </div>
+
+    <!-- 我的积分卡(对齐 pointShop.vue:5-15)-->
+    <div class="my-points">
+        <div class="points-info">
+            <span class="point-num">{$point|default=0}</span>
+            <span class="points-title">{$tt['index.common.point']|default='积分'}</span>
+        </div>
+        <a class="exchange-button" href="/{$lang_seg}/point/task">
+            <span>{$tt['point.ClaimPoints']|default='立即赚取积分'}</span>
+            <span class="arrow">›</span>
+        </a>
     </div>
 
     {if !empty($integralCls)}
