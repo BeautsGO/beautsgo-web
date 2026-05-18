@@ -1,23 +1,125 @@
 {extend name="layout/base" /}
-{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+
+{block name="extra_head"}
+<style>
+/* News 1:1 还原 subPackages_lightningRod/me/news.vue */
+.news-page{ min-height: 100vh; background: #f6f6f6; padding-bottom: 70px; }
+.news-head{
+    position: sticky; top: 0; z-index: 20; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+}
+.news-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.news-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+
+/* 顶部"系统消息"卡(对齐 news.vue .top 段)*/
+.news-top{
+    display: flex; align-items: center;
+    background: #fff; padding: 12px; margin-bottom: 10px;
+    text-decoration: none; color: inherit;
+}
+.news-top__left{
+    width: 40px; height: 40px; flex-shrink: 0; margin-right: 12px;
+    border-radius: 50%; overflow: hidden;
+    background: linear-gradient(135deg,#fe739d,#ff9ac3);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 20px;
+}
+.news-top__left img{ width: 100%; height: 100%; object-fit: cover; }
+.news-top__right{ flex: 1; }
+.news-top__title{
+    display: flex; align-items: center; gap: 6px;
+    font-size: 14px; color: #1B1B1B; font-weight: 600;
+}
+.news-top__title .dot{
+    display: inline-block; width: 7px; height: 7px;
+    border-radius: 50%; background: #FF4D4D;
+}
+.news-top__detail{ font-size: 12px; color: #999; margin-top: 2px; }
+
+/* 动态消息列表(对齐 news.vue .list)*/
+.news-list{
+    display: flex; justify-content: space-between; align-items: flex-start;
+    background: #fff; padding: 10px; margin-bottom: 10px;
+    text-decoration: none; color: inherit;
+}
+.news-list__left{ flex: 1; display: flex; min-width: 0; }
+.news-list__ava{
+    flex-shrink: 0; text-align: center; margin-right: 10px;
+    font-size: 10px; color: #999;
+}
+.news-list__ava img{
+    width: 40px; height: 40px; border-radius: 50%;
+    margin-bottom: 4px; object-fit: cover; background: #f3f3f7;
+}
+.news-list__name{ flex: 1; min-width: 0; }
+.news-list__name-top{
+    display: flex; flex-direction: column; gap: 4px;
+    margin-bottom: 6px; font-size: 12px; color: #1B1B1B;
+}
+.news-list__nickname{ font-weight: 500; }
+.news-list__title{
+    color: #666; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; max-width: 210px;
+}
+.news-list__name-down{ font-size: 11px; color: #999; }
+
+.news-list__right{ flex-shrink: 0; width: 50px; height: 50px; border-radius: 6px; overflow: hidden; background: #f3f3f7; margin-left: 10px; }
+.news-list__right img{ width: 100%; height: 100%; object-fit: cover; }
+
+.empty{ text-align: center; padding: 60px 0; color: #999; font-size: 13px; }
+</style>
+{/block}
+
 {block name="content"}
-<div class="user-page">
-    <div class="page-head">
-        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
-        <h1 class="page-title">消息中心</h1>
+<div class="news-page">
+    <div class="news-head">
+        <a class="back" href="/{$lang_seg}/me" aria-label="返回">‹</a>
+        <div class="title">{$tt['system.title']|default='消息中心'}</div>
     </div>
-    {if empty($list)}<div class="empty">{$tt['point.Empty']|default='暂无消息'}</div>{/if}
-    <div class="u-list">
-    {foreach $list as $m}
-        <a class="u-list-item" href="#">
-            <div class="u-list-item__body">
-                <div class="u-list-item__title">{:!empty($m["title"])?$m["title"]:(!empty($m["name"])?$m["name"]:'系统消息')}</div>
-                <div class="u-list-item__meta">{:!empty($m["content"])?$m["content"]:(!empty($m["intro"])?$m["intro"]:'')}</div>
-                <div class="u-list-item__time">{if !empty($m.create_time)}{:is_numeric($m.create_time)?date('Y-m-d H:i',$m.create_time):$m.create_time}{/if}</div>
+
+    <!-- 顶部"系统消息"卡(toSystem)-->
+    <a class="news-top" href="/{$lang_seg}/me/news?type=system">
+        <div class="news-top__left">
+            {if !empty($systemIcon)}<img src="{$systemIcon}" alt="">{else/}📢{/if}
+        </div>
+        <div class="news-top__right">
+            <div class="news-top__title">
+                {$tt['system.title']|default='系统消息'}
+                {if !empty($unread) && $unread > 0}<span class="dot"></span>{/if}
             </div>
-        </a>
+            <div class="news-top__detail">
+                {if !empty($unread) && $unread > 0}{$unread}{$tt['me.newMessage']|default=' 条新消息'}{else/}{$tt['me.noNewMessage']|default='暂无新消息'}{/if}
+            </div>
+        </div>
+    </a>
+
+    {if empty($list)}
+    <div class="empty">{$tt['point.Empty']|default='暂无消息'}</div>
+    {/if}
+
+    <!-- 动态消息列表(评论回复)-->
+    {foreach $list as $item}
+    <a class="news-list" href="/{$lang_seg}/me/news/{$item.id|default=$item.comment_id|default=0}">
+        <div class="news-list__left">
+            <div class="news-list__ava">
+                {if !empty($item.avatar)}<img src="{$item.avatar}" alt="">{else/}<img src="http://beautsgoimg.59w.net/20230908113801/64fa97191e12c.png" alt="">{/if}
+                <div>{if !empty($item.create_time)}{:is_numeric($item['create_time'])?date('m-d',(int)$item['create_time']):substr((string)$item['create_time'], 5, 5)}{/if}</div>
+            </div>
+            <div class="news-list__name">
+                <div class="news-list__name-top">
+                    <span class="news-list__nickname">{$item.nickname|default=$item.user_name|default=$tt['system.title']|default='系统消息'}</span>
+                    <span class="news-list__title">{$item.title|default=$item.content|default=''}</span>
+                </div>
+                <div class="news-list__name-down">{$tt['me.replieComment']|default='回复了你的评价'}</div>
+            </div>
+        </div>
+        {if !empty($item.cover)}
+        <div class="news-list__right"><img src="{$item.cover}" alt="" loading="lazy"></div>
+        {/if}
+    </a>
     {/foreach}
-    </div>
+
     {include file="components/_pagination" /}
     {include file="components/_tabbar" /}
 </div>
