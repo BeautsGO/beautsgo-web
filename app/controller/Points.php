@@ -52,48 +52,50 @@ class Points extends BaseController
     public function detail(int $id = 0)
     {
         if (!$id) $this->abort404('Missing point id');
-        $prefix = $this->langPrefix();
+        $auth = new \app\service\AuthService();
 
-        $row = Db::name('integral_project')
-            ->field(['id', $prefix . 'title AS title', 'en_title', 'title AS zh_title',
-                     $prefix . 'content AS content', 'cover_detail', 'point', 'price', 'num', 'redeem_num',
-                     'h_id'])
-            ->where('id', $id)
-            ->where('status', 1)
-            ->find();
-        if (!$row) $this->abort404('Point item not found');
+        // 1:1 对齐 pointShopDetail.vue getShopDetail():$http.get('/Integral/detail/'+id)
+        $resp = $auth->call('GET', '/Integral/detail/' . $id);
+        $row  = (array) ($resp['data'] ?? []);
+        if (empty($row)) $this->abort404('Point item not found');
 
-        if (empty($row['title'])) $row['title'] = $row['en_title'] ?: $row['zh_title'];
-        $cov = json_decode((string) $row['cover_detail'], true) ?: [];
-        $row['cover']     = is_array($cov) ? $cov : [];
-        $row['cover_url'] = $row['cover'][0]['url'] ?? '';
-        $row['content']   = htmlspecialchars_decode((string) ($row['content'] ?? ''));
-        $row['redeem_num'] = $row['redeem_num'] ?: random_int(50, 500);
-
-        // 适用医院(h_id 字段是 JSON 数组,如 ["254","349"])
-        $hids = [];
-        if (!empty($row['h_id'])) {
-            if (is_array($row['h_id'])) $hids = $row['h_id'];
-            else {
-                $decoded = json_decode((string) $row['h_id'], true);
-                $hids = is_array($decoded) ? $decoded : [];
-            }
+        // 按当前语言挑标题/正文/使用规则(对齐 vue:608-619)
+        $titleField   = $this->localizedField($row, 'title', $row['title'] ?? '');
+        $contentField = $this->localizedField($row, 'content', $row['content'] ?? '');
+        $useIntro     = $this->localizedField($row, 'use_intro', $row['use_intro'] ?? '');
+        $row['title']     = $titleField;
+        $row['content']   = htmlspecialchars_decode((string) $contentField);
+        $row['use_intro'] = htmlspecialchars_decode((string) $useIntro);
+        $banner = (array) ($row['banner'] ?? $row['cover_detail'] ?? []);
+        if (!$banner && !empty($row['cover'])) {
+            $banner = is_array($row['cover']) ? [$row['cover']] : [];
         }
-        $hospitals = [];
-        if ($hids) {
-            $hospitals = Db::name('hospital')->whereIn('id', $hids)->where('status', 1)
-                ->field(['id', $prefix . 'name AS name', 'en_name', 'name AS zh_name', 'cover_detail',
-                         $this->columnExists('hospital','slug') ? 'slug' : 'NULL AS slug'])
-                ->limit(6)
-                ->select()->toArray();
-            foreach ($hospitals as &$h) {
-                if (empty($h['name'])) $h['name'] = $h['en_name'] ?: $h['zh_name'];
-                $hc = json_decode((string) $h['cover_detail'], true) ?: [];
-                $h['cover_url'] = is_array($hc) ? ($hc[0]['url'] ?? '') : '';
-                if (empty($h['slug'])) $h['slug'] = (string) $h['id'];
-                unset($h['cover_detail']);
+        $row['banner']  = $banner;
+        $row['cover_url'] = $banner[0]['url'] ?? ($banner[0]['cover'] ?? '');
+
+        // 适用医院 1:1 对齐 vue getHospital():$http.get('Integral/hospitalList/'+id)
+        $hResp = $auth->call('GET', '/Integral/hospitalList/' . $id);
+        $hospitals = (array) ($hResp['data'] ?? []);
+        foreach ($hospitals as &$h) {
+            // cover 可能是 {url:...} 对象或字符串;统一为数组方便模板取值
+            if (is_array($h['cover'] ?? null)) {
+                $h['cover_url'] = $h['cover']['url'] ?? ($h['cover']['cover'] ?? '');
+            } else {
+                $h['cover_url'] = (string) ($h['cover'] ?? '');
+                $h['cover'] = ['url' => $h['cover_url']];
             }
+            if (empty($h['slug'])) $h['slug'] = (string) ($h['id'] ?? '');
         }
+        unset($h);
+        $selected = $hospitals[0] ?? [];
+
+        // 用户当前积分(对齐 vue getPoint():$http.get('user/getPoint'))
+        $pResp = $auth->call('GET', '/user/getPoint');
+        $pData = (array) ($pResp['data'] ?? []);
+        $userPoint = (int) ($pData['user_point'] ?? $pData['point'] ?? 0);
+
+        // 价格格式化(对齐 vue formatPrice 中文 ≥1万显示 万₩)
+        $formattedPrice = $this->formatPrice((float) ($row['price'] ?? 0));
 
         $title = $row['title'] . ' - 积分兑换 - BeautsGO';
         $desc = mb_substr(strip_tags((string) ($row['content'] ?? '')), 0, 155);
@@ -106,9 +108,36 @@ class Points extends BaseController
             ->buildBreadcrumb([['name' => '首页', 'url' => '/'], ['name' => '积分商城', 'url' => '/point/shop'], ['name' => $row['title'], 'url' => '/point/' . $id]]);
 
         return $this->render('pages/point/detail', [
-            'item'      => $row,
-            'hospitals' => $hospitals,
+            'item'             => $row,
+            'hospitals'        => $hospitals,
+            'selectedHospital' => $selected,
+            'userPoint'        => $userPoint,
+            'formattedPrice'   => $formattedPrice,
         ]);
+    }
+
+    private function localizedField(array $row, string $base, string $fallback): string
+    {
+        $prefix = '';
+        switch ($this->lang) {
+            case 'zh-Hant': $prefix = 'zh_hant_'; break;
+            case 'en':      $prefix = 'en_';      break;
+            case 'ja':      $prefix = 'ja_';      break;
+            case 'th':      $prefix = 'th_';      break;
+            case 'ko-KR':   $prefix = 'ko_kr_';   break;
+        }
+        if ($prefix && !empty($row[$prefix . $base])) return (string) $row[$prefix . $base];
+        return (string) $fallback;
+    }
+
+    private function formatPrice(float $price): string
+    {
+        if ($price <= 0) return '';
+        if (in_array($this->lang, ['zh-Hans', 'zh-Hant'], true)) {
+            if ($price >= 10000) return number_format($price / 10000, 1) . '万₩';
+            return ((int) $price) . '₩';
+        }
+        return (string) $price;
     }
 
     private function langPrefix(): string

@@ -1,41 +1,375 @@
 {extend name="layout/base" /}
 
 {block name="extra_head"}
-<link rel="stylesheet" href="/static/css/pages/case.css?v={$assets.css_ver}">
+<style>
+/* ============================================================
+ * pointShopDetail 1:1 还原 (subPackages_lightningRod/point/pointShopDetail.vue scoped scss; rpx → px,1rpx = 0.5px)
+ * ============================================================ */
+.pd-body{
+    min-height: 100vh; background: #f5f5f5;
+    box-sizing: border-box; padding-bottom: 140px;
+}
+.pd-head{
+    position: sticky; top: 0; z-index: 30; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: rgba(255,255,255,.94); border-bottom: 1px solid #f1f1f1;
+}
+.pd-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.pd-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 15px; font-weight: 600; color: #1B1B1B; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 顶部 swiper(对齐 .swiper-body 100% × padding-bottom 100%)*/
+.pd-swiper-body{ position: relative; width: 100%; padding-bottom: 100%; background: #eee; overflow: hidden; }
+.pd-swiper{ position: absolute; inset: 0; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.pd-swiper::-webkit-scrollbar{ display: none; }
+.pd-swiper-item{ flex: 0 0 100%; height: 100%; scroll-snap-align: start; position: relative; }
+.pd-swiper-item img.swiper-img{ width: 100%; height: 100%; object-fit: cover; display: block; }
+.pd-swiper-play{
+    position: absolute; inset: 0; z-index: 2;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.pd-swiper-play img{ width: 45px; height: 45px; }
+.pd-swiper-dots{
+    position: absolute; right: 10px; bottom: 24px;
+    background: rgba(51,51,51,.5); color: #fff;
+    border-radius: 10px; padding: 3px 7px;
+    font-size: 12px; z-index: 5;
+}
+
+/* 标题 + 价格(对齐 .detail-box .price-title / .price-content)*/
+.pd-detail-box{
+    margin: 10px 12px; background: #fff; border-radius: 12px;
+    box-sizing: border-box; padding: 17px 10px 10px;
+}
+.pd-price-title{ display: flex; justify-content: space-between; align-items: center; font-size: 16px; font-weight: 700; color: #1B1B1B; }
+.pd-price-title .num{ font-size: 12px; font-weight: 400; color: #000; }
+.pd-price-content{ display: flex; justify-content: space-between; align-items: center; padding-top: 1px; margin-top: 10px; }
+.pd-price-content .price{ font-size: 16px; color: #FC6290; font-weight: 600; }
+.pd-price-content .price .yuan{ color: #FC6290; font-weight: 600; margin-left: 2px; }
+.pd-price-content .redeem-num{ color: #AFAFAF; font-size: 12.5px; font-weight: 400; }
+
+/* 选择机构卡 list-item-title + list-item-view */
+.pd-list-item .list-item-title{
+    display: flex; flex-direction: row; justify-content: space-between; align-items: center;
+    color: #959494; font-size: 13px; margin-bottom: 10px; cursor: pointer;
+}
+.pd-list-item .list-item-title .right{ display: inline-flex; align-items: center; gap: 4px; }
+.pd-list-item .list-item-title .right .count{ color: #FE5B8D; }
+.pd-list-item .list-item-title .right .arrow{ color: #AFAFAF; }
+.pd-list-item .list-item-view{
+    display: flex; flex-direction: row; justify-content: space-between; align-items: center;
+    text-decoration: none; color: inherit;
+}
+.pd-list-item-viewleft{ display: flex; flex-direction: row; align-items: center; flex: 1; min-width: 0; }
+.pd-list-item-left img{ width: 48.5px; height: 48.5px; border-radius: 3.5px; object-fit: cover; }
+.pd-list-item-right{ display: flex; flex-direction: column; margin-left: 11px; flex: 1; min-width: 0; }
+.pd-hospital-name{ display: flex; flex-direction: row; align-items: center; flex-wrap: wrap; color: #444; font-size: 12px; }
+.pd-hospital-name .hospital-title{ color: #0C0D10; font-size: 16px; font-weight: 700; margin-right: 6px; }
+.pd-hospital-name .hospital-tag{ color: #EF5189; font-size: 10px; background: #FEEBF2; padding: 2.5px 3.5px; white-space: nowrap; margin-left: 5px; }
+.pd-hospital-info{ display: flex; flex-wrap: wrap; align-items: center; color: #444; font-size: 12px; margin-top: 4px; }
+.pd-hospital-info .info-line{ display: inline-block; width: 1px; height: 12px; background: #ccc; margin: 0 5px; }
+.pd-list-item-viewright{ width: 25px; flex-shrink: 0; color: #ccc; font-size: 18px; text-align: right; margin-left: 10px; }
+
+/* 富文本区(.rich-box + .rich-title with u-divider 仿样式)*/
+.pd-rich-box{ margin: 0 12px 15px; }
+.pd-rich-title{ display: flex; align-items: center; justify-content: center; margin: 12px 0 8px; }
+.pd-rich-title span{ font-size: 13px; color: #888; padding: 0 12px; }
+.pd-rich-title .line{ flex: 1; height: 1px; background: #ddd; max-width: 60px; }
+.pd-rich-text{
+    background: #fff; border-radius: 10px;
+    padding: 12px 10px; white-space: pre-wrap;
+    font-size: 14px; line-height: 1.7; color: #333;
+}
+.pd-rich-text img{ width: 100%; height: auto; display: block; }
+.pd-rich-text p{ margin: 0 0 6px; }
+
+/* 底部固定按钮 .btns(对齐 vue 100rpx≈50px 半圆 #FD83AB)*/
+.pd-btns{
+    position: fixed; left: 50%; transform: translateX(-50%); bottom: 0;
+    width: 100%; max-width: 640px; box-sizing: border-box;
+    background: #fff; padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+    display: flex; flex-direction: column; align-items: center; z-index: 80;
+    box-shadow: 0 -4px 12px rgba(0,0,0,.04);
+}
+.pd-btns-detail{
+    width: 100%; min-height: 50px;
+    background: #FD83AB; color: #fff;
+    border: 0; border-radius: 22px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 7px 0; cursor: pointer; text-decoration: none;
+    box-shadow: 0 6px 16px rgba(253,131,171,.4);
+}
+.pd-btns-detail .main{ font-size: 16px; font-weight: 500; }
+.pd-btns-detail .sub{ font-size: 11px; margin-top: 4px; opacity: .9; }
+.pd-btns .available{ color: #7D7D7D; font-size: 11px; margin-top: 8px; }
+
+/* 选择机构弹窗 .mask + .bottom-popup */
+.pd-mask{
+    position: fixed; inset: 0; background: rgba(0,0,0,.6);
+    z-index: 999; display: none; align-items: flex-end;
+}
+.pd-mask.open{ display: flex; }
+.pd-popup{
+    width: calc(100% - 30px); margin: 0 15px;
+    background: #fff; border-radius: 10px 10px 0 0;
+    padding: 15px; position: relative; box-sizing: border-box;
+    min-height: 50%; max-height: 80%; overflow-y: auto;
+    animation: pd-pop-in .25s ease;
+}
+@keyframes pd-pop-in{ from { transform: translateY(100%); } to { transform: translateY(0); } }
+.pd-popup-title{ position: relative; display: flex; justify-content: center; align-items: center; margin-bottom: 15px; }
+.pd-popup-title-left{ font-size: 16px; color: #000; font-weight: 700; }
+.pd-popup .close-btn{ position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-size: 22px; color: #afadad; cursor: pointer; line-height: 1; padding: 4px 8px; }
+
+.pd-popup .list-item{
+    display: flex; align-items: center; padding: 7px;
+    border-radius: 5px; cursor: pointer;
+}
+.pd-popup .list-item.selected{ background: #eee; }
+.pd-popup .select-dot{
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 1px solid #ccc; background: #fff; margin-right: 20px;
+    flex-shrink: 0; box-sizing: border-box;
+}
+.pd-popup .select-dot.select-bg{
+    background: #FD739C url('https://beautsgoimg.59w.net/20250317143415/67d7c267784f8.png') no-repeat center/50%;
+    border-color: #FD739C;
+}
+.pd-popup .list-item-left{ display: flex; flex: 1; min-width: 0; align-items: center; gap: 11px; }
+.pd-popup .list-item-left .avatar{ width: 48.5px; height: 48.5px; border-radius: 3.5px; object-fit: cover; flex-shrink: 0; }
+.pd-popup .list-item-info{ flex: 1; min-width: 0; }
+
+.pd-popup .select-btn{
+    width: 90%; background: #FD739C; color: #fff;
+    border: 0; border-radius: 6px; font-size: 17px; font-weight: 700;
+    padding: 10px 0; margin: 15px auto 5px; display: block; cursor: pointer;
+}
+</style>
 {/block}
 
 {block name="content"}
-<div class="case-detail">
-    <div class="page-head">
-        <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
-        <h1 class="page-title">积分商品</h1>
+<div class="pd-body">
+    <div class="pd-head">
+        <a class="back" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="title">{$item.title}</h1>
     </div>
 
-    <div class="case-detail__images">
-        {if !empty($item.cover_url)}<img src="{$item.cover_url}" alt="{$item.title}" loading="lazy">{/if}
-    </div>
-
-    <div class="case-detail__body">
-        <h2 style="font-size:18px; color:#1B1B1B; margin:0 0 8px;">{$item.title}</h2>
-        <div style="display:flex; align-items:baseline; gap:8px; margin-bottom:12px;">
-            <span style="color:#EF5189; font-weight:700; font-size:20px;">{$item.point} 积分</span>
-            {if !empty($item.price)}<span style="color:#999; font-size:12px;">+ ¥{$item.price}</span>{/if}
-            <span style="margin-left:auto; color:#999; font-size:11px;">已兑 {$item.redeem_num}</span>
-        </div>
-        <div class="case-detail__content" style="margin-bottom:12px;">{$item.content|raw}</div>
-
-        {if !empty($hospitals)}
-        <div class="case-detail__related">
-            <div class="related-title">适用医院</div>
-            {foreach $hospitals as $h}
-            <a class="related-card" href="/{$lang_seg}/hospital/{$h.slug}" style="margin-bottom:8px;">
-                {if !empty($h.cover_url)}<img src="{$h.cover_url}" alt="{$h.name}" loading="lazy">{/if}
-                <div class="related-name">{$h.name}</div>
-            </a>
+    <!-- 顶部 banner(对齐 vue .swiper-body)-->
+    {if !empty($item.banner)}
+    <div class="pd-swiper-body">
+        <div class="pd-swiper" id="pdSwiper">
+            {foreach $item.banner as $idx => $b}
+            <div class="pd-swiper-item">
+                {if !empty($b.is_mp4) and $b.is_mp4 == 1}
+                <div class="pd-swiper-play" data-video-url="{$b.url}">
+                    <img src="/static/icons/play.svg" alt="play" onerror="this.style.display='none'">
+                </div>
+                {/if}
+                <img class="swiper-img" src="{!empty($b.cover)?$b.cover:$b.url}" alt="" loading="lazy">
+            </div>
             {/foreach}
         </div>
+        {if count($item.banner) > 1}
+        <div class="pd-swiper-dots"><span id="pdDotCur">1</span>/{count($item.banner)}</div>
         {/if}
     </div>
+    {/if}
+
+    <!-- 标题 + 价格 + 已兑(对齐 .detail-box .price-title / .price-content)-->
+    <div class="pd-detail-box">
+        <div class="pd-price-title">
+            <span>{$item.title}</span>
+            <span class="num">{$tt['pointDetails.Inventory']|default='库存'} {$item.num|default=0}</span>
+        </div>
+        <div class="pd-price-content">
+            <span class="price">{$item.point}{$tt['index.common.point']|default='积分'}{if !empty($formattedPrice)}<span class="yuan">+{$formattedPrice}</span>{/if}</span>
+            <div class="price-bottom">
+                <span class="redeem-num">{$tt['index.common.AlreadyRedeemed']|default='已兑'}{$item.redeem_num|default=0}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 选择机构卡(对齐 vue v-if hospitalList.length > 0)-->
+    {if !empty($hospitals)}
+    <div class="pd-detail-box">
+        <div class="pd-list-item">
+            <div class="list-item-title" id="pdSelectHospitalBtn">
+                <span>{$tt['pointDetails.ChooseOrganization']|default='选择机构'}</span>
+                <span class="right">
+                    <span class="count">{$tt['pointDetails.ATotalOf']|default='共'} {count($hospitals)} {$tt['pointDetails.organizations']|default='家机构'}</span>
+                    <span class="arrow">›</span>
+                </span>
+            </div>
+            <a class="list-item-view" id="pdSelHospitalCard" href="/{$lang_seg}/hospital/{!empty($selectedHospital['slug'])?$selectedHospital['slug']:$selectedHospital['id']}">
+                <div class="pd-list-item-viewleft">
+                    <div class="pd-list-item-left">
+                        <img id="pdSelHosCover" src="{$selectedHospital.cover_url|default=''}" alt="" loading="lazy">
+                    </div>
+                    <div class="pd-list-item-right">
+                        <div class="pd-hospital-name">
+                            <span class="hospital-title" id="pdSelHosName">{$selectedHospital.name|default=''}</span>
+                            {if !empty($selectedHospital.same_price)}<span class="hospital-tag">{$tt['index.common.cnkrsame']|default='中韩同价'}</span>{/if}
+                        </div>
+                        <div class="pd-hospital-info">
+                            <span class="info-txt" id="pdSelHosLevel">{$selectedHospital.level_name|default=''}</span>
+                            <span class="info-line"></span>
+                            <span class="info-txt" id="pdSelHosDoctors">{$selectedHospital.doctors_count|default=''}</span>
+                            <span class="info-line"></span>
+                            <span class="info-txt" id="pdSelHosAddr">{$selectedHospital.zh_cn_address|default=''}</span>
+                        </div>
+                    </div>
+                </div>
+                <span class="pd-list-item-viewright">›</span>
+            </a>
+        </div>
+    </div>
+    {/if}
+
+    <!-- 商品详情(对齐 .rich-box ProductDetails)-->
+    {if !empty($item.content)}
+    <div class="pd-rich-box">
+        <div class="pd-rich-title"><span class="line"></span><span>{$tt['pointDetails.ProductDetails']|default='商品详情'}</span><span class="line"></span></div>
+        <div class="pd-rich-text">{$item.content|raw}</div>
+    </div>
+    {/if}
+
+    <!-- 使用规则(对齐 .rich-box RulesOfUse)-->
+    {if !empty($item.use_intro)}
+    <div class="pd-rich-box">
+        <div class="pd-rich-title"><span class="line"></span><span>{$tt['pointDetails.RulesOfUse']|default='使用规则'}</span><span class="line"></span></div>
+        <div class="pd-rich-text">{$item.use_intro|raw}</div>
+    </div>
+    {/if}
+
+    <!-- 底部固定按钮(对齐 .btns)-->
+    <div class="pd-btns">
+        {if $userPoint < $item.point}
+        <a class="pd-btns-detail" href="/{$lang_seg}/point/task">
+            <span class="main">{$tt['pointDetails.EarnPoints']|default='赚取积分'}</span>
+            <span class="sub">{$item.point}{$tt['index.common.point']|default='积分'}{if !empty($formattedPrice)}+{$formattedPrice}{/if}</span>
+        </a>
+        {else/}
+        <a class="pd-btns-detail" id="pdExchangeBtn" href="/{$lang_seg}/point/{$item.id}/redeem{if !empty($selectedHospital.id)}?h_id={$selectedHospital.id}{/if}">
+            <span class="main">{$tt['pointDetails.RedeemNow']|default='立即兑换'}</span>
+            <span class="sub">{$item.point}{$tt['index.common.point']|default='积分'}{if !empty($formattedPrice)}+{$formattedPrice}{/if}</span>
+        </a>
+        {/if}
+        <span class="available">{$tt['pointDetails.AvailablePoints']|default='可用积分'} {$userPoint}</span>
+    </div>
+
+    <!-- 机构选择弹窗(对齐 .mask + .bottom-popup)-->
+    {if !empty($hospitals)}
+    <div class="pd-mask" id="pdHosMask">
+        <div class="pd-popup">
+            <div class="pd-popup-title">
+                <span class="pd-popup-title-left">{$tt['pointDetails.ChooseOrganization']|default='选择机构'}</span>
+                <span class="close-btn" id="pdHosClose">×</span>
+            </div>
+            <div class="pd-popup-list">
+                {foreach $hospitals as $h}
+                <div class="list-item {if $h.id == $selectedHospital.id}selected{/if}"
+                     data-hid="{$h.id}"
+                     data-name="{$h.name|default=''}"
+                     data-cover="{$h.cover_url|default=''}"
+                     data-level="{$h.level_name|default=''}"
+                     data-doctors="{$h.doctors_count|default=''}"
+                     data-addr="{$h.zh_cn_address|default=''}"
+                     data-slug="{!empty($h['slug'])?$h['slug']:$h['id']}">
+                    <span class="select-dot {if $h.id == $selectedHospital.id}select-bg{/if}"></span>
+                    <div class="list-item-left">
+                        <img class="avatar" src="{$h.cover_url|default=''}" alt="" loading="lazy">
+                        <div class="list-item-info">
+                            <div class="pd-hospital-name">
+                                <span class="hospital-title">{$h.name|default=''}</span>
+                                {if !empty($h.same_price)}<span class="hospital-tag">{$tt['index.common.cnkrsame']|default='中韩同价'}</span>{/if}
+                            </div>
+                            <div class="pd-hospital-info">
+                                <span class="info-txt">{$h.level_name|default=''}</span>
+                                <span class="info-line"></span>
+                                <span class="info-txt">{$h.doctors_count|default=''}</span>
+                                <span class="info-line"></span>
+                                <span class="info-txt">{$h.zh_cn_address|default=''}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {/foreach}
+            </div>
+            <button class="select-btn" id="pdHosConfirm">{$tt['pointDetails.Surechose']|default='确认选择'}</button>
+        </div>
+    </div>
+    {/if}
+
     {include file="components/_tabbar" /}
 </div>
+
+<script>
+(function(){
+    /* swiper 翻页指示器(对齐 vue swiperChange)*/
+    var sw = document.getElementById('pdSwiper');
+    var dotCur = document.getElementById('pdDotCur');
+    if(sw && dotCur){
+        sw.addEventListener('scroll', function(){
+            var idx = Math.round(sw.scrollLeft / sw.clientWidth) + 1;
+            dotCur.textContent = String(idx);
+        }, {passive: true});
+    }
+
+    /* swiper 内 .pd-swiper-play 视频弹窗(对齐 vue videoPlay)*/
+    document.querySelectorAll('[data-video-url]').forEach(function(el){
+        el.addEventListener('click', function(e){
+            e.stopPropagation();
+            var url = el.dataset.videoUrl;
+            if(window.BG && BG.playVideo) BG.playVideo(url);
+            else window.open(url, '_blank');
+        });
+    });
+
+    /* 机构选择弹窗(对齐 toSelectHospital/closePopup/confirmSelect)*/
+    var mask = document.getElementById('pdHosMask');
+    var openBtn = document.getElementById('pdSelectHospitalBtn');
+    var closeBtn = document.getElementById('pdHosClose');
+    var confirmBtn = document.getElementById('pdHosConfirm');
+    var card = document.getElementById('pdSelHospitalCard');
+    var exchangeBtn = document.getElementById('pdExchangeBtn');
+    var lang = '{$lang_seg}';
+    var pid = {$item.id};
+    var currentHid = card ? (function(){
+        var sel = mask && mask.querySelector('.list-item.selected');
+        return sel ? sel.dataset.hid : '';
+    })() : '';
+    var pendingHid = currentHid;
+
+    if(mask && openBtn){
+        openBtn.addEventListener('click', function(e){ e.preventDefault(); mask.classList.add('open'); });
+        closeBtn && closeBtn.addEventListener('click', function(){ mask.classList.remove('open'); });
+        mask.addEventListener('click', function(e){ if(e.target === mask) mask.classList.remove('open'); });
+
+        mask.querySelectorAll('.list-item').forEach(function(li){
+            li.addEventListener('click', function(){
+                mask.querySelectorAll('.list-item').forEach(function(x){ x.classList.remove('selected'); x.querySelector('.select-dot').classList.remove('select-bg'); });
+                li.classList.add('selected');
+                li.querySelector('.select-dot').classList.add('select-bg');
+                pendingHid = li.dataset.hid;
+            });
+        });
+
+        confirmBtn && confirmBtn.addEventListener('click', function(){
+            var li = mask.querySelector('.list-item[data-hid="' + pendingHid + '"]');
+            if(li && card){
+                card.href = '/' + lang + '/hospital/' + li.dataset.slug;
+                document.getElementById('pdSelHosCover').src = li.dataset.cover;
+                document.getElementById('pdSelHosName').textContent = li.dataset.name;
+                document.getElementById('pdSelHosLevel').textContent = li.dataset.level;
+                document.getElementById('pdSelHosDoctors').textContent = li.dataset.doctors;
+                document.getElementById('pdSelHosAddr').textContent = li.dataset.addr;
+            }
+            if(exchangeBtn && pendingHid){
+                exchangeBtn.href = '/' + lang + '/point/' + pid + '/redeem?h_id=' + pendingHid;
+            }
+            currentHid = pendingHid;
+            mask.classList.remove('open');
+        });
+    }
+})();
+</script>
 {/block}
