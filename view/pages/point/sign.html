@@ -2,6 +2,12 @@
 
 {block name="extra_head"}
 <style>
+/* ============================================================
+ * 签到日历精修 — 对齐 point.vue .jf_qd .qd_top + .qd_content(rpx→px)
+ *   - 7 day icons:icon1=已签到红色印章,icon2=未签到灰色印章
+ *   - 第一个未签到加 bounce 动画(isFirstUnSigned)
+ *   - 数据来自 POST /sign/info { go_check } 的 seven_days_records
+ * ============================================================ */
 .point-body{ min-height: 100vh; background: linear-gradient(180deg,#afa7ef 0%,#f6f6f6 320px); padding-bottom: 70px; }
 .point-head{ padding: 44px 20px 20px; color: #fff; text-align: center; }
 .point-head .label{ font-size: 12px; opacity: .85; margin-bottom: 6px; }
@@ -16,35 +22,49 @@
 }
 .point-tabs a.active{ background: #fff; color: #fe739d; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
 
-.sign-card{ background: #fff; border-radius: 12px; margin: 0 15px 15px; padding: 16px; }
-.sign-card .qd-top{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-.sign-card .qd-top .title{ font-size: 15px; font-weight: 600; color: #333; }
-.sign-card .qd-top .day-text{ display: block; font-size: 11px; color: #999; margin-top: 4px; }
-.sign-card .qd-top .day-active{ color: #fe739d; font-weight: 600; }
-.sign-card .qd-top button{
-    padding: 8px 16px; background: #fe739d; color: #fff;
-    border: 0; border-radius: 18px; font-size: 13px; cursor: pointer;
+/* 签到卡(对齐 .jf_qd)*/
+.sign-card{
+    background: #fff; border-radius: 12px;
+    margin: 0 15px 15px; padding: 10px;
+    box-sizing: border-box;
 }
-.sign-card .qd-top button:disabled{ background: #ccc; cursor: not-allowed; }
+.sign-card .qd-top{ display: flex; justify-content: space-between; align-items: center; padding: 0 5px; }
+.sign-card .top-left{ font-size: 15px; font-weight: 700; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sign-card .day-text{ display: inline-block; margin-left: 8px; font-size: 11px; color: #111; font-weight: 400; }
+.sign-card .day-active{ color: #ff4758; font-weight: 600; }
+.sign-card .top-right{
+    font-size: 12px; color: #fe7480; cursor: pointer;
+    padding: 4px 10px; border: 0; background: none; white-space: nowrap;
+}
+.sign-card .top-right.signed{ color: #aaa; cursor: default; }
 
-.sign-days{ display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-.sign-day{ display: flex; flex-direction: column; align-items: center; text-align: center; }
+/* 七天日历 .qd_content / .qd_item / .day_icon */
+.sign-days{ display: flex; align-items: flex-start; margin-top: 10px; }
+.sign-day{ flex: 1; text-align: center; cursor: pointer; }
 .sign-day .day-icon{
-    position: relative; width: 36px; height: 36px; border-radius: 50%;
-    background: #f3f3f7;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 5px;
+    position: relative; width: 41px; height: 48px; margin: 0 auto;
+    background-size: 100% 100%; background-repeat: no-repeat;
 }
-.sign-day .day-icon.signed{ background: linear-gradient(135deg,#fe739d,#ff9ac3); color: #fff; }
-.sign-day .day-icon.signed::after{ content: '✓'; color: #fff; font-size: 14px; font-weight: 700; }
-.sign-day .day-icon.bounce{ animation: sign-bounce 1.2s infinite; }
-.sign-day .day-icon .jf{
-    position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
-    font-size: 10px; color: #fe739d; font-weight: 700; white-space: nowrap;
+.sign-day .day-icon.first_icon{
+    background-image: url('https://beautsgoimg.59w.net/20250304104507/67c66c1ba94f1.png');
 }
-.sign-day .day-num{ font-size: 10px; color: #999; }
+.sign-day .day-icon.second_icon{
+    background-image: url('https://beautsgoimg.59w.net/20250304104517/67c66c25c79bd.png');
+}
+.sign-day .day-icon.bounce{ animation: sign-bounce 1s infinite; }
+.sign-day .day-icon .qd-jf{
+    position: absolute; left: 0; right: 0; bottom: 6px;
+    text-align: center; font-size: 10px; line-height: 1; font-weight: 700;
+}
+.sign-day .day-icon.first_icon .qd-jf{ color: #fff; }
+.sign-day .day-icon.second_icon .qd-jf{ color: #ff5f63; }
+.sign-day .day-num{ font-size: 11px; color: #393939; margin-top: 10px; }
 
-@keyframes sign-bounce{ 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-4px); } }
+@keyframes sign-bounce{
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-15px); }
+    60% { transform: translateY(-7px); }
+}
 
 .point-msg{ margin: 10px 15px; padding: 8px 12px; border-radius: 6px; font-size: 12px; text-align: center; }
 .point-msg.ok{ background: #e6fff0; color: #1aac4a; }
@@ -67,30 +87,44 @@
     </div>
 
     {if !empty($error)}<div class="point-msg err">{$error}</div>{/if}
-    {if $signed}<div class="point-msg ok">{$tt['point.SignInSuccessful']|default='签到成功'} 🎉</div>{/if}
+    {if $signed}<div class="point-msg ok">{$tt['point.SignInSuccessful']|default='签到成功'}</div>{/if}
 
     {php}
-        $days = (int) ($continuousDays ?? 0);
-        $signPts = [10,10,15,15,20,20,50];
+        // 与 vue isFirstUnSigned 等价:取第一个 signed=false 的 index
+        $list = !empty($signList) ? $signList : [
+            ['signed' => false, 'points' => 10, 'the' => 1],
+            ['signed' => false, 'points' => 10, 'the' => 2],
+            ['signed' => false, 'points' => 15, 'the' => 3],
+            ['signed' => false, 'points' => 15, 'the' => 4],
+            ['signed' => false, 'points' => 20, 'the' => 5],
+            ['signed' => false, 'points' => 20, 'the' => 6],
+            ['signed' => false, 'points' => 50, 'the' => 7],
+        ];
+        $firstUnsignedIdx = -1;
+        foreach ($list as $k => $row) {
+            if (empty($row['signed'])) { $firstUnsignedIdx = $k; break; }
+        }
     {/php}
+
     <form class="sign-card" method="post" action="/{$lang_seg}/point/sign">
         <div class="qd-top">
             <div>
-                <div class="title">{$tt['point.SignInForPoints']|default='签到领积分'}</div>
-                <span class="day-text">{$tt['point.SignedIn']|default='已连签'}<span class="day-active">{$days}</span>/{$tt['point.Sevendays']|default='7天'}</span>
+                <span class="top-left">{$tt['point.SignInForPoints']|default='签到领积分'}</span>
+                <span class="day-text">{$tt['point.SignedIn']|default='已连签'}<span class="day-active">{$continuousDays|default=0}</span>/{$tt['point.Sevendays']|default='7天'}</span>
             </div>
-            <button type="submit" {if $signed}disabled{/if}>
-                {if $signed}{$tt['point.SignInSuccessful']|default='已签到'}{else/}{$tt['point.SignInNow']|default='立即签到'}{/if}
-            </button>
+            {if $hasSignedToday}
+            <span class="top-right signed">{$tt['point.SignInSuccessful']|default='今日已签到'}</span>
+            {else/}
+            <button class="top-right" type="submit">{$tt['point.SignInNow']|default='立即签到'} ›</button>
+            {/if}
         </div>
         <div class="sign-days">
-            {foreach $signPts as $k => $pts}
-            {php}$dayNo = $k + 1;{/php}
+            {foreach $list as $idx => $item}
             <div class="sign-day">
-                <div class="day-icon{if $dayNo <= $days} signed{/if}{if !$signed && $dayNo == $days + 1} bounce{/if}">
-                    {if $dayNo > $days}<div class="jf">+{$pts}</div>{/if}
+                <div class="day-icon {if !empty($item.signed)}first_icon{else/}second_icon{/if}{if !$hasSignedToday and $idx == $firstUnsignedIdx} bounce{/if}">
+                    <span class="qd-jf">+{$item.points|default=0}</span>
                 </div>
-                <div class="day-num">{$tt['point.No']|default='第'}{$dayNo}{$tt['point.day']|default='天'}</div>
+                <div class="day-num">{$tt['point.No']|default='第'}{$item.the|default=($idx+1)}{$tt['point.day']|default='天'}</div>
             </div>
             {/foreach}
         </div>

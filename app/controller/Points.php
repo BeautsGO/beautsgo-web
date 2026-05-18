@@ -166,23 +166,32 @@ class Points extends BaseController
     public function sign()
     {
         $auth = new \app\service\AuthService();
-        $signed = false;
         $error = '';
-        if ($this->request->isPost()) {
-            $resp = $auth->call('POST', '/sign/info', []);
-            if ($resp['ok']) $signed = true;
-            else $error = $resp['msg'] ?: '签到失败';
-        }
-        // 获取当前积分
+        // 1:1 对齐 point.vue getSigninfo():POST /sign/info { go_check }
+        // go_check=1 表示执行签到;0/缺省 仅查询日历
+        $goCheck = (int) ($this->request->isPost() ? 1 : 0);
+        $resp = $auth->call('POST', '/sign/info', ['go_check' => $goCheck]);
+        $data = (array) ($resp['data'] ?? []);
+        if (!$resp['ok'] && $goCheck === 1) $error = $resp['msg'] ?: '签到失败';
+
+        $signList = (array) ($data['seven_days_records'] ?? []);
+        $continuousDays = (int) ($data['continuous_days'] ?? 0);
+        $hasSignedToday = (bool) ($data['has_signed_in_today'] ?? false);
+        $signed = ($goCheck === 1 && $hasSignedToday);
+
         $pointResp = $auth->call('GET', '/user/getPoint', []);
-        $point = (int) ($pointResp['data']['point'] ?? $pointResp['data'] ?? 0);
+        $pData = (array) ($pointResp['data'] ?? []);
+        $point = (int) ($pData['user_point'] ?? $pData['point'] ?? 0);
 
         $this->seo->setTdk('每日签到 - BeautsGO', '签到领积分', '签到,积分')->buildOrganization();
         return $this->render('pages/point/sign', [
-            'user'   => $auth->getCurrentUser(),
-            'point'  => $point,
-            'signed' => $signed,
-            'error'  => $error,
+            'user'           => $auth->getCurrentUser(),
+            'point'          => $point,
+            'signed'         => $signed,
+            'error'          => $error,
+            'signList'       => $signList,
+            'continuousDays' => $continuousDays,
+            'hasSignedToday' => $hasSignedToday,
         ]);
     }
 
