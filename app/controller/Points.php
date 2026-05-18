@@ -198,14 +198,28 @@ class Points extends BaseController
     public function task()
     {
         $auth = new \app\service\AuthService();
-        $resp = $auth->call('GET', '/Point/taskList', []);
-        $tasks = (array) ($resp['data'] ?? []);
-        if (isset($tasks['list'])) $tasks = $tasks['list'];
+        // 1:1 对齐 pointtask.vue getTaskList():$http.get('point/taskList');
+        //         Object.values(res.data).sort(a-b completed)
+        $resp = $auth->call('GET', '/point/taskList', []);
+        $raw  = (array) ($resp['data'] ?? []);
+        if (isset($raw['list'])) $raw = $raw['list'];
+        // dict → values
+        $tasks = array_values($raw);
+        // 未完成在前(对齐 vue sort)
+        usort($tasks, function ($a, $b) {
+            return (int) ($a['completed'] ?? 0) - (int) ($b['completed'] ?? 0);
+        });
+
+        // 用户积分(对齐顶部 .my-points)
+        $pResp = $auth->call('GET', '/user/getPoint');
+        $pData = (array) ($pResp['data'] ?? []);
+        $point = (int) ($pData['user_point'] ?? $pData['point'] ?? 0);
 
         $this->seo->setTdk('积分任务 - BeautsGO', '完成任务领积分', '积分任务')->buildOrganization();
         return $this->render('pages/point/task', [
             'user'  => $auth->getCurrentUser(),
             'tasks' => $tasks,
+            'point' => $point,
         ]);
     }
 

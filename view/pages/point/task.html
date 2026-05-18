@@ -2,6 +2,9 @@
 
 {block name="extra_head"}
 <style>
+/* ============================================================
+ * pointtask 1:1 还原 pointtask.vue scoped scss (rpx → px)
+ * ============================================================ */
 .point-body{ min-height: 100vh; background: linear-gradient(180deg,#afa7ef 0%,#f6f6f6 320px); padding-bottom: 70px; }
 .point-head{ padding: 44px 20px 20px; color: #fff; text-align: center; }
 .point-head .label{ font-size: 12px; opacity: .85; margin-bottom: 6px; }
@@ -16,34 +19,49 @@
 }
 .point-tabs a.active{ background: #fff; color: #fe739d; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
 
-.task-card{ background: #fff; border-radius: 12px; margin: 0 15px 15px; padding: 14px 16px; }
-.task-card .title{ font-size: 15px; font-weight: 600; color: #333; margin-bottom: 12px; }
+/* 顶部"赚积分大幅广告"(对齐 vue .my-points 90px 高背景图)*/
+.task-banner{
+    height: 90px; width: calc(100% - 24px); margin: 0 12px 10px;
+    border-radius: 5px; overflow: hidden;
+    background: url('https://beautsgoimg.59w.net/20250814103124/689d4a7c63c7a.png') center/cover no-repeat;
+}
 
+/* 任务列表卡 .jf_qd.get_jf */
+.task-card{ background: #fff; border-radius: 12px; margin: 0 12px; padding: 0 12px; }
 .rw-item{
-    display: flex; align-items: center;
-    padding: 12px 0; border-bottom: 1px solid #f5f5f5;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 5px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
     text-decoration: none; color: inherit;
 }
 .rw-item:last-child{ border-bottom: 0; }
-.rw-item__icon{
-    width: 38px; height: 38px; border-radius: 8px;
-    background: linear-gradient(135deg,#fff5fa,#ffe8f0);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; margin-right: 12px;
-    color: #fe739d; font-size: 18px;
+.rw-item .item-left{ flex: 1; min-width: 0; padding-right: 10px; }
+.rw-item .left-text{ color: #080808; font-size: 14px; }
+.rw-item .left-text2{ color: #929292; font-size: 12px; margin-top: 5px; }
+.rw-item .left-text3{
+    margin-top: 5px; color: #ff5a62; font-size: 12px;
 }
-.rw-item__body{ flex: 1; min-width: 0; }
-.rw-item__name{ font-size: 14px; color: #333; font-weight: 500; }
-.rw-item__desc{ font-size: 11px; color: #999; margin-top: 4px; }
-.rw-item__points{ font-size: 11px; color: #fe739d; margin-top: 3px; }
-.rw-item__btn{
+.rw-item .left-text3 b{ font-weight: 700; }
+
+.rw-item .item-right{
     flex-shrink: 0; padding: 6px 14px;
-    background: #fe739d; color: #fff; border-radius: 14px;
-    font-size: 12px; font-weight: 500;
+    border-radius: 15px; font-size: 12px; text-align: center;
+    background: #fff; line-height: 1.2;
 }
-.rw-item__btn--done{ background: #f3f3f7; color: #999; }
+.rw-item .item-right.prama-button{ border: 1px solid #ff5a62; color: #ff5a62; }
+.rw-item .item-right.disabled-button{ border: 1px solid #bebebe; color: #bebebe; cursor: not-allowed; }
 
 .empty{ text-align: center; padding: 40px 0; color: #999; font-size: 12px; }
+
+/* 公众号关注弹窗(对齐 first_follow 任务 previewImage)*/
+.tk-mask{
+    position: fixed; inset: 0; background: rgba(0,0,0,.86);
+    z-index: 999; display: none; align-items: center; justify-content: center;
+}
+.tk-mask.open{ display: flex; }
+.tk-mask img{ max-width: 80%; max-height: 80vh; border-radius: 6px; }
+.tk-mask .close{ position: absolute; top: 24px; right: 24px; width: 32px; height: 32px; line-height: 30px; text-align: center; color: #fff; border: 1px solid #fff; border-radius: 50%; cursor: pointer; }
 </style>
 {/block}
 
@@ -51,7 +69,7 @@
 <div class="point-body">
     <div class="point-head">
         <div class="label">{$tt['point.MyPoints']|default='我的积分'}</div>
-        <div class="num">{:isset($user['point']) ? $user['point'] : 0}</div>
+        <div class="num">{$point|default=0}</div>
         <div class="tip">{$tt['point.CompleteTasksToEarnPoints']|default='完成任务赚积分,兑换福利不停歇'}</div>
     </div>
 
@@ -61,32 +79,84 @@
         <a href="/{$lang_seg}/point/shop">{$tt['point.PointsMall']|default='积分商城'}</a>
     </div>
 
+    <!-- 顶部广告图(对齐 vue .my-points 占位图)-->
+    <div class="task-banner"></div>
+
     <div class="task-card">
-        <div class="title">{$tt['point.ViewMoreTasks']|default='可领取的任务'}</div>
         {if empty($tasks)}
         <div class="empty">{$tt['point.Empty']|default='暂无任务'}</div>
         {else/}
-            {foreach $tasks as $t}
-            {php}$done = !empty($t['done']) || !empty($t['is_done']);{/php}
-            <a class="rw-item" href="{$t.path|default='javascript:'}">
-                <div class="rw-item__icon">
-                    {if !empty($t['icon'])}<img src="{$t.icon}" style="width:100%;height:100%;border-radius:8px;object-fit:cover" alt="">{else/}✦{/if}
-                </div>
-                <div class="rw-item__body">
-                    <div class="rw-item__name">{:!empty($t["title"])?$t["title"]:(!empty($t["name"])?$t["name"]:'任务')}</div>
-                    {if !empty($t.description) || !empty($t.intro)}
-                    <div class="rw-item__desc">{:!empty($t['description'])?$t['description']:(!empty($t['intro'])?$t['intro']:'')}</div>
+            {foreach $tasks as $item}
+            {php}
+                $done       = !empty($item['completed']);
+                $symbol     = (string) ($item['symbol'] ?? '');
+                $btnText    = (string) ($item['button_text'] ?? '前往');
+                $name       = (string) ($item['name'] ?? '任务');
+                $desc       = (string) ($item['desc'] ?? '');
+                $shareNum   = (int) ($item['share_num'] ?? 0);
+                $rediretXcx = (string) ($item['rediret_xcx'] ?? '');
+                $redirectH5 = (string) ($item['redirect_h5'] ?? '');
+                $showInvite = ($symbol === 'invite_10' || $symbol === 'invite_5');
+                // navigatorTo 的等价 href:对齐 switchUrl 映射 + first_follow + h5 webview
+                $xcxToWeb = [
+                    '/pages/index/index' => '/' . $lang_seg . '/',
+                    '/pages/hospital/hospital' => '/' . $lang_seg . '/hospital',
+                    '/pages/doctor/doctor' => '/' . $lang_seg . '/doctor',
+                    '/pages/me/me' => '/' . $lang_seg . '/me',
+                ];
+                if ($done) {
+                    $href = 'javascript:void(0)';
+                } elseif ($symbol === 'first_follow') {
+                    $href = 'javascript:void(0)';
+                } elseif ($rediretXcx !== '') {
+                    $href = $xcxToWeb[$rediretXcx] ?? $rediretXcx;
+                } elseif ($redirectH5 !== '') {
+                    $href = $redirectH5;
+                } else {
+                    $href = 'javascript:void(0)';
+                }
+            {/php}
+            <a class="rw-item"
+               href="{$href}"
+               {if $symbol == 'first_follow' && !$done}data-follow-img="https://beautsgoimg.59w.net/20250227173846/67c032a606f6f.jpg"{/if}
+               {if $redirectH5 !== '' && $rediretXcx === '' && !$done}target="_blank" rel="noopener"{/if}>
+                <div class="item-left">
+                    <div class="left-text">{$name}</div>
+                    {if $desc !== ''}<div class="left-text2">{$desc}</div>{/if}
+                    {if $showInvite}
+                    <div class="left-text3">{$tt['point.TeamAlreadyFormed']|default='已组队'}<b>{$shareNum}</b>{$tt['point.people']|default='人'}</div>
                     {/if}
-                    <div class="rw-item__points">+{:!empty($t['point'])?$t['point']:(!empty($t['reward'])?$t['reward']:0)} {$tt['me.Pointunit']|default='分'}</div>
                 </div>
-                <span class="rw-item__btn{if $done} rw-item__btn--done{/if}">
-                    {if $done}{$tt['point.Done']|default='已完成'}{else/}{$tt['point.Goto']|default='去完成'}{/if}
+                <span class="item-right {if $done}disabled-button{else/}prama-button{/if}">
+                    {if $done}{$tt['point.Completed']|default='已完成'}{else/}{$btnText}{/if}
                 </span>
             </a>
             {/foreach}
         {/if}
     </div>
 
+    <div class="tk-mask" id="tkMask">
+        <span class="close" id="tkMaskClose">×</span>
+        <img id="tkMaskImg" src="" alt="">
+    </div>
+
     {include file="components/_tabbar" /}
 </div>
+
+<script>
+(function(){
+    /* first_follow 任务 → 长按保存关注公众号(对齐 vue uni.previewImage)*/
+    var mask = document.getElementById('tkMask');
+    var maskImg = document.getElementById('tkMaskImg');
+    document.querySelectorAll('[data-follow-img]').forEach(function(el){
+        el.addEventListener('click', function(e){
+            e.preventDefault();
+            maskImg.src = el.dataset.followImg;
+            mask.classList.add('open');
+        });
+    });
+    document.getElementById('tkMaskClose').addEventListener('click', function(){ mask.classList.remove('open'); });
+    mask.addEventListener('click', function(e){ if(e.target === mask) mask.classList.remove('open'); });
+})();
+</script>
 {/block}
