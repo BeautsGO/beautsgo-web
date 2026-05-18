@@ -1,37 +1,148 @@
 {extend name="layout/base" /}
-{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+
+{block name="extra_head"}
+<style>
+/* 意见反馈 1:1 还原 subPackages_lightningRod/me/opinion.vue */
+.fb-head{
+    position: sticky; top: 0; z-index: 20; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+}
+.fb-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.fb-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+
+.fb-body{ background: #f5f5f5; min-height: 100vh; box-sizing: border-box; padding: 12px 10px 95px; }
+.fb-top-title{ font-size: 15px; color: #1B1B1B; font-weight: 500; margin-bottom: 15px; }
+.fb-textarea{
+    width: 100%; min-height: 140px; box-sizing: border-box;
+    padding: 10px; background: #fff; border: 0; border-radius: 7px;
+    font-size: 12px; color: #1a1a1a; outline: none; resize: vertical;
+    margin-bottom: 15px; font-family: inherit;
+}
+.fb-textarea::placeholder{ color: #999; }
+.fb-center-title{ font-size: 15px; color: #333; margin-bottom: 17px; }
+
+/* 截图上传(对齐 .camera)*/
+.fb-camera{ display: flex; align-items: center; flex-wrap: wrap; }
+.fb-camera__item{
+    width: 110px; height: 110px;
+    background: #EEEEEE; border-radius: 7px;
+    position: relative; margin-right: 8px; margin-bottom: 15px;
+    flex-shrink: 0; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+}
+.fb-camera__item .upload{
+    width: 25px; height: 25px; opacity: .5;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23999'><path d='M12 4a8 8 0 100 16 8 8 0 000-16zm1 11h-2v-2h2v2zm0-4h-2V7h2v4z'/></svg>");
+    background-size: contain; background-repeat: no-repeat;
+}
+.fb-camera__item .img{ width: 100%; height: 100%; }
+.fb-camera__item .img img{ width: 100%; height: 100%; object-fit: cover; display: block; }
+.fb-camera__item .del{
+    position: absolute; top: 2px; right: 2px;
+    width: 20px; height: 20px; line-height: 18px; text-align: center;
+    background: rgba(0,0,0,.5); color: #fff; border-radius: 50%;
+    font-size: 14px; cursor: pointer; z-index: 2;
+}
+.fb-camera__item input[type=file]{ display: none; }
+
+.fb-down-title{ font-size: 15px; color: #333; margin: 6px 0 12px; }
+.fb-inp{
+    width: 100%; padding: 12px; box-sizing: border-box;
+    background: #fff; border: 0; border-radius: 7px;
+    font-size: 12px; color: #1a1a1a; outline: none;
+    margin-bottom: 18px;
+}
+.fb-inp::placeholder{ color: #999; }
+
+/* 底部固定提交按钮(对齐 .sub)*/
+.fb-sub{
+    position: fixed; left: 0; bottom: 0; width: 100%;
+    height: 55px; padding-bottom: env(safe-area-inset-bottom);
+    display: flex; align-items: center; justify-content: center;
+    background: #fff; max-width: 640px; left: 50%; transform: translateX(-50%);
+    box-shadow: 0 -4px 12px rgba(0,0,0,.05); z-index: 90;
+}
+.fb-sub button{
+    width: calc(100% - 30px); height: 40px;
+    background: #fe739d; color: #fff; border: 0; border-radius: 20px;
+    font-size: 15px; font-weight: 700; cursor: pointer;
+}
+
+.fb-msg.ok{ margin: 0 0 12px; padding: 10px; background: #e6fff0; color: #1aac4a; border-radius: 6px; text-align: center; font-size: 12px; }
+.fb-msg.err{ margin: 0 0 12px; padding: 10px; background: #fff5fa; color: #ef5189; border-radius: 6px; text-align: center; font-size: 12px; }
+</style>
+{/block}
+
 {block name="content"}
-<div class="user-page">
-    <div class="page-head">
-        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
-        <h1 class="page-title">意见反馈</h1>
-    </div>
-    {if $saved}<div class="msg-ok">反馈已提交,感谢您的支持</div>{/if}
-    {if !empty($error)}<div class="msg-err">{$error}</div>{/if}
-    <form method="post" action="/{$lang_seg}/me/feedback">
-        <div class="u-form-card">
-            <div class="u-form-row">
-                <div class="u-form-row__label">类型</div>
-                <div class="u-form-row__field">
-                    <select name="type">
-                        <option value="1">功能建议</option>
-                        <option value="2">问题反馈</option>
-                        <option value="3">投诉</option>
-                        <option value="4">其他</option>
-                    </select>
-                </div>
-            </div>
-            <div class="u-form-row">
-                <div class="u-form-row__label">联系电话</div>
-                <div class="u-form-row__field"><input type="tel" name="phone" placeholder="便于我们联系您"></div>
-            </div>
-            <div class="u-form-row">
-                <div class="u-form-row__label">反馈内容</div>
-                <div class="u-form-row__field"><textarea name="content" rows="5" placeholder="请详细描述您的意见或问题"></textarea></div>
-            </div>
-        </div>
-        <button class="u-btn-primary" type="submit">提交反馈</button>
-    </form>
-    {include file="components/_tabbar" /}
+<div class="fb-head">
+    <a class="back" href="/{$lang_seg}/me" aria-label="返回">‹</a>
+    <div class="title">{$tt['me.Opinion']|default='意见反馈'}</div>
 </div>
+
+<form class="fb-body" method="post" action="/{$lang_seg}/me/feedback" enctype="multipart/form-data" id="fbForm">
+    {if $saved}<div class="fb-msg ok">{$tt['me.opinion.success']|default='反馈已提交,感谢您的支持'}</div>{/if}
+    {if !empty($error)}<div class="fb-msg err">{$error}</div>{/if}
+
+    <div class="fb-top-title">{$tt['me.Problemdescription']|default='问题描述'}</div>
+    <textarea class="fb-textarea" name="content" maxlength="9999" placeholder="{$tt['me.opinion.textareaPlc']|default='请详细描述您的意见或问题'}" required></textarea>
+
+    <div class="fb-center-title">{$tt['me.Uploadscreenshot']|default='上传截图(最多 9 张)'}</div>
+    <div class="fb-camera" id="fbCamera">
+        <label class="fb-camera__item" id="fbCameraAdd">
+            <input type="file" name="picture[]" accept="image/*" multiple id="fbFile">
+            <span class="upload"></span>
+        </label>
+    </div>
+
+    <div class="fb-down-title">{$tt['me.Contactinformation']|default='联系方式'}</div>
+    <input class="fb-inp" type="tel" name="phone" placeholder="{$tt['me.opinion.inputPlc']|default='便于我们联系您(选填)'}">
+
+    <div class="fb-sub">
+        <button type="submit">{$tt['index.common.submit']|default='提交'}</button>
+    </div>
+</form>
+
+<script>
+(function(){
+    var fileInput = document.getElementById('fbFile');
+    var camera = document.getElementById('fbCamera');
+    var addBtn = document.getElementById('fbCameraAdd');
+    var MAX = 9;
+    if(!fileInput) return;
+    fileInput.addEventListener('change', function(){
+        var files = Array.from(fileInput.files);
+        var current = camera.querySelectorAll('.fb-camera__item').length - 1;
+        if(current + files.length > MAX){
+            BG.toast('最多上传 ' + MAX + ' 张', 'error'); return;
+        }
+        files.forEach(function(f){
+            var reader = new FileReader();
+            reader.onload = function(ev){
+                var item = document.createElement('div');
+                item.className = 'fb-camera__item';
+                item.innerHTML = '<div class="img"><img src="' + ev.target.result + '" alt=""></div><span class="del">×</span>';
+                item.querySelector('.del').addEventListener('click', function(e){
+                    e.stopPropagation();
+                    item.remove();
+                    if(camera.querySelectorAll('.fb-camera__item').length < MAX) addBtn.style.display = '';
+                });
+                camera.insertBefore(item, addBtn);
+                if(camera.querySelectorAll('.fb-camera__item').length - 1 >= MAX){
+                    addBtn.style.display = 'none';
+                }
+            };
+            reader.readAsDataURL(f);
+        });
+    });
+
+    document.getElementById('fbForm').addEventListener('submit', function(e){
+        var content = document.querySelector('textarea[name=content]').value.trim();
+        if(content.length < 5){
+            e.preventDefault();
+            BG.toast('反馈内容至少 5 个字', 'error');
+        }
+    });
+})();
+</script>
 {/block}

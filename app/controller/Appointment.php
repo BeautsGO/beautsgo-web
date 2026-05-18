@@ -15,10 +15,15 @@ use app\repository\ProjectRepository;
  */
 class Appointment extends BaseController
 {
+    /**
+     * 预约面诊表单(对齐 appointmentInput.vue)
+     *   GET /Appointment/showForm  动态字段列表
+     *   POST /Appointment/saveForm 提交
+     */
     public function form()
     {
         $auth = new AuthService();
-        $user = $auth->getCurrentUser();  // AuthMiddleware 已保证登录
+        $user = $auth->getCurrentUser();
 
         $hid = (int) $this->request->param('h_id', 0);
         $did = (int) $this->request->param('d_id', 0);
@@ -28,13 +33,20 @@ class Appointment extends BaseController
         $doctor   = $did ? (new DoctorRepository($this->lang))->detailById($did)   : null;
         $project  = $pid ? (new ProjectRepository($this->lang))->detailById($pid)  : null;
 
+        // 动态字段(对齐 appointmentInput.vue:110)
+        $resp = $auth->call('GET', '/Appointment/showForm');
+        $initForm = (array) ($resp['data'] ?? []);
+        foreach ($initForm as &$f) $f['value'] = '';
+        unset($f);
+
         $this->seo->setTdk('预约面诊 - BeautsGO', '在线预约面诊', '预约面诊')->buildOrganization();
         return $this->render('pages/appointment/form', [
             'user'     => $user,
             'hospital' => $hospital,
             'doctor'   => $doctor,
             'project'  => $project,
-            'error'    => '',
+            'initForm' => $initForm,
+            'error'    => (string) $this->request->param('error', ''),
             'success'  => '',
         ]);
     }
@@ -42,19 +54,29 @@ class Appointment extends BaseController
     public function submit()
     {
         $auth = new AuthService();
+        // 基础字段
         $payload = [
-            'h_id'         => (int) $this->request->param('h_id', 0),
-            'd_id'         => (int) $this->request->param('d_id', 0),
-            'p_id'         => (int) $this->request->param('p_id', 0),
-            'name'         => trim((string) $this->request->param('name', '')),
-            'phone'        => trim((string) $this->request->param('phone', '')),
-            'wechat'       => trim((string) $this->request->param('wechat', '')),
-            'visit_date'   => (string) $this->request->param('visit_date', ''),
-            'remark'       => (string) $this->request->param('remark', ''),
+            'h_id'   => (int) $this->request->param('h_id', 0),
+            'd_id'   => (int) $this->request->param('d_id', 0),
+            'p_id'   => (int) $this->request->param('p_id', 0),
+            'remark' => (string) $this->request->param('remark', ''),
         ];
-        if ($payload['name'] === '' || $payload['phone'] === '') {
+        // 动态字段(form[key]=value)
+        $extra = (array) $this->request->param('form', []);
+        foreach ($extra as $k => $v) {
+            if (!is_string($k) || $k === '') continue;
+            $payload[$k] = is_array($v) ? '' : (string) $v;
+        }
+
+        $name = trim((string) ($payload['name'] ?? $this->request->param('name', '')));
+        $phone = trim((string) ($payload['phone'] ?? $this->request->param('phone', '')));
+        if ($name !== '') $payload['name'] = $name;
+        if ($phone !== '') $payload['phone'] = $phone;
+
+        if ($name === '' || $phone === '') {
             return redirect($this->request->url() . '?error=' . urlencode('请填写姓名与联系方式'));
         }
+
         // 对齐 appointmentInput.vue:186 POST Appointment/saveForm
         $resp = $auth->call('POST', '/Appointment/saveForm', $payload);
         if ($resp['ok']) {
@@ -62,14 +84,7 @@ class Appointment extends BaseController
                 'message' => $resp['data']['msg'] ?? '预约提交成功,工作人员会尽快联系您',
             ]);
         }
-        return $this->render('pages/appointment/form', [
-            'user'     => $auth->getCurrentUser(),
-            'hospital' => null,
-            'doctor'   => null,
-            'project'  => null,
-            'error'    => $resp['msg'] ?: '提交失败',
-            'success'  => '',
-        ]);
+        return redirect($this->request->url() . '?error=' . urlencode($resp['msg'] ?: '提交失败'));
     }
 
     /**

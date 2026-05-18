@@ -137,23 +137,39 @@
         <input type="hidden" name="d_id" value="{$doctor.id|default=0}">
         <input type="hidden" name="p_id" value="{$project.id|default=0}">
 
-        <div class="appt-form-item">
-            <label>{$tt['me.userInfoSet.namePlc']|default='姓名'}</label>
-            <input type="text" name="name" placeholder="{$tt['order.namePlc']|default='请输入您的姓名'}" required>
-        </div>
-        <div class="appt-form-item">
-            <label>{$tt['me.userInfoSet.phonePlc']|default='手机号'}</label>
-            <input type="tel" name="phone" placeholder="{$tt['order.phonePlc']|default='请输入手机号'}" required>
-        </div>
-        <div class="appt-form-item">
-            <label>{$tt['order.wechat']|default='微信号'}</label>
-            <input type="text" name="wechat" placeholder="{$tt['order.wechatPlc']|default='方便客服联系(选填)'}">
-        </div>
-        <div class="appt-form-item">
-            <label>{$tt['order.visitDate']|default='预约日期'}</label>
-            <input type="date" name="visit_date">
-            <span class="arrow">›</span>
-        </div>
+        {if !empty($initForm)}
+            <!-- 动态字段(对齐 appointmentInput.vue initForm) -->
+            {foreach $initForm as $idx => $item}
+            <div class="appt-form-item">
+                <label>{$item.label|default=''}</label>
+                {if $item.type == 'date'}
+                <input type="date" name="form[{$item.key|default=$idx}]" placeholder="{$item.placeholder|default=''}">
+                <span class="arrow">›</span>
+                {else/}
+                <input type="text" name="form[{$item.key|default=$idx}]" placeholder="{$item.placeholder|default=''}">
+                {/if}
+            </div>
+            {/foreach}
+        {else/}
+            <!-- 后端无 initForm 时,固定 4 个字段 fallback -->
+            <div class="appt-form-item">
+                <label>{$tt['me.userInfoSet.namePlc']|default='姓名'}</label>
+                <input type="text" name="name" placeholder="{$tt['order.namePlc']|default='请输入您的姓名'}" required>
+            </div>
+            <div class="appt-form-item">
+                <label>{$tt['me.userInfoSet.phonePlc']|default='手机号'}</label>
+                <input type="tel" name="phone" placeholder="{$tt['order.phonePlc']|default='请输入手机号'}" required>
+            </div>
+            <div class="appt-form-item">
+                <label>{$tt['order.wechat']|default='微信号'}</label>
+                <input type="text" name="wechat" placeholder="{$tt['order.wechatPlc']|default='方便客服联系(选填)'}">
+            </div>
+            <div class="appt-form-item">
+                <label>{$tt['order.visitDate']|default='预约日期'}</label>
+                <input type="date" name="visit_date">
+                <span class="arrow">›</span>
+            </div>
+        {/if}
         <div class="appt-form-item">
             <label>{$tt['order.remark']|default='备注'}</label>
             <input type="text" name="remark" placeholder="{$tt['order.remarkPlc']|default='可填写诉求/需求'}">

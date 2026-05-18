@@ -51,6 +51,29 @@ class Cases extends BaseController
         $case = $repo->fetchDetail($id);
         if (!$case) $this->abort404('Case not found');
 
+        // 回复列表(对齐 comdetail.vue:loadData GET Comment/detail)
+        $page = max(1, (int) $this->request->param('rp', 1));
+        $rsp = $this->api->get('/Comment/detail', ['id' => $id, 'page' => $page, 'limit' => 20]);
+        $replies = (array) ($rsp['data']['list'] ?? []);
+        $replyCount = (int) ($rsp['data']['count'] ?? 0);
+
+        // POST 回复
+        $replied = false;
+        $replyError = '';
+        if ($this->request->isPost()) {
+            $content = trim((string) $this->request->param('content', ''));
+            $pid     = (int) $this->request->param('pid', 0);  // 父评论 id
+            if ($content !== '') {
+                $r = (new \app\service\AuthService())->call('POST', '/Comment/reply', [
+                    'comment_id' => $id,
+                    'pid'        => $pid,
+                    'content'    => $content,
+                ]);
+                if ($r['ok']) $replied = true;
+                else $replyError = $r['msg'] ?: '回复失败';
+            }
+        }
+
         $title = mb_substr($case['content'] ?? '医美案例', 0, 30) . ' - 真实案例 - BeautsGO';
         $desc = mb_substr($case['content'] ?? '', 0, 155);
         $langSeg = (string) (config('seo.lang_path_map')[$this->lang] ?? 'cn');
@@ -67,6 +90,12 @@ class Cases extends BaseController
                 ['name' => '案例 #' . $id, 'url' => '/case/' . $id],
             ]);
 
-        return $this->render('pages/case/detail', ['case' => $case]);
+        return $this->render('pages/case/detail', [
+            'case'       => $case,
+            'replies'    => $replies,
+            'replyCount' => $replyCount,
+            'replied'    => $replied,
+            'replyError' => $replyError,
+        ]);
     }
 }
