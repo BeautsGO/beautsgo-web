@@ -120,14 +120,36 @@ class Me extends BaseController
         $type = max(1, min(3, (int) $this->request->param('type', 1)));  // 1 医院 2 医生 3 项目
         $page = max(1, (int) $this->request->param('page', 1));
 
+        // 1:1 对齐 collect.vue loadData():$http.get('Collect/myCollect', {page, limit, type})
         $resp = $auth->call('GET', '/Collect/myCollect', [
-            'collect_type' => $type,
-            'page'         => $page,
-            'limit'        => 10,
+            'type'  => $type,
+            'page'  => $page,
+            'limit' => 20,
         ]);
-        $list  = (array) ($resp['data']['list'] ?? $resp['data'] ?? []);
+        $list  = (array) ($resp['data']['list'] ?? []);
         $total = (int) ($resp['data']['count'] ?? count($list));
-        $totalPages = max(1, (int) ceil($total / 10));
+        $totalPages = max(1, (int) ceil($total / 20));
+
+        // 归一化卡片字段(slug + cover_url),对齐 hospital/doctor/project 卡片组件预期
+        foreach ($list as &$it) {
+            if (empty($it['slug']) && !empty($it['id'])) $it['slug'] = (string) $it['id'];
+            if (empty($it['cover_url'])) {
+                $c = $it['cover'] ?? ($it['cover_detail'] ?? '');
+                if (is_array($c)) {
+                    $first = $c[0] ?? $c;
+                    $it['cover_url'] = $first['url'] ?? ($first['cover'] ?? '');
+                } else {
+                    $it['cover_url'] = (string) $c;
+                }
+            }
+        }
+        unset($it);
+
+        $tabList = [
+            ['id' => 1, 'fallback' => '机构', 'key' => 'index.tabbar.hospital'],
+            ['id' => 2, 'fallback' => '医生', 'key' => 'index.common.doctor'],
+            ['id' => 3, 'fallback' => '项目', 'key' => 'index.common.project'],
+        ];
 
         $this->seo->setTdk('我的收藏 - BeautsGO', '我的收藏', '我的收藏')->buildOrganization();
         return $this->render('pages/me/collect', [
@@ -139,6 +161,7 @@ class Me extends BaseController
             'totalPages'   => $totalPages,
             'filterParams' => ['area' => 0, 'level' => 0, 'category' => 0],
             'tab'          => 0,
+            'tabList'      => $tabList,
         ]);
     }
 
