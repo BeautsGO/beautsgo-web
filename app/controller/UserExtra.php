@@ -19,7 +19,7 @@ use think\facade\Db;
  */
 class UserExtra extends BaseController
 {
-    /* ============== 改手机号 ============== */
+    /* ============== 改手机号(对齐 changePhone.vue)============== */
     public function changePhone()
     {
         $auth = new AuthService();
@@ -27,25 +27,41 @@ class UserExtra extends BaseController
         $error = '';
         $saved = false;
         if ($this->request->isPost()) {
-            $payload = [
-                'new_phone' => trim((string) $this->request->param('new_phone', '')),
-                'code'      => trim((string) $this->request->param('code', '')),
-            ];
-            if (!preg_match('/^\d{6,15}$/', $payload['new_phone'])) {
+            // 对齐 changePhone.vue 字段名:phone / code / country_id
+            $phone     = trim((string) $this->request->param('phone', ''));
+            $code      = trim((string) $this->request->param('code', ''));
+            $countryId = (int) $this->request->param('country_id', 0);
+
+            if (!preg_match('/^\d{6,15}$/', $phone)) {
                 $error = '请输入正确的手机号';
-            } elseif (strlen($payload['code']) < 4) {
+            } elseif ($code === '') {
                 $error = '请输入验证码';
             } else {
-                $resp = $auth->call('POST', '/login/changePhone', $payload);
+                $resp = $auth->call('POST', '/login/changePhone', [
+                    'phone'      => $phone,
+                    'code'       => $code,
+                    'country_id' => $countryId,
+                ]);
                 if ($resp['ok']) $saved = true;
                 else $error = $resp['msg'] ?: '更换失败';
             }
         }
+
+        // 手机号掩码显示
+        $maskedPhone = '';
+        if (!empty($user['phone'])) {
+            $p = (string) $user['phone'];
+            $maskedPhone = strlen($p) >= 11
+                ? preg_replace('/^(\d{3})\d{4}(\d{4})/', '$1****$2', $p)
+                : $p;
+        }
+
         $this->seo->setTdk('更换手机号 - BeautsGO', '更换手机号', '更换手机号')->buildOrganization();
         return $this->render('pages/me/change-phone', [
-            'user'  => $user,
-            'error' => $error,
-            'saved' => $saved,
+            'user'        => $user,
+            'maskedPhone' => $maskedPhone,
+            'error'       => $error,
+            'saved'       => $saved,
         ]);
     }
 
