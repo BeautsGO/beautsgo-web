@@ -23,6 +23,13 @@ class Auth extends BaseController
             return redirect($back);
         }
 
+        // 1:1 对齐 login.vue:810 getCountryList():$http.get('Common/countryList')
+        $countryList = $this->fetchCountryList();
+        $defaultCountry = $this->defaultCountryFallback();
+        foreach ($countryList as $c) {
+            if ((int) ($c['id'] ?? 0) === 1) { $defaultCountry = $c; break; }
+        }
+
         $this->seo
             ->setTdk('登录 - BeautsGO', '登录 BeautsGO 韩国医美预约平台', '登录,韩国医美')
             ->setCanonical((string) config('seo.site_url') . '/' . $this->langSeg() . '/login')
@@ -30,9 +37,11 @@ class Auth extends BaseController
         $this->trackPage('登录页', 0, '登录');
 
         return $this->render('pages/auth/login', [
-            'back'  => (string) $this->request->param('back', ''),
-            'error' => '',
-            'phone' => '',
+            'back'            => (string) $this->request->param('back', ''),
+            'error'           => '',
+            'phone'           => '',
+            'countryList'     => $countryList,
+            'defaultCountry'  => $defaultCountry,
         ]);
     }
 
@@ -76,6 +85,8 @@ class Auth extends BaseController
             return $this->render('pages/auth/login', [
                 'back'  => $back, 'phone' => $phone,
                 'error' => '请填写手机号和验证码',
+                'countryList'    => $this->fetchCountryList(),
+                'defaultCountry' => $this->defaultCountryFallback(),
             ]);
         }
 
@@ -93,9 +104,31 @@ class Auth extends BaseController
             return $this->render('pages/auth/login', [
                 'back'  => $back, 'phone' => $phone,
                 'error' => $resp['msg'] ?: '登录失败',
+                'countryList'    => $this->fetchCountryList(),
+                'defaultCountry' => $this->defaultCountryFallback(),
             ]);
         }
         return redirect($back ?: '/' . $this->langSeg() . '/me');
+    }
+
+    private function fetchCountryList(): array
+    {
+        try {
+            $resp = (new AuthService())->call('GET', '/Common/countryList');
+            if (!empty($resp['ok'])) {
+                return (array) ($resp['data']['all'] ?? []);
+            }
+        } catch (\Throwable $e) {}
+        return [];
+    }
+
+    private function defaultCountryFallback(): array
+    {
+        return [
+            'id' => 1, 'dial' => '86',
+            'name_cn' => '中国', 'native_language' => '中国',
+            'national_flag' => 'https://beautsgoimg.59w.net/country_ico/cn.svg',
+        ];
     }
 
     public function logout()

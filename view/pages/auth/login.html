@@ -165,15 +165,15 @@
 
             <form method="post" action="/{$lang_seg}/login" id="loginForm">
                 {if !empty($back)}<input type="hidden" name="back" value="{$back|raw}">{/if}
-                <input type="hidden" name="country_id" id="countryId" value="44">
+                <input type="hidden" name="country_id" id="countryId" value="{$defaultCountry.id|default=1}">
 
                 <div class="container">
                     <div class="content">
-                        <!-- 国家选择 -->
+                        <!-- 国家选择(对齐 login.vue:37-61,219 国 from /Common/countryList)-->
                         <div class="country-selector" id="ctSel">
                             <div class="selected-country" id="ctSelHead">
-                                <img src="https://flagcdn.com/w40/cn.png" class="flag" alt="" id="ctFlag">
-                                <span class="country-name" id="ctName">{$tt['login.defaultCountry']|default='中国'}</span>
+                                <img src="{$defaultCountry.national_flag|default='https://beautsgoimg.59w.net/country_ico/cn.svg'}" class="flag" alt="" id="ctFlag">
+                                <span class="country-name" id="ctName">{$defaultCountry.name_cn|default='中国'}</span>
                                 <span class="arrow"></span>
                             </div>
                             <div class="dropdown">
@@ -181,38 +181,40 @@
                                     <input class="search-input" id="ctSearch" placeholder="{$tt['login.searchCountry']|default='搜索国家/地区'}" autocomplete="off">
                                 </div>
                                 <div class="dropdown-list" id="ctList">
-                                    <div class="country-item" data-id="44" data-dial="86" data-name="中国" data-native="China" data-flag="https://flagcdn.com/w40/cn.png">
-                                        <img class="flag" src="https://flagcdn.com/w40/cn.png" alt="">
-                                        <div class="country-info"><span class="name">中国</span><span class="native-name">China</span></div>
-                                        <span class="code">+86</span>
+                                    {if empty($countryList)}
+                                    <!-- API 失败兜底:仅 5 国 -->
+                                    {php}
+                                    $countryList = [
+                                        ['id'=>1,   'dial'=>'86','name_cn'=>'中国','native_language'=>'中国','national_flag'=>'https://beautsgoimg.59w.net/country_ico/cn.svg'],
+                                        ['id'=>107, 'dial'=>'82','name_cn'=>'韩国','native_language'=>'대한민국','national_flag'=>'https://beautsgoimg.59w.net/country_ico/kr.svg'],
+                                        ['id'=>234, 'dial'=>'1', 'name_cn'=>'美国','native_language'=>'United States','national_flag'=>'https://beautsgoimg.59w.net/country_ico/us.svg'],
+                                        ['id'=>106, 'dial'=>'81','name_cn'=>'日本','native_language'=>'日本','national_flag'=>'https://beautsgoimg.59w.net/country_ico/jp.svg'],
+                                        ['id'=>216, 'dial'=>'66','name_cn'=>'泰国','native_language'=>'ประเทศไทย','national_flag'=>'https://beautsgoimg.59w.net/country_ico/th.svg'],
+                                    ];
+                                    {/php}
+                                    {/if}
+                                    {foreach $countryList as $c}
+                                    <div class="country-item"
+                                         data-id="{$c.id}"
+                                         data-dial="{$c.dial}"
+                                         data-name="{$c.name_cn}"
+                                         data-native="{$c.native_language|default=$c.name_cn}"
+                                         data-flag="{$c.national_flag}">
+                                        <img class="flag" src="{$c.national_flag}" alt="" loading="lazy">
+                                        <div class="country-info">
+                                            <span class="name">{$c.name_cn}</span>
+                                            <span class="native-name">{$c.native_language|default=''}</span>
+                                        </div>
+                                        <span class="code">+{$c.dial}</span>
                                     </div>
-                                    <div class="country-item" data-id="113" data-dial="82" data-name="韩国" data-native="대한민국" data-flag="https://flagcdn.com/w40/kr.png">
-                                        <img class="flag" src="https://flagcdn.com/w40/kr.png" alt="">
-                                        <div class="country-info"><span class="name">韩国</span><span class="native-name">대한민국</span></div>
-                                        <span class="code">+82</span>
-                                    </div>
-                                    <div class="country-item" data-id="234" data-dial="1" data-name="美国" data-native="United States" data-flag="https://flagcdn.com/w40/us.png">
-                                        <img class="flag" src="https://flagcdn.com/w40/us.png" alt="">
-                                        <div class="country-info"><span class="name">美国</span><span class="native-name">United States</span></div>
-                                        <span class="code">+1</span>
-                                    </div>
-                                    <div class="country-item" data-id="106" data-dial="81" data-name="日本" data-native="日本" data-flag="https://flagcdn.com/w40/jp.png">
-                                        <img class="flag" src="https://flagcdn.com/w40/jp.png" alt="">
-                                        <div class="country-info"><span class="name">日本</span><span class="native-name">日本</span></div>
-                                        <span class="code">+81</span>
-                                    </div>
-                                    <div class="country-item" data-id="216" data-dial="66" data-name="泰国" data-native="ประเทศไทย" data-flag="https://flagcdn.com/w40/th.png">
-                                        <img class="flag" src="https://flagcdn.com/w40/th.png" alt="">
-                                        <div class="country-info"><span class="name">泰国</span><span class="native-name">ประเทศไทย</span></div>
-                                        <span class="code">+66</span>
-                                    </div>
+                                    {/foreach}
                                 </div>
                             </div>
                         </div>
 
                         <!-- 手机号 -->
                         <div class="phone-input-container">
-                            <span class="phone-prefix" id="ctPrefix">+86</span>
+                            <span class="phone-prefix" id="ctPrefix">+{$defaultCountry.dial|default='86'}</span>
                             <input class="phone-input" type="tel" name="phone" placeholder="{$tt['me.userInfoSet.phonePlc']|default='请输入手机号'}" value="{$phone|default=''}" required autocomplete="tel">
                         </div>
 
