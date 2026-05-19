@@ -1,52 +1,177 @@
 {extend name="layout/base" /}
 {block name="extra_head"}
 <style>
-.sh{background:#f7f7f9;min-height:100vh}
-.sh .head{padding:12px 16px;background:#fff}
-.sh form{display:flex;gap:8px;padding:10px 16px;background:#fff}
-.sh form input{flex:1;height:36px;padding:0 14px;border-radius:999px;border:0;background:#f3f3f7;font-size:12px}
-.sh form button{padding:0 18px;border-radius:999px;border:0;background:#fc6290;color:#fff;font-size:12px}
-.sh .lvls{display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px;background:#fff;border-top:1px solid #f0f0f3}
-.sh .lvls a{padding:6px 14px;border-radius:999px;font-size:12px;color:#555;text-decoration:none;background:#f3f3f7}
-.sh .lvls a.active{background:#fc6290;color:#fff}
-.sh .list{padding:12px}
-.sh .row{display:flex;gap:12px;background:#fff;border-radius:10px;padding:12px;margin-bottom:10px;text-decoration:none;color:inherit}
-.sh .row img{width:64px;height:64px;border-radius:6px;object-fit:cover;background:#f1f1f3}
-.sh .row .meta{flex:1;min-width:0}
-.sh .row .name{font-size:14px;font-weight:600;color:#222;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
-.sh .row .sub{color:#888;font-size:12px;margin-top:4px}
-.sh .row .addr{color:#999;font-size:12px;margin-top:2px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
-.empty{padding:60px 0;text-align:center;color:#999}
+/* ============================================================
+ * 选择预约机构 1:1 还原 pages/make/hospital.vue scoped scss
+ *   顶部 mynav 搜索栏(粉色返回 + 搜索框 + 搜索按钮)
+ *   select-box 标题:粉色 line + 热门推荐 + "共 N 家"
+ *   hospital-level-scroll 横向 tag 行
+ *   list-item 60px cover + 名称 + 同价 tag + 等级/医生数 + 地址
+ * ============================================================ */
+.sh-body{ background: #f5f5f5; min-height: 100vh; padding-bottom: 30px; box-sizing: border-box; }
+.sh-head{
+    position: sticky; top: 0; z-index: 30;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+}
+.sh-head-top{
+    display: flex; align-items: center; padding: 6px 12px;
+    height: 44px; gap: 8px;
+}
+.sh-head-top .back{
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    color: #1B1B1B; text-decoration: none; font-size: 22px;
+    flex-shrink: 0;
+}
+.sh-head-top form{
+    flex: 1; display: flex; align-items: center;
+    background: #f3f3f7; border-radius: 18px;
+    padding: 0 14px; height: 32px;
+}
+.sh-head-top form svg{ flex-shrink: 0; }
+.sh-head-top form input{
+    flex: 1; height: 100%; padding: 0 8px;
+    border: 0; outline: none; background: transparent;
+    font-size: 13px;
+}
+.sh-head-top form .submit{
+    padding: 0 6px; background: transparent; border: 0;
+    color: #fc6290; font-size: 12px; cursor: pointer; flex-shrink: 0;
+}
+
+/* select-box 标题 */
+.sh-select-box{
+    background: #fff; padding: 10px 12px;
+}
+.sh-select-title{
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+}
+.sh-title-left{
+    display: flex; align-items: center;
+    font-size: 14px; color: #1B1B1B; font-weight: 600;
+}
+.sh-title-left .line{
+    display: inline-block; width: 3px; height: 13px;
+    background: #fc6290; border-radius: 2px; margin-right: 6px;
+}
+.sh-title-right{
+    font-size: 12px; color: #999;
+}
+
+.sh-lvls{
+    display: flex; gap: 8px; overflow-x: auto;
+    padding: 4px 0;
+    scrollbar-width: none; white-space: nowrap;
+}
+.sh-lvls::-webkit-scrollbar{ display: none; }
+.sh-lvls a{
+    flex-shrink: 0; padding: 5px 12px; border-radius: 12px;
+    font-size: 12px; color: #585858; text-decoration: none;
+    background: #eee;
+    border: 1px solid transparent;
+}
+.sh-lvls a.active{ background: #E9E7FF; color: #8880FE; border-color: #8880FE; }
+
+/* 列表 */
+.sh-list{ padding: 10px 12px; }
+.sh-row{
+    display: flex; gap: 10px;
+    background: #fff; border-radius: 8px;
+    padding: 10px; margin-bottom: 8px;
+    text-decoration: none; color: inherit;
+}
+.sh-row .cover{
+    width: 60px; height: 60px;
+    border-radius: 4px; overflow: hidden; flex-shrink: 0;
+    background: #f1f1f3;
+}
+.sh-row .cover img{ width: 100%; height: 100%; object-fit: cover; }
+.sh-row .meta{ flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+.sh-row .hospital-name{
+    display: flex; align-items: center; flex-wrap: wrap;
+    gap: 5px;
+}
+.sh-row .hospital-title{
+    color: #0C0D10; font-size: 16px; font-weight: 700;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 65%;
+}
+.sh-row .hospital-tag{
+    color: #EF5189; font-size: 10px;
+    background: #FEEBF2;
+    padding: 2px 4px; border-radius: 2px;
+    white-space: nowrap;
+}
+.sh-row .hospital-info{
+    display: flex; flex-wrap: wrap; align-items: center;
+    color: #444; font-size: 12px; margin-top: 4px;
+}
+.sh-row .info-line{
+    display: inline-block; width: 1px; height: 11px;
+    background: #ccc; margin: 0 5px;
+}
+.sh-row .address-txt{
+    color: #999; font-size: 11px;
+    margin-top: 3px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.sh-empty{ padding: 60px 0; text-align: center; color: #999; font-size: 13px; }
 </style>
 {/block}
 {block name="content"}
-<section class="sh">
-    <div class="head"><div class="page-head"><a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a><h1 class="page-title">{$tt['make.title']|default='选择预约机构'} ({$total})</h1></div></div>
-    <form method="get" action="">
-        {if $level > 0}<input type="hidden" name="level" value="{$level}">{/if}
-        <input type="search" name="q" value="{$q}" placeholder="{$tt['make.placeholder']|default='输入机构名'}">
-        <button type="submit">{$tt['index.common.search']|default='搜索'}</button>
-    </form>
-    <div class="lvls">
-        <a href="?level=0{if $q != ''}&q={$q}{/if}" class="{if $level == 0}active{/if}">{$tt['point.All']|default='全部'}</a>
-        {foreach $levels as $l}
-        <a href="?level={$l.id|default=0}{if $q != ''}&q={$q}{/if}" class="{if $level == $l.id}active{/if}">{$l.name|default=''}</a>
-        {/foreach}
+<section class="sh-body">
+    <div class="sh-head">
+        <div class="sh-head-top">
+            <a class="back" href="javascript:history.back()" aria-label="返回">‹</a>
+            <form method="get" action="">
+                {if $level > 0}<input type="hidden" name="level" value="{$level}">{/if}
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#909399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+                <input type="search" name="q" value="{$q}" placeholder="{$tt['make.placeholder']|default='请输入想要预约的机构'}" autocomplete="off">
+                <button class="submit" type="submit">{$tt['index.common.search']|default='搜索'}</button>
+            </form>
+        </div>
     </div>
-    <div class="list">
+
+    <div class="sh-select-box">
+        <div class="sh-select-title">
+            <div class="sh-title-left"><span class="line"></span>{$tt['make.Hotrecommend']|default='热门推荐'}</div>
+            <div class="sh-title-right">{$tt['point.All']|default='全部'} {$total} {$tt['make.Hospitalnum']|default='家'}</div>
+        </div>
+        <div class="sh-lvls">
+            <a href="?level=0{if $q != ''}&q={$q|urlencode|raw}{/if}" class="{if $level == 0}active{/if}">{$tt['point.All']|default='全部'}</a>
+            {foreach $levels as $l}
+            <a href="?level={$l.id|default=0}{if $q != ''}&q={$q|urlencode|raw}{/if}" class="{if $level == $l.id}active{/if}">{$l.name|default=''}</a>
+            {/foreach}
+        </div>
+    </div>
+
+    <div class="sh-list">
         {if empty($list)}
-        <div class="empty">{$tt['point.Empty']|default='暂无机构'}</div>
+        <div class="sh-empty">{$tt['projectDetails.Empty']|default='暂无机构'}</div>
         {else/}
         {foreach $list as $h}
-        {$slug = $h.en_name|default=$h.id|default=0}
-        {$cover = ''}
-        {if !empty($h.cover) && is_array($h.cover)}{$cover = $h.cover[0]['url']|default=''}{/if}
-        <a class="row" href="/{$lang_seg}/appointment?h_id={$h.id|default=0}">
-            {if !empty($cover)}<img src="{$cover}" alt="" loading="lazy">{else/}<div style="width:64px;height:64px;background:#f1f1f3;border-radius:6px"></div>{/if}
+        {php}
+            $cover = '';
+            if (!empty($h['cover']) && is_array($h['cover'])) $cover = $h['cover'][0]['url'] ?? '';
+            elseif (!empty($h['cover_url'])) $cover = $h['cover_url'];
+        {/php}
+        <a class="sh-row" href="/{$lang_seg}/appointment?h_id={$h.id|default=0}">
+            <div class="cover">
+                {if !empty($cover)}<img src="{$cover}" alt="" loading="lazy">{/if}
+            </div>
             <div class="meta">
-                <div class="name">{$h.name|default=''}</div>
-                <div class="sub">{$h.level_name|default=''}{if !empty($h.doctors_count)} · {$tt['index.common.doctor']|default='医生'} {$h.doctors_count}{/if}</div>
-                <div class="addr">{:!empty($h["zh_cn_address"])?$h["zh_cn_address"]:(!empty($h["address"])?$h["address"]:'')}</div>
+                <div class="hospital-name">
+                    <span class="hospital-title">{$h.name|default=''}</span>
+                    {if !empty($h.same_price)}<span class="hospital-tag">{$tt['index.common.cnkrsame']|default='中韩同价'}</span>{/if}
+                </div>
+                <div class="hospital-info">
+                    <span>{$h.level_name|default=''}</span>
+                    {if !empty($h.doctors_count)}<span class="info-line"></span><span>{$h.doctors_count}</span>{/if}
+                </div>
+                {if !empty($h.zh_cn_address) || !empty($h.address)}
+                <div class="address-txt">{:!empty($h["zh_cn_address"])?$h["zh_cn_address"]:(!empty($h["address"])?$h["address"]:'')}</div>
+                {/if}
             </div>
         </a>
         {/foreach}
