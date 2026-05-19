@@ -1,24 +1,210 @@
 {extend name="layout/base" /}
 
 {block name="extra_head"}
-<link rel="stylesheet" href="/static/css/pages/case.css?v={$assets.css_ver}">
+<style>
+/* ============================================================
+ * hospitalPrice 1:1 还原 subPackages_lightningRod/hospitalPrice/hospitalPrice.vue scoped scss
+ *   .PriceListItem-box 标题卡:医院名 + 中韩同价 tag + 地址
+ *   .download-btn 下载水印版按钮
+ *   .u-content 富文本主体,is_show=false 时加遮罩 + 登录按钮
+ *   .bottomNav 底部固定:立即预约 + 客服咨询
+ * ============================================================ */
+.hp-page{
+    min-height: 100vh; background: #f5f5f5;
+    padding-bottom: 80px; box-sizing: border-box;
+}
+.hp-head{
+    position: sticky; top: 0; z-index: 30; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+}
+.hp-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.hp-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 顶部医院名卡 */
+.hp-box{
+    background: #fff; padding: 14px 16px;
+    margin-bottom: 8px;
+}
+.hp-box .name{
+    display: flex; align-items: center; gap: 8px;
+    font-size: 17px; font-weight: 700; color: #1B1B1B;
+}
+.hp-box .same-price-tag{
+    background: #FEEBF2; color: #EF5189;
+    padding: 2px 6px; border-radius: 4px;
+    font-size: 11px; font-weight: 500;
+}
+.hp-box .address{
+    margin-top: 6px;
+    font-size: 12px; color: #999;
+}
+
+/* 下载水印版按钮 */
+.hp-download-wrap{
+    background: #fff; padding: 10px 16px;
+    margin-bottom: 8px; display: flex; justify-content: flex-end;
+}
+.hp-download-btn{
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 6px 12px;
+    background: linear-gradient(135deg,#fe739d,#ff9ac3);
+    color: #fff; border: 0; border-radius: 16px;
+    font-size: 12px; cursor: pointer; text-decoration: none;
+    box-shadow: 0 4px 12px rgba(254,115,157,.3);
+}
+.hp-download-btn .icon{ font-size: 14px; }
+
+/* 富文本主体 */
+.hp-content-wrap{
+    position: relative;
+    background: #fff; padding: 16px;
+    overflow: hidden;
+}
+.hp-content{
+    font-size: 14px; line-height: 1.7; color: #333;
+    word-break: break-word;
+}
+.hp-content img{ max-width: 100% !important; height: auto !important; display: block; }
+.hp-content p{ margin: 0 0 8px; }
+
+/* 未登录遮罩(对齐 vue .content-mask + .mask-btn)*/
+.hp-content-wrap.masked{
+    max-height: 600px;
+}
+.hp-content-mask{
+    position: absolute; left: 0; right: 0; bottom: 0;
+    height: 280px;
+    background: linear-gradient(to top, #fff 30%, rgba(255,255,255,0));
+    display: flex; align-items: flex-end; justify-content: center;
+    padding-bottom: 40px;
+}
+.hp-content-mask .login-btn{
+    background: #EF5189; color: #fff;
+    padding: 10px 28px; border-radius: 24px;
+    font-size: 14px; font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 6px 18px rgba(239,81,137,.35);
+}
+
+/* 底部固定 nav(对齐 vue .bottomNav)*/
+.hp-bottom-nav{
+    position: fixed; left: 50%; transform: translateX(-50%); bottom: 0;
+    width: 100%; max-width: 640px; box-sizing: border-box;
+    background: #fff; padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+    z-index: 80;
+    border-top: 1px solid #f1f1f1;
+    display: flex; gap: 10px;
+}
+.hp-bottom-nav .nav-right,
+.hp-bottom-nav .nav-left{
+    flex: 1; height: 42px; border-radius: 21px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 15px; font-weight: 500;
+    text-decoration: none; cursor: pointer;
+    position: relative;
+}
+.hp-bottom-nav .nav-right{
+    background: #FF9AC3;
+}
+.hp-bottom-nav .nav-right .orderpoint{
+    position: absolute; top: -10px; left: 46%;
+    transform: translateX(-50%);
+    min-width: 78px; height: 20px; padding: 0 6px; line-height: 20px;
+    background: linear-gradient(270deg,#fd6a69 0%,#fe2c39 100%);
+    color: #fff; font-size: 10px;
+    border-radius: 16px 16px 16px 1px;
+    white-space: nowrap; text-align: center;
+    box-shadow: 0 4px 12px rgba(254,44,57,.35);
+}
+.hp-bottom-nav .nav-left{
+    background: #00c853;
+    animation: hp-breathe 2s ease-in-out infinite;
+    box-shadow: 0 0 10px rgba(0,200,83,.6);
+}
+@keyframes hp-breathe{
+    0%, 100% { box-shadow: 0 0 10px rgba(0,200,83,.6); transform: scale(1); }
+    50%      { box-shadow: 0 0 20px rgba(0,200,83,.9); transform: scale(1.02); }
+}
+
+/* 兜底:旧版只有 cover 图片时 */
+.hp-fallback-images{
+    background: #fff;
+    padding: 10px;
+}
+.hp-fallback-images img{
+    width: 100%; height: auto; display: block;
+    margin-bottom: 8px; border-radius: 4px;
+    cursor: zoom-in;
+}
+
+.hp-empty{
+    text-align: center; padding: 80px 16px;
+    color: #999; font-size: 13px;
+}
+</style>
 {/block}
 
 {block name="content"}
-<div class="case-detail">
-    <div class="page-head">
-        <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
-        <h1 class="page-title">{$hospital.name|default=''} 价目表</h1>
+<div class="hp-page">
+    <div class="hp-head">
+        <a class="back" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="title">{$hospital.name|default=''} {$tt['hospital.price.title']|default='价目表'}</h1>
     </div>
 
-    <div class="case-detail__images">
-        {if empty($covers)}
-        <div class="empty">{$tt['point.Empty']|default='暂无价目表'}</div>
+    <!-- 顶部医院名卡(对齐 vue .PriceListItem-box)-->
+    <div class="hp-box">
+        <div class="name">
+            <span>{$hospital.name|default=''}</span>
+            {if !empty($hospital.same_price) && $hospital.same_price == 1}
+            <span class="same-price-tag">{$tt['index.common.cnkrsame']|default='中韩同价'}</span>
+            {/if}
+        </div>
+        {if !empty($hospital.zh_cn_address)}
+        <div class="address">{$hospital.zh_cn_address}</div>
         {/if}
+    </div>
+
+    {if !empty($richContent)}
+    <!-- 下载水印版按钮(对齐 vue .download-btn)-->
+    {if !empty($watermarkUrl)}
+    <div class="hp-download-wrap">
+        <a class="hp-download-btn" href="{$watermarkUrl}" download target="_blank" rel="noopener">
+            <span class="icon">⬇</span>
+            <span>{$tt['hospital.price.dowload']|default='下载水印版价目表'}</span>
+        </a>
+    </div>
+    {/if}
+
+    <!-- 富文本主体(对齐 vue .u-content + is_show 遮罩)-->
+    <div class="hp-content-wrap {if !$isShow}masked{/if}">
+        <div class="hp-content">{$richContent|raw}</div>
+        {if !$isShow}
+        <div class="hp-content-mask">
+            <a class="login-btn" href="/{$lang_seg}/login">{$tt['doctorDetails.Loginfulldetails']|default='登录查看完整价目表'}</a>
+        </div>
+        {/if}
+    </div>
+    {elseif !empty($covers)/}
+    <!-- 兜底:本地 cover 图片(API 失败时)-->
+    <div class="hp-fallback-images">
         {foreach $covers as $c}
-        {if !empty($c.url)}<img src="{$c.url}" alt="{$hospital.name} 价目表" loading="lazy" data-preview="{$c.url}" data-preview-group="price-pics">{/if}
+        {if !empty($c.url)}<img src="{$c.url}" alt="{$hospital.name} 价目表" loading="lazy" data-preview="{$c.url}">{/if}
         {/foreach}
     </div>
-    {include file="components/_tabbar" /}
+    {else/}
+    <div class="hp-empty">{$tt['hospitalDetails.Pricenotavailable']|default='暂无价目表'}</div>
+    {/if}
+
+    <!-- 底部 nav(对齐 vue .bottomNav-item)-->
+    <div class="hp-bottom-nav">
+        <a class="nav-right" href="/{$lang_seg}/appointment?h_id={$hospital.id|default=0}">
+            <span>{$tt['index.common.BookNow']|default='立即预约'}</span>
+            <span class="orderpoint">{$tt['point.Orderpoint']|default='下单送积分'}</span>
+        </a>
+        <a class="nav-left" href="/{$lang_seg}/chat/{$hospital.id|default=0}">
+            {$tt['index.common.chatNow']|default='立即咨询'}
+        </a>
+    </div>
 </div>
 {/block}

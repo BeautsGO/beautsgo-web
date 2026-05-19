@@ -181,15 +181,42 @@ class Hospital extends BaseController
         $hospital = ctype_digit($slug) ? $repo->detailById((int) $slug) : $repo->detailBySlug($slug);
         if (!$hospital) $this->abort404('Hospital not found');
 
-        // hospital_price 单条:cover JSON / nums
-        $price = Db::name('hospital_price')
-            ->where('h_id', $hospital['id'])
-            ->field(['id', 'h_id', 'cover_detail'])
-            ->find();
+        $hid = (int) $hospital['id'];
+
+        // 1:1 对齐 hospitalPrice.vue getInfo():$http.get('Hospital/priceDetail/'+id)
+        $richContent = '';
+        $watermarkUrl = '';
+        $isShow = true;
+        $auth = new \app\service\AuthService();
+        try {
+            $resp = $auth->call('GET', '/Hospital/priceDetail/' . $hid);
+            if (!empty($resp['ok'])) {
+                $d = (array) ($resp['data'] ?? []);
+                $info = (array) ($d['info'] ?? []);
+                $isShow = (bool) ($d['is_show'] ?? true);
+                $prefix = $this->langPrefixForPrice();
+                // 按当前语言挑 content / watermark_url
+                $contentKey = $prefix . 'content';
+                $watermarkKey = $prefix . 'watermark_url';
+                $richContent = (string) ($info[$contentKey] ?? $info['content'] ?? '');
+                $watermarkUrl = (string) ($info[$watermarkKey] ?? $info['watermark_url'] ?? '');
+                $richContent = htmlspecialchars_decode($richContent);
+                // 用户未登录时(is_show=false)做内容遮罩
+                if (empty($auth->getCurrentUser()['phone'] ?? '')) $isShow = false;
+            }
+        } catch (\Throwable $e) { /* fallback to DB */ }
+
+        // 兜底:本地 hospital_price 表
         $coverArr = [];
-        if ($price && !empty($price['cover_detail'])) {
-            $d = json_decode((string) $price['cover_detail'], true);
-            $coverArr = is_array($d) ? $d : [];
+        if ($richContent === '') {
+            $price = Db::name('hospital_price')
+                ->where('h_id', $hid)
+                ->field(['id', 'h_id', 'cover_detail'])
+                ->find();
+            if ($price && !empty($price['cover_detail'])) {
+                $d = json_decode((string) $price['cover_detail'], true);
+                $coverArr = is_array($d) ? $d : [];
+            }
         }
 
         $title = $hospital['name'] . ' 价目表 - 韩国医美价格透明 - BeautsGO';
@@ -208,8 +235,23 @@ class Hospital extends BaseController
             ]);
 
         return $this->render('pages/hospital/price', [
-            'hospital' => $hospital,
-            'covers'   => $coverArr,
+            'hospital'     => $hospital,
+            'covers'       => $coverArr,
+            'richContent'  => $richContent,
+            'watermarkUrl' => $watermarkUrl,
+            'isShow'       => $isShow,
         ]);
+    }
+
+    private function langPrefixForPrice(): string
+    {
+        switch ($this->lang) {
+            case 'zh-Hant': return 'zh_hant_';
+            case 'en':      return 'en_';
+            case 'ja':      return 'ja_';
+            case 'th':      return 'th_';
+            case 'ko-KR':   return 'ko_kr_';
+            default:        return '';
+        }
     }
 }
