@@ -1,42 +1,226 @@
 {extend name="layout/base" /}
+
 {block name="extra_head"}
 <style>
-.po-page{padding:16px;background:#f7f7f9;min-height:100vh}
-.po-card{background:#fff;border-radius:10px;padding:16px;margin-bottom:14px}
-.po-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed #eee;font-size:12px;color:#333;gap:14px}
-.po-row:last-child{border-bottom:0}
-.po-row .l{color:#999;white-space:nowrap}
-.po-row .r{text-align:right;flex:1}
-.po-row .r.act{color:#fc6290;font-weight:600}
-.po-express{padding-top:6px}
-.po-express .step{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #f1f1f3;font-size:12px;color:#666}
-.po-express .step .time{flex:0 0 110px;color:#999}
+/* ============================================================
+ * pointOrderDetail 1:1 还原 subPackages_lightningRod/pointOrderDetail/pointOrderDetail.vue
+ *   .body 灰底 #dad9d95b + 10px padding
+ *   .order-detail 白底 10px 圆角 padding 15px
+ *   .group flex row,.left-item 80px 固定 + nowrap,.right-item flex break-word
+ *   .active-color #ff5a62 / #FF0000
+ * ============================================================ */
+.po-body{
+    background: #dad9d95b;
+    padding: 10px;
+    min-height: 100vh;
+    padding-bottom: 30px;
+    box-sizing: border-box;
+}
+.po-head{
+    position: sticky; top: 0; z-index: 30; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+    margin: -10px -10px 10px;
+}
+.po-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.po-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+
+.order-detail{
+    border-radius: 10px; background: #fff;
+    padding: 15px;
+    color: #8a8a8a; font-size: 13px;
+    margin-bottom: 10px;
+}
+.group{
+    display: flex; margin-bottom: 10px;
+    line-height: 1.5;
+}
+.group:last-child{ margin-bottom: 0; }
+.left-item{
+    width: 80px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    color: #8a8a8a;
+}
+.right-item{
+    flex: 1;
+    word-wrap: break-word; word-break: break-all;
+    color: #333;
+}
+.right-item.active-color{ color: #ff5a62; }
+
+/* 物流卡(同 expressData.vue 同样布局,只是嵌在订单详情下面)*/
+.express-detail{
+    border-radius: 10px; background: #fff;
+    padding: 15px;
+}
+.express-title{
+    display: flex; flex-direction: row;
+    justify-content: space-between; align-items: center;
+    color: #444; font-size: 12px;
+    padding: 10px 5px;
+    border-bottom: 1px solid #f5f5f5;
+}
+.express-title-left{
+    display: flex; flex-direction: row; align-items: center;
+    flex: 1; min-width: 0;
+}
+.express-title-left img{
+    width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+    background: #f3f3f7; object-fit: cover;
+}
+.express-title-left .comname{
+    margin-left: 5px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.express-title-right{ display: flex; flex-direction: row; flex-shrink: 0; align-items: center; gap: 6px; }
+.express-title-right .action{ color: #afa7ef; cursor: pointer; text-decoration: none; }
+.express-title-right .sep{ color: #ccc; }
+
+.step-box{ padding: 12px 0 0; transition: max-height .3s ease; overflow: hidden; }
+.step-box.folded{ max-height: 100px; }
+.step-box .step{
+    position: relative; padding: 8px 0 8px 22px;
+    font-size: 12px; color: #888;
+    border-left: 1px solid #e5e3fa; margin-left: 6px;
+}
+.step-box .step:first-of-type{ color: #afa7ef; }
+.step-box .step::before{
+    content: ''; position: absolute; left: -5px; top: 12px;
+    width: 9px; height: 9px; border-radius: 50%; background: #ccc;
+}
+.step-box .step:first-of-type::before{
+    background: #afa7ef; box-shadow: 0 0 0 3px rgba(175,167,239,.25);
+}
+.step-box .step .time{ display: block; font-size: 11px; color: #999; margin-bottom: 2px; }
+
+.read-more-wrap{ position: relative; }
+.read-more-wrap.folded::after{
+    content: ''; position: absolute; left: 0; right: 0; bottom: 32px; height: 40px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0), #fff);
+    pointer-events: none;
+}
+.read-more-toggle{
+    display: block; margin: 0 auto;
+    color: #afa7ef; font-size: 13px;
+    background: transparent; border: 0;
+    padding: 6px 14px; cursor: pointer;
+}
 </style>
 {/block}
+
 {block name="content"}
-<section class="po-page">
-    <div class="page-head"><a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a><h1 class="page-title">{$tt['order.title']|default='积分订单详情'}</h1></div>
-    <div class="po-card">
-        <div class="po-row"><span class="l">{$tt['ProductName']|default='商品'}</span><span class="r">{$info.integral_title|default=''}</span></div>
-        <div class="po-row"><span class="l">{$tt['ProductCost']|default='消耗'}</span><span class="r">{$info.pay_point|default=0}{$tt['index.common.point']|default='积分'}{if !empty($info.pay_price)} + {$info.pay_price}₩{/if}</span></div>
-        <div class="po-row"><span class="l">{$tt['order.status']|default='状态'}</span><span class="r act">{$info.status_text|default=''}</span></div>
-        {if !empty($info.reason)}<div class="po-row"><span class="l">{$tt['reason']|default='原因'}</span><span class="r act">{$info.reason}</span></div>{/if}
-        {if !empty($info.create_time)}<div class="po-row"><span class="l">{$tt['order.Ordertime']|default='下单时间'}</span><span class="r">{$info.create_time}</span></div>{/if}
+<div class="po-body">
+    <div class="po-head">
+        <a class="back" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="title">{$tt['order.title']|default='订单详情'}</h1>
+    </div>
+
+    <!-- 订单字段(对齐 vue .order-detail .group)-->
+    <div class="order-detail">
+        <div class="group">
+            <div class="left-item">{$tt['ProductName']|default='商品名称'}</div>
+            <div class="right-item">{$info.integral_title|default=''}</div>
+        </div>
+        <div class="group">
+            <div class="left-item">{$tt['ProductCost']|default='消耗'}</div>
+            <div class="right-item">{$info.pay_point|default=0}{$tt['index.common.point']|default='积分'}{if !empty($info.pay_price)}+{$info.pay_price}₩{/if}</div>
+        </div>
+        <div class="group">
+            <div class="left-item">{$tt['order.status']|default='状态'}</div>
+            <div class="right-item active-color">{$info.status_text|default=''}</div>
+        </div>
+        {if !empty($info.reason)}
+        <div class="group">
+            <div class="left-item">{$tt['reason']|default='原因'}</div>
+            <div class="right-item active-color">{$info.reason}</div>
+        </div>
+        {/if}
+        {if !empty($info.create_time)}
+        <div class="group">
+            <div class="left-item">{$tt['order.Ordertime']|default='下单时间'}</div>
+            <div class="right-item">
+                {if is_numeric($info.create_time)}{:date('Y-m-d H:i:s', (int)$info['create_time'])}{else/}{$info.create_time}{/if}
+            </div>
+        </div>
+        {/if}
         {if !empty($info.form_value) && is_array($info.form_value)}
             {foreach $info.form_value as $f}
-            <div class="po-row"><span class="l">{$f.title|default=''}</span><span class="r">{$f.value|default=''}</span></div>
+            <div class="group">
+                <div class="left-item">{$f.title|default=''}</div>
+                <div class="right-item">{$f.value|default=''}</div>
+            </div>
             {/foreach}
         {/if}
     </div>
+
+    <!-- 物流卡(对齐 vue express-detail v-if expressData)-->
     {if !empty($express) && !empty($express.number)}
-    <div class="po-card po-express">
-        <div class="po-row"><span class="l">{$express.expressCompanyName|default='物流'}</span><span class="r">{$express.number}</span></div>
-        {if !empty($express.logisticsTraceDetails) && is_array($express.logisticsTraceDetails)}
-            {foreach $express.logisticsTraceDetails as $t}
-            <div class="step"><span class="time">{$t.time|default=''}</span><span>{$t.desc|default=''}</span></div>
-            {/foreach}
-        {/if}
+    <div class="express-detail">
+        <div class="express-title">
+            <div class="express-title-left">
+                {if !empty($express.expressCompanyLogo)}<img src="{$express.expressCompanyLogo}" alt="">{/if}
+                <span class="comname">{$express.expressCompanyName|default=''}</span>
+                <span class="comname" id="poExNum">{$express.number}</span>
+            </div>
+            <div class="express-title-right">
+                <a class="action" href="javascript:void(0)" id="poExCopy">{$tt['point.copy']|default='复制'}</a>
+                {if !empty($express.courierPhone)}
+                <span class="sep">|</span>
+                <a class="action" href="tel:{$express.courierPhone}">{$tt['point.Callphone']|default='联系快递员'}</a>
+                {/if}
+            </div>
+        </div>
+        <div class="read-more-wrap folded" id="poReadMore">
+            <div class="step-box folded" id="poStepBox">
+                {if !empty($express.logisticsTraceDetails) && is_array($express.logisticsTraceDetails)}
+                    {foreach $express.logisticsTraceDetails as $t}
+                    <div class="step">
+                        <span class="time">
+                            {if is_numeric($t.time)}{:date('m-d H:i:s', (int)$t['time'])}{else/}{$t.time|default=''}{/if}
+                        </span>
+                        <span class="desc">{$t.desc|default=''}</span>
+                    </div>
+                    {/foreach}
+                {/if}
+            </div>
+            <button class="read-more-toggle" id="poReadMoreBtn" type="button">{$tt['express.viewMore']|default='查看更多物流明细 ▾'}</button>
+        </div>
     </div>
     {/if}
-</section>
+</div>
+
+<script>
+(function(){
+    var copyBtn = document.getElementById('poExCopy');
+    if(copyBtn){
+        copyBtn.addEventListener('click', function(){
+            var num = (document.getElementById('poExNum').textContent || '').trim();
+            if(!num) return;
+            (window.BG && BG.copy ? BG.copy(num) : function(){
+                var ta = document.createElement('textarea');
+                ta.value = num; document.body.appendChild(ta);
+                ta.select(); try { document.execCommand('copy'); } catch(e){}
+                ta.remove();
+            }());
+            BG.toast && BG.toast('{$tt["showToast.Clipboard"]|default="已复制"}', 'success');
+        });
+    }
+    var box = document.getElementById('poStepBox');
+    var wrap = document.getElementById('poReadMore');
+    var btn = document.getElementById('poReadMoreBtn');
+    if(box && btn){
+        if(box.scrollHeight <= 100){
+            wrap.classList.remove('folded'); box.classList.remove('folded');
+            btn.style.display = 'none';
+        }
+        btn.addEventListener('click', function(){
+            var folded = box.classList.toggle('folded');
+            wrap.classList.toggle('folded', folded);
+            btn.textContent = folded ? '{$tt["express.viewMore"]|default="查看更多物流明细 ▾"}'
+                                     : '{$tt["express.collapse"]|default="收起物流明细 ▴"}';
+        });
+    }
+})();
+</script>
 {/block}

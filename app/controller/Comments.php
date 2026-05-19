@@ -22,16 +22,35 @@ class Comments extends BaseController
             $this->abort404('Invalid comment listing params');
         }
         $page = max(1, (int) $this->request->param('page', 1));
+        $tagId = (int) $this->request->param('tag_id', 0);
         $offset = ($page - 1) * self::PAGE_SIZE;
 
+        // 1:1 对齐 commentList.vue getTagList():POST /comment/tagList { with_id, type }
+        $tags = $this->fetchTagsFor($type, $with_id);
+
+        $where = ['type' => $type, 'with_id' => $with_id, 'status' => 2];
+        $commentIds = null;
+        if ($tagId > 0) {
+            $commentIds = Db::name('tag_relationship')
+                ->where('tag_id', $tagId)
+                ->where('with_id', $with_id)
+                ->column('comment_id');
+        }
+
         $total = (int) Db::name('comment')
-            ->where(['type' => $type, 'with_id' => $with_id, 'status' => 2])
+            ->where($where)
+            ->when(!is_null($commentIds), function ($q) use ($commentIds) {
+                $q->whereIn('id', $commentIds ?: [0]);
+            })
             ->count();
 
         $rows = Db::name('comment')
             ->field(['id', 'uid', 'uid_type', 'rating', 'create_time', 'mediaList',
                      'content', 'en_content', 'zh_hant_content', 'ja_content'])
-            ->where(['type' => $type, 'with_id' => $with_id, 'status' => 2])
+            ->where($where)
+            ->when(!is_null($commentIds), function ($q) use ($commentIds) {
+                $q->whereIn('id', $commentIds ?: [0]);
+            })
             ->order('create_time desc')
             ->limit($offset, self::PAGE_SIZE)
             ->select()->toArray();
@@ -80,9 +99,30 @@ class Comments extends BaseController
             'type'         => $type,
             'with_id'      => $with_id,
             'subjectName'  => $subjectName,
-            'filterParams' => ['type' => $type, 'with_id' => $with_id, 'area' => 0, 'level' => 0, 'category' => 0],
+            'tags'         => $tags,
+            'tagId'        => $tagId,
+            'filterParams' => ['type' => $type, 'with_id' => $with_id, 'tag_id' => $tagId, 'area' => 0, 'level' => 0, 'category' => 0],
             'tab'          => 0,
         ]);
+    }
+
+    /**
+     * 评价标签列表(1:1 对齐 commentList.vue getTagList():POST /comment/tagList)
+     */
+    private function fetchTagsFor(int $type, int $with_id): array
+    {
+        $prefix = $this->langPrefix();
+        $field = $prefix . 'name';
+        return Db::name('tag_relationship')
+            ->alias('tr')
+            ->leftJoin('tag t', 't.id = tr.tag_id AND t.is_del = 0')
+            ->where('t.type', $type)
+            ->where('tr.with_id', $with_id)
+            ->group('tr.tag_id')
+            ->order('tr.create_time desc')
+            ->field("t.id, t.$field AS name")
+            ->select()
+            ->toArray();
     }
 
     private function fetchSubjectName(int $type, int $id): string

@@ -1,51 +1,204 @@
 {extend name="layout/base" /}
 
+{block name="extra_head"}
+<link rel="stylesheet" href="/static/css/pages/case.css?v={$assets.css_ver}">
+<style>
+/* ============================================================
+ * commentList 1:1 还原 subPackages_lightningRod/commentList/commentList.vue scoped scss
+ *   .comment-list-page 灰底 10px padding
+ *   .tags 横向滚动 tag 行,tag-active 紫底白字
+ *   .comment-item 白底 10px 圆角 padding 15px,头像/昵称/google icon/star/content/media
+ * ============================================================ */
+.cl-page{
+    padding: 10px;
+    background: #f5f5f5;
+    min-height: 100vh;
+    box-sizing: border-box;
+    padding-bottom: 30px;
+}
+.cl-head{
+    position: sticky; top: 0; z-index: 30; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+    margin: -10px -10px 10px;
+}
+.cl-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.cl-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+
+/* 标签筛选(对齐 vue .tags + .tag .tag-active)*/
+.cl-tags{
+    display: flex; overflow-x: auto;
+    gap: 8px; padding: 5px 0 10px;
+    white-space: nowrap;
+    scrollbar-width: none;
+}
+.cl-tags::-webkit-scrollbar{ display: none; }
+.cl-tags .tag{
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 14px;
+    background: #fff;
+    color: #555; font-size: 12px;
+    border: 1px solid #e5e5e5;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.cl-tags .tag.tag-active{
+    background: linear-gradient(135deg,#afa7ef,#968ae8);
+    color: #fff;
+    border-color: transparent;
+}
+
+/* 评论卡片 */
+.cl-list{ display: flex; flex-direction: column; gap: 10px; }
+.cl-item{
+    background: #fff; border-radius: 10px;
+    padding: 14px;
+    font-size: 13px; color: #333;
+}
+.cl-item .header{ display: flex; align-items: center; }
+.cl-item .avatar{ width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; margin-right: 10px; object-fit: cover; background: #f3f3f7; }
+.cl-item .user-info{ flex: 1; min-width: 0; }
+.cl-item .username{
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; color: #1B1B1B; font-weight: 500;
+}
+.cl-item .google-icon{ width: 14px; height: 14px; }
+.cl-item .meta-time{ font-size: 11px; color: #999; margin-top: 2px; }
+
+.cl-item .star-rating{
+    display: flex; align-items: center; gap: 4px;
+    margin: 8px 0 6px;
+}
+.cl-item .stars .star{ font-size: 13px; color: #ddd; }
+.cl-item .stars .star.active{ color: #fcc02e; }
+.cl-item .rating-num{ font-size: 12px; color: #fcc02e; font-weight: 600; margin-left: 4px; }
+
+.cl-item .content{
+    font-size: 13px; line-height: 1.6;
+    color: #333; word-break: break-word;
+    margin-top: 6px;
+}
+
+.cl-item .images{
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-top: 8px;
+}
+.cl-item .images > div{ width: calc((100% - 12px)/3); aspect-ratio: 1/1; border-radius: 5px; overflow: hidden; background: #f3f3f7; }
+.cl-item .images img,
+.cl-item .images video{ width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; }
+
+.cl-empty{ text-align: center; color: #999; font-size: 13px; padding: 50px 0; }
+
+/* 图片预览 lightbox */
+.cl-lightbox{
+    position: fixed; inset: 0; background: rgba(0,0,0,.86);
+    z-index: 999; display: none;
+    align-items: center; justify-content: center;
+}
+.cl-lightbox.open{ display: flex; }
+.cl-lightbox img{ max-width: 92%; max-height: 80vh; border-radius: 5px; }
+.cl-lightbox .close{
+    position: absolute; top: 30px; right: 20px;
+    width: 36px; height: 36px; line-height: 36px; text-align: center;
+    background: rgba(0,0,0,.4); color: #fff; border-radius: 50%;
+    cursor: pointer; border: 1px solid #fff;
+}
+</style>
+{/block}
+
 {block name="content"}
-<div class="comment-page">
-    <div class="page-head">
-        <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
-        <h1 class="page-title">{$subjectName|default='用户评价'}</h1>
+<div class="cl-page">
+    <div class="cl-head">
+        <a class="back" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="title">{$subjectName|default='用户评价'}</h1>
     </div>
 
-    <div class="feedback-list-component">
-        <div class="user-feedback">
-            <div class="feedback-list">
-                {if empty($comments)}
-                <div class="empty">{$tt['point.Empty']|default='暂无评价'}</div>
-                {/if}
-                {foreach $comments as $cm}
-                <div class="feedback-item">
-                    <div class="feedback-header">
-                        <div>
-                            <img class="avatar" src="{$cm.avatar}" alt="user">
-                            <div class="user-info"><div class="username"><span>{$cm.nickname}</span></div></div>
-                        </div>
+    <!-- 标签筛选(对齐 vue .tags + 全部 + 各标签)-->
+    {if !empty($tags)}
+    <div class="cl-tags">
+        <a class="tag {if $tagId == 0}tag-active{/if}" href="?type={$type}&with_id={$with_id}">
+            {$tt['index.tabs.all']|default='全部'}
+        </a>
+        {foreach $tags as $tag}
+        <a class="tag {if $tagId == $tag.id}tag-active{/if}" href="?type={$type}&with_id={$with_id}&tag_id={$tag.id}">
+            {$tag.name|default=''}
+        </a>
+        {/foreach}
+    </div>
+    {/if}
+
+    {if empty($comments)}
+    <div class="cl-empty">{$tt['point.Empty']|default='暂无评价'}</div>
+    {else/}
+    <div class="cl-list">
+        {foreach $comments as $cm}
+        <div class="cl-item">
+            <div class="header">
+                <img class="avatar" src="{$cm.avatar}" alt="" loading="lazy">
+                <div class="user-info">
+                    <div class="username">
+                        <span>{$cm.nickname}</span>
+                        {if !empty($cm.is_google_review)}<img class="google-icon" src="https://beautsgoimg.59w.net/20250805145532/6891aae400665.png" alt="G">{/if}
                     </div>
-                    {if $cm.rating > 0}
-                    <div class="star-rating">
-                        <div class="stars">{foreach name=":range(1,5)" item="n"}<span class="star{if $n <= $cm['rating']} active{/if}">★</span>{/foreach}</div>
-                        <span class="rating-num">{$cm.rating}.0</span>
+                    {if !empty($cm.create_time)}
+                    <div class="meta-time">
+                        {if is_numeric($cm.create_time)}{:date('Y-m-d', (int)$cm['create_time'])}{else/}{$cm.create_time}{/if}
                     </div>
                     {/if}
-                    <div class="feedback-content">{$cm.content}</div>
-                    {if !empty($cm.mediaList)}
-                    <div class="feedback-images">
-                        {foreach $cm.mediaList as $m}
-                        <div>{if !empty($m.type) && $m['type'] == 'video'}<video src="{$m.url}" controls></video>{else}<img src="{$m.url}" alt="media" loading="lazy">{/if}</div>
-                        {/foreach}
-                    </div>
+                </div>
+            </div>
+            {if $cm.rating > 0}
+            <div class="star-rating">
+                <div class="stars">
+                    {foreach name=":range(1,5)" item="n"}<span class="star{if $n <= $cm['rating']} active{/if}">★</span>{/foreach}
+                </div>
+                <span class="rating-num">{$cm.rating}.0</span>
+            </div>
+            {/if}
+            <div class="content">{$cm.content}</div>
+            {if !empty($cm.mediaList) && is_array($cm.mediaList)}
+            <div class="images">
+                {foreach $cm.mediaList as $m}
+                <div>
+                    {if !empty($m.type) && $m['type'] == 'video'}
+                    <video src="{$m.url}" controls preload="none"></video>
+                    {else/}
+                    <img src="{$m.url}" alt="" loading="lazy" data-preview="{$m.url}">
                     {/if}
                 </div>
                 {/foreach}
             </div>
+            {/if}
         </div>
+        {/foreach}
     </div>
+    {/if}
 
     {include file="components/_pagination" /}
+
+    <!-- 图片预览 lightbox -->
+    <div class="cl-lightbox" id="clLightbox">
+        <span class="close" id="clLightboxClose">×</span>
+        <img id="clLightboxImg" src="" alt="">
+    </div>
+
     {include file="components/_tabbar" /}
 </div>
-{/block}
 
-{block name="extra_head"}
-<link rel="stylesheet" href="/static/css/pages/case.css?v={$assets.css_ver}">
+<script>
+(function(){
+    /* 图片点击预览(对齐 vue previewMedia uni.previewImage)*/
+    var lb = document.getElementById('clLightbox');
+    var lbImg = document.getElementById('clLightboxImg');
+    document.querySelectorAll('[data-preview]').forEach(function(el){
+        el.addEventListener('click', function(){
+            lbImg.src = el.dataset.preview;
+            lb.classList.add('open');
+        });
+    });
+    document.getElementById('clLightboxClose').addEventListener('click', function(){ lb.classList.remove('open'); });
+    lb.addEventListener('click', function(e){ if(e.target === lb) lb.classList.remove('open'); });
+})();
+</script>
 {/block}
