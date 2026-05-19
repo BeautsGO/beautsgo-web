@@ -7,15 +7,38 @@
     <div class="list-item-right">
         <div class="list-item-title">{$p.name}</div>
         <div class="list-item-price-box">
-            <div class="yy-price-wrap">
-                <span class="price-hb-price">₩ {$p.korean_won}</span>
-                {if !empty($p.unit)}<span class="price-unit">/{$p.unit}</span>{/if}
+            <!-- 1. 价格(对齐 iteminfo.vue .price-hb-wrap)-->
+            <div class="yy-hb-wrap">
+                <div class="price-hb-title">{$tt['index.common.price']|default='价格'}</div>
+                <div class="price-hb-price">
+                    <span class="price-num">{$p.korean_won|default=''}</span>
+                    {if !empty($p.unit)}<span class="price-unit">/{$p.unit}</span>{/if}
+                </div>
             </div>
-            {if !empty($p.sale_nums)}<span class="sale-num">{$tt['index.common.AlreadyRedeemed']|default='已售'}{$p.sale_nums}</span>{/if}
+            <i class="yy-line"></i>
+            <!-- 2. 已预约(对齐 .yy-num-wrap)-->
+            <div class="yy-num-wrap">
+                <div class="yy-num-title">{$tt['index.common.AlreadyBooked']|default='已预约'}</div>
+                <div class="yy-num-info">{$p.sale_nums|default=0}</div>
+            </div>
+            <i class="yy-line"></i>
+            <!-- 3. 面诊费(对齐 .yy-price-wrap;service_fee=[price, symbol] 数组)-->
+            <div class="yy-price-wrap">
+                <div class="yy-price-title">{$tt['index.common.BookingServiceFee']|default='面诊费'}</div>
+                <div class="yy-price-num">
+                    {if !empty($p.service_fee) && is_array($p.service_fee)}
+                        <span class="price-num-icon">{$p.service_fee.1|default=''}</span>{$p.service_fee.0|default=''}
+                    {elseif !empty($p.clinic_fee)/}
+                        ₩{$p.clinic_fee}
+                    {else/}
+                        -
+                    {/if}
+                </div>
+            </div>
         </div>
         <div class="list-item-info">
-            {if !empty($p.hospital_name)}<span class="info-hospital">{$p.hospital_name}</span>{/if}
-            {if !empty($p.doctor_name)}<span class="info-doctor">{$p.doctor_name}</span>{/if}
+            {if !empty($p.hospital_name) || !empty($p.hospitalName)}<span class="info-hospital">{!empty($p.hospital_name)?$p.hospital_name:$p.hospitalName}</span>{/if}
+            {if !empty($p.doctor_name) || !empty($p.doctorName)}<span class="info-doctor">{!empty($p.doctor_name)?$p.doctor_name:$p.doctorName}</span>{/if}
         </div>
     </div>
 </a>
