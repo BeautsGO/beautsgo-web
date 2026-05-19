@@ -17,13 +17,58 @@ class Chat extends BaseController
     public function index()
     {
         $auth = new AuthService();
+        // 1:1 对齐 chatList.vue:186 $http.get('Chat/unreadMessageList')
         $resp = $auth->call('GET', '/Chat/unreadMessageList', []);
         $list = (array) ($resp['data']['list'] ?? $resp['data'] ?? []);
 
+        // 归一化嵌套字段(对齐 vue filteredChatList computed map):
+        //   item.hospital.name → hospitalName
+        //   item.hospital.cover[0].url → hospitalCover
+        //   item.last_content → displayContent
+        //   item.last_timestamp → displayTime
+        //   item.unread_count → unreadCount
+        foreach ($list as &$it) {
+            $hosp = $it['hospital'] ?? [];
+            $it['hospitalName']  = $hosp['name'] ?? ($it['hospital_name'] ?? ($it['name'] ?? '客服'));
+            $cov = $hosp['cover'] ?? null;
+            if (is_array($cov)) {
+                $first = $cov[0] ?? $cov;
+                $it['hospitalCover'] = $first['url'] ?? ($first['cover'] ?? '');
+            } else {
+                $it['hospitalCover'] = (string) ($it['cover_url'] ?? $it['cover'] ?? '');
+            }
+            $it['displayTime']    = $it['last_timestamp'] ?? ($it['last_time'] ?? '');
+            $it['displayContent'] = $it['last_content']  ?? ($it['last_message'] ?? '');
+            $it['unreadCount']    = (int) ($it['unread_count'] ?? 0);
+            $it['hospitalId']     = (int) ($hosp['id'] ?? ($it['h_id'] ?? ($it['hospital_id'] ?? 0)));
+        }
+        unset($it);
+
+        // 空会话时回落到医院推荐列表(对齐 vue chatList.length === 0 → hospitalList)
+        $hospitalList = [];
+        if (empty($list)) {
+            try {
+                $hr = $auth->call('GET', '/getHospital', ['page' => 1, 'limit' => 10]);
+                $hospitalList = (array) ($hr['data']['list'] ?? []);
+                foreach ($hospitalList as &$h) {
+                    if (empty($h['cover_url'])) {
+                        $c = $h['cover'] ?? null;
+                        if (is_array($c)) {
+                            $first = $c[0] ?? $c;
+                            $h['cover_url'] = $first['url'] ?? ($first['cover'] ?? '');
+                        }
+                    }
+                    if (empty($h['slug'])) $h['slug'] = (string) ($h['id'] ?? '');
+                }
+                unset($h);
+            } catch (\Throwable $e) {}
+        }
+
         $this->seo->setTdk('客服会话 - BeautsGO', '在线咨询会话', '客服,咨询')->buildOrganization();
         return $this->render('pages/chat/list', [
-            'user' => $auth->getCurrentUser(),
-            'list' => $list,
+            'user'         => $auth->getCurrentUser(),
+            'list'         => $list,
+            'hospitalList' => $hospitalList,
         ]);
     }
 

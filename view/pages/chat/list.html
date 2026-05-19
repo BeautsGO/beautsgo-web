@@ -1,79 +1,183 @@
 {extend name="layout/base" /}
 
 {block name="extra_head"}
+<link rel="stylesheet" href="/static/css/pages/index.css?v={$assets.css_ver}">
 <style>
-.chat-list-page{ background: #f6f6f6; min-height: 100vh; padding-bottom: 70px; }
-.chat-list-page .page-head{
-    position: sticky; top: 0; z-index: 20; height: 44px;
-    background: #fff; border-bottom: 1px solid #f1f1f1;
+/* ============================================================
+ * chatList 1:1 还原 subPackages_lightningRod/chat/chatList.vue scoped scss
+ *   .chat-container 灰底
+ *   .search-bar 仅在 chatList.length>0 时显示
+ *   .chat-item 50px 圆头像 + 红色 badge + 名称/时间/内容/未读数
+ *   chatList 为空时:有推荐医院 → 显示 "去机构咨询" 提示 + 医院列表
+ * ============================================================ */
+.cc-page{
+    background: #f5f5f5; min-height: 100vh;
+    padding-bottom: 70px; box-sizing: border-box;
+}
+.cc-head{
+    position: sticky; top: 0; z-index: 30; height: 44px;
     display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
 }
-.chat-list-page .back-btn{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 20px; }
-.chat-list-page .page-title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+.cc-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.cc-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
 
-.cl-list{ background: #fff; }
-.cl-item{
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 16px; border-bottom: 1px solid #f5f5f5;
-    text-decoration: none; color: inherit; position: relative;
+.cc-search{
+    background: #fff; padding: 10px 12px;
+    border-bottom: 1px solid #f5f5f5;
+    position: sticky; top: 44px; z-index: 20;
 }
-.cl-item:last-child{ border-bottom: 0; }
-.cl-item__avatar{
-    width: 50px; height: 50px; border-radius: 50%;
-    background: #f3f3f7; overflow: hidden; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
+.cc-search .input{
+    display: flex; align-items: center;
+    background: #f3f3f7; border-radius: 18px;
+    padding: 0 12px; height: 36px;
 }
-.cl-item__avatar img{ width: 100%; height: 100%; object-fit: cover; }
-.cl-item__body{ flex: 1; min-width: 0; }
-.cl-item__row1{ display: flex; align-items: center; justify-content: space-between; }
-.cl-item__name{ font-size: 15px; font-weight: 600; color: #1B1B1B; max-width: 60%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cl-item__time{ font-size: 11px; color: #bbb; flex-shrink: 0; }
-.cl-item__row2{ display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
-.cl-item__msg{ font-size: 13px; color: #999; max-width: 80%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cl-item__badge{
+.cc-search .input svg{ flex-shrink: 0; }
+.cc-search .input input{
+    flex: 1; border: 0; outline: none; background: transparent;
+    padding: 0 8px; font-size: 14px;
+}
+
+.cc-empty-notice{
+    text-align: center; padding: 20px 16px 10px;
+    color: #999; font-size: 13px;
+}
+.cc-empty{
+    text-align: center; padding: 80px 16px 40px;
+    color: #999; font-size: 13px;
+}
+
+.cc-list{ background: #fff; margin-top: 6px; }
+.cc-item{
+    display: flex; align-items: center;
+    padding: 12px 16px; gap: 12px;
+    border-bottom: 1px solid #f5f5f5;
+    text-decoration: none; color: inherit; cursor: pointer;
+}
+.cc-item:last-child{ border-bottom: 0; }
+.cc-avatar{
+    position: relative;
+    width: 50px; height: 50px;
+    border-radius: 50%; overflow: hidden;
+    background: #f3f3f7;
+    flex-shrink: 0;
+}
+.cc-avatar img{ width: 100%; height: 100%; object-fit: cover; }
+.cc-avatar .badge{
+    position: absolute; top: -2px; right: -2px;
     min-width: 18px; height: 18px; line-height: 18px;
-    padding: 0 5px; border-radius: 9px; background: #FF4D4D; color: #fff;
-    font-size: 11px; text-align: center; font-weight: 500; flex-shrink: 0;
+    padding: 0 5px; border-radius: 9px;
+    background: #FF4D4D; color: #fff;
+    font-size: 11px; text-align: center; font-weight: 500;
 }
-.empty{ text-align: center; padding: 80px 20px; color: #999; font-size: 13px; }
-.empty img{ width: 100px; opacity: .5; margin: 0 auto 12px; }
+.cc-content{ flex: 1; min-width: 0; }
+.cc-header-row{
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 4px;
+}
+.cc-name{
+    font-size: 15px; font-weight: 600; color: #1B1B1B;
+    max-width: 60%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cc-time{ font-size: 11px; color: #999; flex-shrink: 0; }
+.cc-message{
+    font-size: 13px; color: #999;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.cc-no-result{
+    padding: 20px 16px; text-align: center;
+    color: #999; font-size: 13px;
+}
+
+/* 无聊天时医院列表占位 */
+.cc-hospital-list{ padding: 12px; background: #f5f5f5; }
 </style>
 {/block}
 
 {block name="content"}
-<div class="chat-list-page">
-    <div class="page-head">
-        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
-        <h1 class="page-title">{$tt['chat.title']|default='消息'}</h1>
+<div class="cc-page">
+    <div class="cc-head">
+        <a class="back" href="/{$lang_seg}/me" aria-label="返回">‹</a>
+        <h1 class="title">{$tt['chat.title']|default='消息'}</h1>
     </div>
 
-    {if empty($list)}
-    <div class="empty">{$tt['chat.empty']|default='暂无会话,去机构详情找心仪的医生发起咨询吧'}</div>
-    {else/}
-    <div class="cl-list">
+    {if !empty($list)}
+    <!-- 搜索栏(对齐 vue v-if chatList.length > 0)-->
+    <div class="cc-search">
+        <div class="input">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#909399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+            <input type="search" id="ccSearchInput" placeholder="{$tt['chat.search']|default='搜索机构 / 消息'}" autocomplete="off">
+        </div>
+    </div>
+
+    <div class="cc-list" id="ccChatList">
         {foreach $list as $c}
-        <a class="cl-item" href="/{$lang_seg}/chat/{:!empty($c["h_id"])?$c["h_id"]:(!empty($c["hospital_id"])?$c["hospital_id"]:0)}">
-            <div class="cl-item__avatar">
-                {if !empty($c.cover_url) || !empty($c.cover)}
-                <img src="{$c.cover_url|default=$c.cover}" alt="" loading="lazy">
+        <a class="cc-item"
+           href="/{$lang_seg}/chat/{$c.hospitalId}"
+           data-name="{$c.hospitalName|default=''}"
+           data-msg="{$c.displayContent|default=''}">
+            <div class="cc-avatar">
+                {if !empty($c.hospitalCover)}
+                <img src="{$c.hospitalCover}" alt="" loading="lazy">
                 {else/}
-                <span style="color:#fe739d;font-size:20px">●</span>
+                <span style="display:flex;align-items:center;justify-content:center;height:100%;color:#fe739d;font-size:18px;">●</span>
+                {/if}
+                {if $c.unreadCount > 0}
+                <span class="badge">{:$c['unreadCount']>99?'99+':$c['unreadCount']}</span>
                 {/if}
             </div>
-            <div class="cl-item__body">
-                <div class="cl-item__row1">
-                    <div class="cl-item__name">{:!empty($c["hospital_name"])?$c["hospital_name"]:(!empty($c["name"])?$c["name"]:'客服')}</div>
-                    <div class="cl-item__time">{if !empty($c.last_time)}{if is_numeric($c.last_time)}{:date('m-d H:i', (int)$c.last_time)}{else/}{$c.last_time}{/if}{/if}</div>
+            <div class="cc-content">
+                <div class="cc-header-row">
+                    <span class="cc-name">{$c.hospitalName|default='客服'}</span>
+                    <span class="cc-time">
+                        {if !empty($c.displayTime)}
+                            {if is_numeric($c.displayTime)}{:date('m-d H:i', (int)$c['displayTime'])}{else/}{$c.displayTime}{/if}
+                        {/if}
+                    </span>
                 </div>
-                <div class="cl-item__row2">
-                    <div class="cl-item__msg">{:!empty($c["last_message"])?$c["last_message"]:(!empty($c["content"])?$c["content"]:'')}</div>
-                    {if !empty($c.unread_count)}<span class="cl-item__badge">{:$c['unread_count']>99?'99+':$c['unread_count']}</span>{/if}
-                </div>
+                <div class="cc-message">{$c.displayContent|default=''}</div>
             </div>
         </a>
         {/foreach}
     </div>
+    <div class="cc-no-result" id="ccNoResult" style="display:none">{$tt['chat.noResult']|default='未找到相关对话'}</div>
+    {else/}
+        {if !empty($hospitalList)}
+        <!-- 空会话兜底:vue chatList.length === 0 && hospitalList.length > 0 -->
+        <div class="cc-empty-notice">{$tt['chatnoData.info']|default='暂无对话,点击下方机构开启咨询'}</div>
+        <div class="cc-hospital-list">
+            {foreach $hospitalList as $h}{include file="components/_card_hospital" /}{/foreach}
+        </div>
+        {else/}
+        <div class="cc-empty">{$tt['hospitalDetails.Contentempty']|default='暂无内容'}</div>
+        {/if}
     {/if}
+
     {include file="components/_tabbar" /}
 </div>
+
+<script>
+(function(){
+    /* 实时搜索过滤(对齐 vue filteredChatList computed)*/
+    var input = document.getElementById('ccSearchInput');
+    var list  = document.getElementById('ccChatList');
+    var noResult = document.getElementById('ccNoResult');
+    if(input && list){
+        input.addEventListener('input', function(){
+            var kw = input.value.trim().toLowerCase();
+            var items = list.querySelectorAll('.cc-item');
+            var shown = 0;
+            items.forEach(function(it){
+                var name = (it.dataset.name || '').toLowerCase();
+                var msg  = (it.dataset.msg  || '').toLowerCase();
+                var match = !kw || name.indexOf(kw) >= 0 || msg.indexOf(kw) >= 0;
+                it.style.display = match ? '' : 'none';
+                if(match) shown++;
+            });
+            noResult.style.display = (kw && shown === 0) ? 'block' : 'none';
+        });
+    }
+})();
+</script>
 {/block}
