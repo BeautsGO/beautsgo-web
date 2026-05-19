@@ -17,7 +17,32 @@
 .cp-subject .sub{ font-size: 11px; color: #999; margin-top: 3px; }
 
 .cp-card{ background: #fff; margin-bottom: 12px; padding: 16px; }
-.cp-section-title{ font-size: 14px; color: #333; font-weight: 600; margin-bottom: 10px; }
+.cp-section-title{ font-size: 14px; color: #333; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+.cp-tag-add-btn{
+    display: inline-flex; align-items: center; gap: 4px;
+    background: transparent; border: 0; cursor: pointer;
+    color: #FD83AB; font-size: 12px; font-weight: 500;
+    padding: 2px 0;
+}
+.cp-tag-add-btn .plus{
+    width: 16px; height: 16px; line-height: 14px;
+    border-radius: 50%; border: 1px solid #FD83AB;
+    text-align: center; font-size: 14px;
+}
+.cp-user-tag{
+    display: flex; align-items: center; gap: 8px; margin-top: 10px;
+}
+.cp-user-tag-input{
+    flex: 1; height: 32px; padding: 0 10px;
+    border: 1px solid #eee; border-radius: 16px;
+    font-size: 12px; outline: none;
+}
+.cp-user-tag-input:focus{ border-color: #fe739d; }
+.cp-user-tag-submit{
+    padding: 6px 12px; background: #FD83AB;
+    color: #fff; border: 0; border-radius: 14px;
+    font-size: 12px; cursor: pointer;
+}
 
 .cp-rate{ display: inline-flex; flex-direction: row-reverse; gap: 4px; vertical-align: middle; }
 .cp-rate input{ position: absolute; opacity: 0; pointer-events: none; }
@@ -98,6 +123,7 @@
     <form method="post" action="/{$lang_seg}/comment/publish?type={$type}&with_id={$with_id}" enctype="multipart/form-data" id="cpForm">
         <input type="hidden" name="type" value="{$type}">
         <input type="hidden" name="with_id" value="{$with_id}">
+        {if !empty($Request.param.apt_id)}<input type="hidden" name="apt_id" value="{$Request.param.apt_id|raw}">{/if}
 
         <div class="cp-card">
             <div class="cp-section-title">{$tt['comment.rate']|default='整体评分'}</div>
@@ -113,19 +139,31 @@
             </div>
         </div>
 
-        {if !empty($tagOptions)}
+        <!-- 推荐标签 + 用户自定义(对齐 userComment.vue tags-section)-->
         <div class="cp-card">
-            <div class="cp-section-title">{$tt['comment.tags']|default='推荐标签'}</div>
-            <div class="cp-tags">
+            <div class="cp-section-title">
+                <span>{$tt['point.Userimpression']|default='用户印象'}</span>
+                <button type="button" class="cp-tag-add-btn" id="cpAddTagToggle">
+                    <span>{$tt['point.Clicktags']|default='添加自定义标签'}</span>
+                    <span class="plus">+</span>
+                </button>
+            </div>
+            <div class="cp-tags" id="cpTagList">
+                {if !empty($tagOptions)}
                 {foreach $tagOptions as $tag}
                 <label class="cp-tag">
                     <input type="checkbox" name="tags[]" value="{$tag.id|default=$tag}">
                     {$tag.name|default=$tag}
                 </label>
                 {/foreach}
+                {/if}
+            </div>
+            <!-- 自定义标签输入(对齐 vue userTagShow + userTag input + tagInputBtn)-->
+            <div class="cp-user-tag" id="cpUserTag" style="display:none;">
+                <input class="cp-user-tag-input" id="cpUserTagInput" maxlength="20" placeholder="{$tt['point.addYourTag']|default='添加您的标签…'}">
+                <button type="button" class="cp-user-tag-submit" id="cpUserTagSubmit">{$tt['point.Addtags']|default='添加'}</button>
             </div>
         </div>
-        {/if}
 
         <div class="cp-card">
             <div class="cp-section-title">{$tt['comment.content']|default='评价内容'}</div>
@@ -200,6 +238,50 @@
             e.preventDefault();
             BG.toast('请至少填写 10 个字', 'error');
         }
+    });
+
+    /* 自定义标签(对齐 vue tagInputShow + tagInputBtn → /comment/useAddTag)*/
+    var toggleBtn = document.getElementById('cpAddTagToggle');
+    var userTagBox = document.getElementById('cpUserTag');
+    var userTagInput = document.getElementById('cpUserTagInput');
+    var userTagSubmit = document.getElementById('cpUserTagSubmit');
+    var tagList = document.getElementById('cpTagList');
+    toggleBtn && toggleBtn.addEventListener('click', function(){
+        var open = userTagBox.style.display !== 'none';
+        userTagBox.style.display = open ? 'none' : 'flex';
+        if(!open) setTimeout(function(){ userTagInput.focus(); }, 50);
+    });
+    userTagSubmit && userTagSubmit.addEventListener('click', function(){
+        var text = userTagInput.value.trim();
+        if(!text){ userTagBox.style.display = 'none'; return; }
+        userTagSubmit.disabled = true;
+        var body = 'type={$type}&with_id={$with_id}&text=' + encodeURIComponent(text);
+        fetch('/{$lang_seg}/comment/add-tag', {
+            method: 'POST', credentials: 'same-origin',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: body
+        }).then(function(r){ return r.json(); }).then(function(j){
+            userTagSubmit.disabled = false;
+            if(!j.ok){ BG.toast(j.msg || '添加失败', 'error'); return; }
+            // 用返回的最新 tag 列表重渲染
+            tagList.innerHTML = (j.list || []).map(function(t){
+                return '<label class="cp-tag"><input type="checkbox" name="tags[]" value="' + (t.id||'') + '">' +
+                       (t.name||'').replace(/</g,'&lt;') + '</label>';
+            }).join('');
+            // 重新绑定 checkbox 视觉态
+            tagList.querySelectorAll('.cp-tag').forEach(function(t){
+                var input = t.querySelector('input');
+                t.addEventListener('click', function(){
+                    setTimeout(function(){ t.classList.toggle('cp-tag--checked', input.checked); }, 0);
+                });
+            });
+            userTagInput.value = '';
+            userTagBox.style.display = 'none';
+            BG.toast('已添加', 'success');
+        }).catch(function(){
+            userTagSubmit.disabled = false;
+            BG.toast('网络错误', 'error');
+        });
     });
 })();
 </script>

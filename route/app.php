@@ -66,6 +66,7 @@ Route::group(':lang', function () {
     Route::get('compare/save-image', 'Compare/saveImage');
     Route::get('compare',            'Compare/detail');
     Route::any('comment/publish',    'Comments/publish');
+    Route::post('comment/add-tag',   'Comments/addTag');
     Route::get('chat',               'Chat/index');
     Route::any('chat/:hid',          'Chat/detail')->pattern(['hid' => '\d+']);
     Route::any('point/sign',         'Points/sign');

@@ -203,6 +203,40 @@ class Comments extends BaseController
         ]);
     }
 
+    /**
+     * 用户添加自定义标签(对齐 userComment.vue:95 POST /comment/useAddTag)
+     * AJAX endpoint:返回 JSON { ok, msg, list }
+     */
+    public function addTag()
+    {
+        $auth = new \app\service\AuthService();
+        $type    = max(1, min(3, (int) $this->request->param('type', 1)));
+        $withId  = (int) $this->request->param('with_id', 0);
+        $text    = trim((string) $this->request->param('text', ''));
+        if ($withId <= 0 || $text === '') {
+            return json(['ok' => false, 'msg' => 'invalid params']);
+        }
+
+        $resp = $auth->call('POST', '/comment/useAddTag', [
+            'with_id' => $withId, 'type' => $type, 'text' => $text,
+        ]);
+        if (empty($resp['ok'])) {
+            return json(['ok' => false, 'msg' => $resp['msg'] ?: '添加失败']);
+        }
+
+        // 刷新标签列表
+        $tagResp = $auth->call('POST', '/comment/tagList', [
+            'type' => $type, 'with_id' => $withId,
+        ]);
+        $list = (array) ($tagResp['data'] ?? []);
+        $list = array_map(function ($t) {
+            if (is_array($t)) return ['id' => (int) ($t['id'] ?? 0), 'name' => (string) ($t['name'] ?? '')];
+            return ['id' => 0, 'name' => (string) $t];
+        }, $list);
+
+        return json(['ok' => true, 'list' => $list]);
+    }
+
     private function fetchSubjectCover(int $type, int $withId): string
     {
         if ($withId <= 0) return '';
