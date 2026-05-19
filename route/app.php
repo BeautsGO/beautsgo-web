@@ -49,6 +49,7 @@ Route::group(':lang', function () {
     Route::get('me/express/:id',     'UserExtra/expressData')->pattern(['id' => '\d+']);
     Route::get('point/team',         'Points/team');
     Route::get('point/task-share',   'Points/taskShare');
+    Route::any('point/share-submit', 'Points/shareSubmit');
     Route::get('point/order/:id',    'Points/orderDetail')->pattern(['id' => '\d+']);
     Route::any('me/feedback',        'Me/feedback');
     Route::get('me/wallet',          'Me/wallet');

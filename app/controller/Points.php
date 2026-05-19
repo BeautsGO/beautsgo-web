@@ -241,6 +241,61 @@ class Points extends BaseController
     }
 
     /**
+     * 分享提交页(对齐 subPackages_lightningRod/point/shareSumbit.vue)
+     *   GET 显示规则 + 推荐标签 + 上传 + 链接表单
+     *   POST 提交 → POST /Point/addMeaterilas { image: [], content: url }
+     */
+    public function shareSubmit()
+    {
+        $auth = new \app\service\AuthService();
+        $error = '';
+        $saved = false;
+
+        if ($this->request->isPost()) {
+            $url = trim((string) $this->request->param('url', ''));
+            // mediaList SSR 端暂不上传 OSS,后续接入 /uploadImage
+            $images = (array) $this->request->param('images', []);
+            $payload = ['image' => $images, 'content' => $url];
+            $resp = $auth->call('POST', '/Point/addMeaterilas', $payload);
+            if (!empty($resp['ok'])) $saved = true;
+            else $error = $resp['msg'] ?: '提交失败';
+        }
+
+        // 从 /getConfig.platformConfig 拉规则文案 + 推荐标签
+        $richContent = '';
+        $tagList = [];
+        try {
+            $cfg = $this->api->get('/getConfig');
+            $pc = (array) ($cfg['data']['platformConfig'] ?? []);
+            $ugc = $pc['xhs_ugc'] ?? [];
+            if (is_array($ugc) && !empty($ugc[0])) {
+                $richContent = htmlspecialchars_decode((string) $ugc[0]);
+            }
+            $rawTag = $pc['xhs_tag'] ?? [];
+            if (is_array($rawTag)) {
+                foreach ($rawTag as $t) {
+                    if (!is_string($t)) continue;
+                    foreach (preg_split('/[\r\n]+/', $t) as $line) {
+                        $line = trim($line);
+                        if ($line !== '' && (strpos($line, '#') === 0)) $tagList[] = $line;
+                    }
+                }
+                $tagList = array_values(array_unique($tagList));
+            }
+        } catch (\Throwable $e) {}
+
+        $this->seo->setTdk('分享 BeautsGO 赢积分 - BeautsGO', '提交分享笔记/截图领积分', '积分,分享')
+            ->buildOrganization();
+        return $this->render('pages/point/share-submit', [
+            'user'        => $auth->getCurrentUser(),
+            'richContent' => $richContent,
+            'tagList'     => $tagList,
+            'error'       => $error,
+            'saved'       => $saved,
+        ]);
+    }
+
+    /**
      * 任务分享背景图(beauts_app/point/taskShare.vue)
      */
     public function taskShare()

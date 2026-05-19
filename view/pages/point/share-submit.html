@@ -1,0 +1,212 @@
+{extend name="layout/base" /}
+
+{block name="extra_head"}
+<style>
+/* ============================================================
+ * shareSumbit 1:1 还原 subPackages_lightningRod/point/shareSumbit.vue scoped scss
+ *   规则说明卡 + 推荐标签复制 + 截图上传 + 链接提交
+ *   .comment-page 灰底 #f5f5f5
+ *   .rules-section 白底 10px 圆角
+ *   .text 富文本盒
+ *   .media-add 上传 + 边框虚线
+ *   .submit-btn 粉色圆角主按钮
+ * ============================================================ */
+.ss-body{
+    padding: 10px; background: #f5f5f5;
+    min-height: 100vh; padding-bottom: 30px;
+    box-sizing: border-box;
+}
+.ss-head{
+    position: sticky; top: 0; z-index: 30; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+    margin: -10px -10px 10px;
+}
+.ss-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.ss-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+
+.ss-rules-section{
+    background: #fff; border-radius: 10px;
+    padding: 14px; margin-bottom: 10px;
+}
+.ss-rules-title{
+    font-size: 16px; font-weight: 700; color: #1B1B1B;
+    margin-bottom: 10px;
+}
+.ss-text{
+    background: #fafafa; border-radius: 6px;
+    padding: 12px 10px;
+    white-space: pre-wrap; word-break: break-word;
+    font-size: 13px; line-height: 1.7; color: #333;
+}
+.ss-text img{ max-width: 100% !important; height: auto !important; display: block; }
+
+.ss-rules-content{
+    margin-top: 12px;
+    padding: 10px; background: #fff5fa; border-radius: 6px;
+    font-size: 13px; color: #FD83AB; line-height: 1.7;
+}
+.ss-rules-content .tip{ color: #666; margin-bottom: 4px; }
+.ss-rules-content .tag{
+    display: inline-block;
+    margin-right: 8px; padding: 2px 6px;
+    color: #FD83AB; cursor: pointer;
+}
+.ss-rules-content .tag:hover{ background: rgba(253,131,171,.08); border-radius: 4px; }
+
+.ss-section-title{
+    font-size: 14px; font-weight: 600; color: #1B1B1B;
+    margin: 10px 0; padding: 0 4px;
+}
+
+.ss-media{
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    background: #fff; padding: 12px; border-radius: 10px;
+    margin-bottom: 10px;
+}
+.ss-media-item{
+    aspect-ratio: 1/1; border-radius: 6px;
+    background: #f3f3f7; overflow: hidden;
+    position: relative;
+}
+.ss-media-item img{ width: 100%; height: 100%; object-fit: cover; display: block; }
+.ss-media-item .del{
+    position: absolute; top: 4px; right: 4px;
+    width: 20px; height: 20px; line-height: 18px; text-align: center;
+    background: rgba(0,0,0,.5); color: #fff; border-radius: 50%;
+    font-size: 14px; cursor: pointer;
+}
+.ss-media-add{
+    aspect-ratio: 1/1; border: 1px dashed #ddd; border-radius: 6px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: #999; font-size: 12px; background: #fafafa; cursor: pointer;
+    position: relative;
+}
+.ss-media-add input[type=file]{ display: none; }
+.ss-media-add .plus{ font-size: 26px; line-height: 1; margin-bottom: 4px; }
+
+.ss-input{
+    background: #fff; border-radius: 10px;
+    padding: 12px; margin-bottom: 10px;
+}
+.ss-input textarea{
+    width: 100%; min-height: 100px;
+    border: 0; outline: none; resize: vertical;
+    font-size: 14px; line-height: 1.6; color: #333;
+    box-sizing: border-box;
+}
+.ss-input textarea::placeholder{ color: #bbb; }
+
+.ss-submit-btn{
+    width: calc(100% - 30px); margin: 20px 15px;
+    height: 44px; background: #fe739d;
+    color: #fff; border: 0; border-radius: 22px;
+    font-size: 15px; font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(254,115,157,.35);
+    display: block;
+}
+
+.ss-msg.ok, .ss-msg.err{ margin: 8px 0 12px; padding: 8px 12px; border-radius: 6px; font-size: 12px; text-align: center; }
+.ss-msg.ok{ background: #e6fff0; color: #1aac4a; }
+.ss-msg.err{ background: #fff5fa; color: #ef5189; }
+</style>
+{/block}
+
+{block name="content"}
+<div class="ss-body">
+    <div class="ss-head">
+        <a class="back" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="title">{$tt['shareSumbit.title']|default='分享得积分'}</h1>
+    </div>
+
+    {if $saved}<div class="ss-msg ok">{$tt['showToast.SubmissionSuccessfu']|default='提交成功,等待审核'}</div>{/if}
+    {if !empty($error)}<div class="ss-msg err">{$error}</div>{/if}
+
+    <!-- 规则说明 + 富文本(对齐 vue .rules-section)-->
+    <div class="ss-rules-section">
+        <div class="ss-rules-title">{$tt['point.ShareBeautsGOToWinPoints']|default='分享 BeautsGO 赢积分'}</div>
+        {if !empty($richContent)}
+        <div class="ss-text">{$richContent|raw}</div>
+        {/if}
+
+        {if !empty($tagList)}
+        <div class="ss-rules-content">
+            <div class="tip">{$tt['point.CopyTheFollowingTags']|default='请复制以下标签发布:'}</div>
+            <div>
+                {foreach $tagList as $tag}
+                <span class="tag" data-copy="{$tag}">{$tag}</span>
+                {/foreach}
+            </div>
+        </div>
+        {/if}
+    </div>
+
+    <form method="post" action="/{$lang_seg}/point/share-submit" enctype="multipart/form-data" id="ssForm">
+        <!-- 截图上传 -->
+        <div class="ss-section-title">{$tt['point.SubmitScreenshot']|default='提交截图'}</div>
+        <div class="ss-media" id="ssMedia">
+            <label class="ss-media-add" id="ssMediaAdd">
+                <input type="file" name="images[]" accept="image/*" multiple>
+                <span class="plus">+</span>
+                <span>{$tt['point.AddScreenshot']|default='添加截图'}</span>
+            </label>
+        </div>
+
+        <!-- 链接提交 -->
+        <div class="ss-section-title">{$tt['point.LinkSubmission']|default='笔记链接'}</div>
+        <div class="ss-input">
+            <textarea name="url" maxlength="500" placeholder="{$tt['point.PleaseEnterTheLinkYouNeedToSubmit']|default='请粘贴您发布的笔记/视频/分享链接'}" required></textarea>
+        </div>
+
+        <button class="ss-submit-btn" type="submit">{$tt['index.common.submit']|default='提交'}</button>
+    </form>
+</div>
+
+<script>
+(function(){
+    /* 点击标签复制(对齐 vue copyToClipboard)*/
+    document.querySelectorAll('[data-copy]').forEach(function(el){
+        el.addEventListener('click', function(){
+            var text = el.dataset.copy;
+            (window.BG && BG.copy ? BG.copy(text) : function(){
+                var ta = document.createElement('textarea');
+                ta.value = text; document.body.appendChild(ta);
+                ta.select(); try { document.execCommand('copy'); } catch(e){}
+                ta.remove();
+            }());
+            BG.toast && BG.toast('{$tt["showToast.Clipboard"]|default="已复制"}', 'success');
+        });
+    });
+
+    /* 截图本地预览(对齐 vue mediaList + addMedia)*/
+    var media = document.getElementById('ssMedia');
+    var addSlot = document.getElementById('ssMediaAdd');
+    var fileInput = addSlot.querySelector('input[type=file]');
+    var MAX = 9;
+    fileInput && fileInput.addEventListener('change', function(){
+        var files = Array.from(fileInput.files);
+        var current = media.querySelectorAll('.ss-media-item').length;
+        files.slice(0, MAX - current).forEach(function(f){
+            var reader = new FileReader();
+            reader.onload = function(ev){
+                var item = document.createElement('div');
+                item.className = 'ss-media-item';
+                item.innerHTML = '<img src="' + ev.target.result + '" alt=""><span class="del">×</span>';
+                item.querySelector('.del').addEventListener('click', function(){ item.remove(); });
+                media.insertBefore(item, addSlot);
+            };
+            reader.readAsDataURL(f);
+        });
+    });
+
+    document.getElementById('ssForm').addEventListener('submit', function(e){
+        var url = document.querySelector('textarea[name=url]').value.trim();
+        if(!url){
+            e.preventDefault();
+            BG.toast('{$tt["point.PleaseEnterTheLinkYouNeedToSubmit"]|default="请填写链接"}', 'error');
+        }
+    });
+})();
+</script>
+{/block}
