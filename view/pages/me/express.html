@@ -1,41 +1,188 @@
 {extend name="layout/base" /}
+
 {block name="extra_head"}
 <style>
-.ex-page{padding:16px;background:#f7f7f9;min-height:100vh}
-.ex-head{padding:14px 16px;background:#fff;border-radius:10px;margin-bottom:14px;display:flex;align-items:center;gap:12px}
-.ex-head img{width:42px;height:42px;border-radius:6px;object-fit:contain;background:#f1f1f3}
-.ex-head .meta{flex:1}
-.ex-head .name{font-size:12px;font-weight:600;color:#222}
-.ex-head .num{font-size:12px;color:#999;margin-top:2px;word-break:break-all}
-.ex-trace{background:#fff;border-radius:10px;padding:10px 16px}
-.ex-trace .step{position:relative;padding:14px 0 14px 22px;border-left:1px dashed #ddd;font-size:12px;color:#666}
-.ex-trace .step:first-child{color:#fc6290}
-.ex-trace .step:before{content:'';position:absolute;left:-5px;top:18px;width:9px;height:9px;border-radius:50%;background:#ccc}
-.ex-trace .step:first-child:before{background:#fc6290}
-.ex-trace .step .time{display:block;font-size:11px;color:#999;margin-bottom:2px}
+/* ============================================================
+ * express 1:1 还原 subPackages_lightningRod/expressData/expressData.vue scoped scss
+ *   .body 白底 + 20px padding
+ *   .express-title 左右排版:logo+公司名+单号 | 复制 | 拨号
+ *   .step-box u-steps 竖排时间轴,颜色 #afa7ef
+ * ============================================================ */
+.ex-body{
+    background: #fff;
+    min-height: 100vh;
+    padding-bottom: 30px;
+    box-sizing: border-box;
+}
+.ex-head{
+    position: sticky; top: 0; z-index: 30; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+}
+.ex-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.ex-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+
+.express-title{
+    display: flex; flex-direction: row;
+    justify-content: space-between; align-items: center;
+    color: #444; font-size: 12px;
+    padding: 10px 5px; margin: 0 15px;
+    border-bottom: 1px solid #f5f5f5;
+}
+.express-title-left{
+    display: flex; flex-direction: row; align-items: center;
+    flex: 1; min-width: 0;
+}
+.express-title-left img{
+    width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+    background: #f3f3f7; object-fit: cover;
+}
+.express-title-left .comname{
+    margin-left: 5px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.express-title-right{
+    display: flex; flex-direction: row; flex-shrink: 0;
+    align-items: center; gap: 6px;
+}
+.express-title-right .action{
+    color: #afa7ef; cursor: pointer;
+    text-decoration: none;
+}
+.express-title-right .sep{ color: #ccc; }
+
+.step-box{
+    padding: 15px;
+    position: relative;
+    transition: max-height .3s ease;
+    overflow: hidden;
+}
+.step-box.folded{ max-height: 200px; }
+.step-box .step{
+    position: relative; padding: 8px 0 8px 22px;
+    font-size: 13px; color: #888;
+    border-left: 1px solid #e5e3fa;
+    margin-left: 6px;
+}
+.step-box .step:first-of-type{ color: #afa7ef; }
+.step-box .step::before{
+    content: '';
+    position: absolute; left: -5px; top: 12px;
+    width: 9px; height: 9px;
+    border-radius: 50%; background: #ccc;
+}
+.step-box .step:first-of-type::before{
+    background: #afa7ef;
+    box-shadow: 0 0 0 3px rgba(175,167,239,.25);
+}
+.step-box .step .time{
+    display: block; font-size: 11px;
+    color: #999; margin-bottom: 2px;
+}
+.step-box .step .desc{ line-height: 1.5; }
+
+/* u-read-more 折叠遮罩 */
+.read-more-wrap{ position: relative; }
+.read-more-wrap.folded::after{
+    content: ''; position: absolute; left: 0; right: 0; bottom: 32px; height: 60px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0), #fff);
+    pointer-events: none;
+}
+.read-more-toggle{
+    display: block; margin: 0 auto;
+    color: #afa7ef; font-size: 13px;
+    background: transparent; border: 0;
+    padding: 8px 14px; cursor: pointer;
+    text-align: center;
+}
+
+.ex-empty{ padding: 40px 0; text-align: center; color: #999; font-size: 13px; }
 </style>
 {/block}
+
 {block name="content"}
-<section class="ex-page">
-    <div class="page-head"><a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a><h1 class="page-title">{$tt['express.title']|default='物流详情'}</h1></div>
+<div class="ex-body">
     <div class="ex-head">
-        {if !empty($express.expressCompanyLogo)}<img src="{$express.expressCompanyLogo}" alt="">{/if}
-        <div class="meta">
-            <div class="name">{$express.expressCompanyName|default='-'}</div>
-            <div class="num">{$express.number|default=''}</div>
+        <a class="back" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="title">{$tt['express.title']|default='物流详情'}</h1>
+    </div>
+
+    {if empty($express)}
+    <div class="ex-empty">{$tt['point.Empty']|default='暂无物流信息'}</div>
+    {else/}
+    <div class="express-title">
+        <div class="express-title-left">
+            {if !empty($express.expressCompanyLogo)}<img src="{$express.expressCompanyLogo}" alt="">{/if}
+            <span class="comname">{$express.expressCompanyName|default='-'}</span>
+            <span class="comname" id="exNum">{$express.number|default=''}</span>
+        </div>
+        <div class="express-title-right">
+            {if !empty($express.number)}
+            <a class="action" href="javascript:void(0)" id="exCopyBtn">{$tt['point.copy']|default='复制'}</a>
+            {/if}
+            {if !empty($express.courierPhone)}
+            <span class="sep">|</span>
+            <a class="action" href="tel:{$express.courierPhone}">{$tt['point.Callphone']|default='联系快递员'}</a>
+            {/if}
         </div>
     </div>
-    <div class="ex-trace">
-        {if !empty($express.logisticsTraceDetails) && is_array($express.logisticsTraceDetails)}
-        {foreach $express.logisticsTraceDetails as $t}
-        <div class="step">
-            <span class="time">{$t.time|default=''}</span>
-            <span>{$t.desc|default=''}</span>
+
+    <div class="read-more-wrap folded" id="exReadMore">
+        <div class="step-box folded" id="exStepBox">
+            {if !empty($express.logisticsTraceDetails) && is_array($express.logisticsTraceDetails)}
+                {foreach $express.logisticsTraceDetails as $t}
+                <div class="step">
+                    <span class="time">
+                        {if is_numeric($t.time)}{:date('m-d H:i:s', (int)$t['time'])}{else/}{$t.time|default=''}{/if}
+                    </span>
+                    <span class="desc">{$t.desc|default=''}</span>
+                </div>
+                {/foreach}
+            {else/}
+                <div class="ex-empty">{$tt['point.Empty']|default='暂无物流轨迹'}</div>
+            {/if}
         </div>
-        {/foreach}
-        {else/}
-        <div class="empty" style="padding:40px 0;text-align:center;color:#999">{$tt['point.Empty']|default='暂无物流信息'}</div>
-        {/if}
+        <button class="read-more-toggle" id="exReadMoreBtn" type="button">{$tt['express.viewMore']|default='查看更多物流明细 ▾'}</button>
     </div>
-</section>
+    {/if}
+</div>
+
+<script>
+(function(){
+    // 复制单号(对齐 vue copyToClipboard)
+    var copyBtn = document.getElementById('exCopyBtn');
+    if(copyBtn){
+        copyBtn.addEventListener('click', function(){
+            var num = (document.getElementById('exNum').textContent || '').trim();
+            if(!num) return;
+            (window.BG && BG.copy ? BG.copy(num) : function(){
+                var ta = document.createElement('textarea');
+                ta.value = num; document.body.appendChild(ta);
+                ta.select(); try { document.execCommand('copy'); } catch(e){}
+                ta.remove();
+            }());
+            BG.toast && BG.toast('{$tt["showToast.Clipboard"]|default="已复制"}', 'success');
+        });
+    }
+
+    // 折叠 / 展开(对齐 u-read-more showHeight 200rpx 即 100px)
+    var box = document.getElementById('exStepBox');
+    var wrap = document.getElementById('exReadMore');
+    var btn = document.getElementById('exReadMoreBtn');
+    if(box && btn){
+        // 内容小于阈值就不需要折叠
+        if(box.scrollHeight <= 200){
+            wrap.classList.remove('folded');
+            box.classList.remove('folded');
+            btn.style.display = 'none';
+        }
+        btn.addEventListener('click', function(){
+            var folded = box.classList.toggle('folded');
+            wrap.classList.toggle('folded', folded);
+            btn.textContent = folded ? '{$tt["express.viewMore"]|default="查看更多物流明细 ▾"}'
+                                     : '{$tt["express.collapse"]|default="收起物流明细 ▴"}';
+        });
+    }
+})();
+</script>
 {/block}
