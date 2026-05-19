@@ -294,6 +294,8 @@ class IndexRepository
             if (empty($r['unit']))           $r['unit']           = $r['en_unit'] ?: $r['zh_unit'];
             if (empty($r['hospital_name'])) $r['hospital_name']  = $r['en_hospital_name'] ?: $r['zh_hospital_name'];
             if (empty($r['doctor_name']))   $r['doctor_name']    = $r['en_doctor_name'] ?: $r['zh_doctor_name'];
+            // service_fee → [price, ₩](对齐 ProjectRepository::fetchDetailById)
+            $r['service_fee'] = [(int) ($r['service_fee'] ?: 30000), '₩'];
             $r['slug']          = $this->buildSlug($r);
             unset($r['cover_detail']);
         }
