@@ -12,6 +12,7 @@
         </div>
         {if !empty($d.tag)}
         <div class="doctor-tag-list">
+            <span class="doctor-tag-label">{$tt['index.common.SpecializesIn']|default='擅长'}</span>
             {foreach $d.tag as $t}<span class="doctor-tag">{$t}</span>{/foreach}
         </div>
         {/if}

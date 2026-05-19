@@ -21,8 +21,9 @@
         <div class="hospital-items">
             {foreach $h.recommend_project as $rp}
             <div class="hospital-item">
+                <span class="hospital-item__discount">{$tt['index.common.Discount']|default='优惠'}</span>
+                <span class="hospital-item__price">{!empty($rp.price_str)?$rp.price_str:'₩ '.($rp.korean_won|default='')}</span>
                 <span class="hospital-item__name">{$rp.name}</span>
-                <span class="hospital-item__price">₩ {$rp.price_str|default=$rp.korean_won}</span>
             </div>
             {/foreach}
         </div>
