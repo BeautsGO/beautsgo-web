@@ -1,24 +1,83 @@
 {extend name="layout/base" /}
+
 {block name="extra_head"}
-<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">
 <link rel="stylesheet" href="/static/css/pages/index.css?v={$assets.css_ver}">
+<style>
+/* ============================================================
+ * record(浏览记录)1:1 还原 subPackages_lightningRod/me/record.vue scoped scss
+ *   与 collect.vue 结构同构,共用粉色 sticky tab + 白底圆角列表
+ * ============================================================ */
+.rc-body{
+    min-height: 100vh; background: #f5f5f5;
+    box-sizing: border-box; padding-bottom: 70px;
+}
+.rc-head{
+    position: sticky; top: 0; z-index: 30; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+}
+.rc-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.rc-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+
+.rc-tab{
+    position: sticky; top: 44px; z-index: 20;
+    width: 100%; display: flex; justify-content: space-around; align-items: center;
+    font-size: 15px; color: #999;
+    background: #f5f5f5; padding-bottom: 12px; padding-top: 10px;
+}
+.rc-tab .tab-detail{ position: relative; padding: 5px 15px; text-decoration: none; color: inherit; }
+.rc-tab .tab-detail.active span{ font-size: 16px; font-weight: 500; color: #333; }
+.rc-tab .tab-detail.active::after{
+    content: '';
+    position: absolute; left: 50%; bottom: -4px; transform: translateX(-50%);
+    width: 15px; height: 3px;
+    background: #FF9AC3; border-radius: 10px;
+}
+
+.rc-detail{
+    background: #fff; border-radius: 15px 15px 0 0;
+    min-height: calc(100vh - 95px);
+    padding: 12px 0; box-sizing: border-box;
+}
+
+.rc-empty{ text-align: center; padding: 60px 0 40px; color: #999; font-size: 12px; }
+.rc-list-jg, .rc-list-ys, .rc-list-xm{ padding: 0 12px; }
+</style>
 {/block}
+
 {block name="content"}
-<div class="user-page index-body">
-    <div class="page-head">
-        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
-        <h1 class="page-title">浏览记录</h1>
+<div class="rc-body">
+    <div class="rc-head">
+        <a class="back" href="/{$lang_seg}/me" aria-label="返回">‹</a>
+        <h1 class="title">{$tt['record.title']|default='浏览记录'}</h1>
     </div>
-    <div class="u-tabs-bar">
-        <a class="{if $type == 1}active{/if}" href="?type=1">机构</a>
-        <a class="{if $type == 2}active{/if}" href="?type=2">医生</a>
-        <a class="{if $type == 3}active{/if}" href="?type=3">项目</a>
+
+    <!-- tab(对齐 vue 计算属性 tabList:机构/医生/项目)-->
+    <div class="rc-tab">
+        {foreach $tabList as $t}
+        <a class="tab-detail {if $type == $t.id}active{/if}" href="?type={$t.id}">
+            <span>{!empty($tt[$t.key])?$tt[$t.key]:$t.fallback}</span>
+        </a>
+        {/foreach}
     </div>
-    {if empty($list)}<div class="empty">{$tt['point.Empty']|default='暂无浏览记录'}</div>{/if}
-    {if $type == 1}<div class="list-jg">{foreach $list as $h}{include file="components/_card_hospital" /}{/foreach}</div>{/if}
-    {if $type == 2}<div class="list-ys">{foreach $list as $d}{include file="components/_card_doctor" /}{/foreach}</div>{/if}
-    {if $type == 3}<div class="list-xm">{foreach $list as $p}{include file="components/_card_project" /}{/foreach}</div>{/if}
-    {include file="components/_pagination" /}
+
+    <div class="rc-detail">
+        {if empty($list)}
+        <div class="rc-empty">{$tt['projectDetails.Empty']|default='暂无浏览记录'}</div>
+        {else/}
+            {if $type == 1}
+            <div class="rc-list-jg">{foreach $list as $h}{include file="components/_card_hospital" /}{/foreach}</div>
+            {/if}
+            {if $type == 2}
+            <div class="rc-list-ys">{foreach $list as $d}{include file="components/_card_doctor" /}{/foreach}</div>
+            {/if}
+            {if $type == 3}
+            <div class="rc-list-xm">{foreach $list as $p}{include file="components/_card_project" /}{/foreach}</div>
+            {/if}
+        {/if}
+        {include file="components/_pagination" /}
+    </div>
+
     {include file="components/_tabbar" /}
 </div>
 {/block}

@@ -220,9 +220,31 @@ class Me extends BaseController
         $auth = new AuthService();
         $type = max(1, min(3, (int) $this->request->param('type', 1)));
         $page = max(1, (int) $this->request->param('page', 1));
-        $resp = $auth->call('GET', '/Browse/myBrowse', ['type' => $type, 'page' => $page, 'limit' => 10]);
-        $list  = (array) ($resp['data']['list'] ?? $resp['data'] ?? []);
+        // 1:1 对齐 record.vue loadData():$http.get('Browse/myBrowse', {page, limit=20, type})
+        $resp = $auth->call('GET', '/Browse/myBrowse', ['type' => $type, 'page' => $page, 'limit' => 20]);
+        $list  = (array) ($resp['data']['list'] ?? []);
         $total = (int) ($resp['data']['count'] ?? count($list));
+
+        // 归一化 cover_url + slug 给卡片组件用
+        foreach ($list as &$it) {
+            if (empty($it['slug']) && !empty($it['id'])) $it['slug'] = (string) $it['id'];
+            if (empty($it['cover_url'])) {
+                $c = $it['cover'] ?? ($it['cover_detail'] ?? '');
+                if (is_array($c)) {
+                    $first = $c[0] ?? $c;
+                    $it['cover_url'] = $first['url'] ?? ($first['cover'] ?? '');
+                } else {
+                    $it['cover_url'] = (string) $c;
+                }
+            }
+        }
+        unset($it);
+
+        $tabList = [
+            ['id' => 1, 'fallback' => '机构', 'key' => 'index.tabbar.hospital'],
+            ['id' => 2, 'fallback' => '医生', 'key' => 'index.common.doctor'],
+            ['id' => 3, 'fallback' => '项目', 'key' => 'index.common.project'],
+        ];
 
         $this->seo->setTdk('浏览记录 - BeautsGO', '我浏览过的医院/医生/项目', '浏览记录')->buildOrganization();
         return $this->render('pages/me/record', [
@@ -231,9 +253,10 @@ class Me extends BaseController
             'list'         => $list,
             'total'        => $total,
             'page'         => $page,
-            'totalPages'   => max(1, (int) ceil($total / 10)),
+            'totalPages'   => max(1, (int) ceil($total / 20)),
             'filterParams' => ['area' => 0, 'level' => 0, 'category' => 0],
             'tab'          => 0,
+            'tabList'      => $tabList,
         ]);
     }
 

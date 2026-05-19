@@ -1,58 +1,100 @@
 {extend name="layout/base" /}
-{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+
+{block name="extra_head"}
+<style>
+/* ============================================================
+ * settings 1:1 还原 subPackages_lightningRod/seting/seting.vue scoped scss
+ *   .setting-view 浅灰背景 + 10px padding-top
+ *   .setting-box 白底圆角包裹 + 10px padding
+ *   .setting-item flex 行 + 9px padding(rpx→px:1rpx=0.5px)
+ * ============================================================ */
+.setting-view{
+    background: #ececec9c; min-height: 100vh;
+    padding-top: 10px; box-sizing: border-box;
+    padding-bottom: 30px;
+}
+.setting-head{
+    position: sticky; top: 0; z-index: 30; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+}
+.setting-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.setting-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+
+.setting-box{
+    margin: 10px;
+    padding: 10px;
+    background: #fff; border-radius: 10px;
+}
+.setting-item{
+    display: flex; flex-direction: row;
+    justify-content: space-between; align-items: center;
+    font-size: 14px; color: #606266;
+    padding: 9px 0;
+    text-decoration: none;
+    border-bottom: 1px solid #f5f5f5;
+}
+.setting-item:last-child{ border-bottom: 0; }
+.setting-item .arrow{ color: #ccc; font-size: 18px; }
+
+/* 注销/退出按钮(对齐 vue logout uni.showModal 确认流程,SSR 用 confirm)*/
+.setting-logout-btn{
+    width: calc(100% - 20px); margin: 30px auto 0;
+    padding: 12px 0;
+    background: #fff; color: #EF5189;
+    border: 1px solid #FD83AB; border-radius: 24px;
+    font-size: 14px; text-align: center;
+    display: block; text-decoration: none; cursor: pointer;
+}
+</style>
+{/block}
+
 {block name="content"}
-<div class="user-page">
-    <div class="page-head">
-        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
-        <h1 class="page-title">设置</h1>
+<div class="setting-view">
+    <div class="setting-head">
+        <a class="back" href="/{$lang_seg}/me" aria-label="返回">‹</a>
+        <h1 class="title">{$tt['Seting.title']|default='设置'}</h1>
     </div>
 
-    <div class="u-list" style="margin-top:12px;">
-        <a class="u-list-item" href="/{$lang_seg}/me/profile">
-            <div class="u-list-item__body">
-                <div class="u-list-item__title">个人资料</div>
-                <div class="u-list-item__meta">头像、昵称、性别</div>
-            </div>
-            <div style="display:flex; align-items:center; color:#ccc; font-size:15px;">›</div>
+    <div class="setting-box">
+        <!-- 意见反馈(对齐 vue toOpinion → /me/opinion) -->
+        <a class="setting-item" href="/{$lang_seg}/me/feedback">
+            <span>{$tt['me.Feedback']|default='意见反馈'}</span>
+            <span class="arrow">›</span>
         </a>
-        <div class="u-list-item">
-            <div class="u-list-item__body">
-                <div class="u-list-item__title">账号 / 邮箱</div>
-                <div class="u-list-item__meta">{$user.phone|default=''}</div>
-            </div>
-        </div>
-        <a class="u-list-item" href="/{$lang_seg}/me/wallet">
-            <div class="u-list-item__body"><div class="u-list-item__title">我的钱包</div></div>
-            <div style="display:flex; align-items:center; color:#ccc; font-size:15px;">›</div>
+        <!-- 关于我们(对齐 vue toAbout → /me/about) -->
+        <a class="setting-item" href="/{$lang_seg}/about">
+            <span>{$tt['me.Aboutus']|default='关于我们'}</span>
+            <span class="arrow">›</span>
         </a>
-        <a class="u-list-item" href="/{$lang_seg}/me/points-log">
-            <div class="u-list-item__body"><div class="u-list-item__title">积分明细</div></div>
-            <div style="display:flex; align-items:center; color:#ccc; font-size:15px;">›</div>
+        {if !empty($user.id)}
+        <!-- 注销账号 / 退出登录(对齐 vue logout uni.showModal LogOut)-->
+        <a class="setting-item" href="javascript:void(0)" id="setLogoutBtn">
+            <span>{$tt['me.Closeaccount']|default='注销账号'}</span>
+            <span class="arrow">›</span>
         </a>
+        {/if}
     </div>
 
-    <div class="u-list" style="margin-top:12px;">
-        <a class="u-list-item" href="/{$lang_seg}/me/feedback">
-            <div class="u-list-item__body"><div class="u-list-item__title">意见反馈</div></div>
-            <div style="display:flex; align-items:center; color:#ccc; font-size:15px;">›</div>
-        </a>
-        <a class="u-list-item" href="/{$lang_seg}/about">
-            <div class="u-list-item__body"><div class="u-list-item__title">关于 BeautsGO</div></div>
-            <div style="display:flex; align-items:center; color:#ccc; font-size:15px;">›</div>
-        </a>
-        <a class="u-list-item" href="/{$lang_seg}/terms">
-            <div class="u-list-item__body"><div class="u-list-item__title">服务条款</div></div>
-            <div style="display:flex; align-items:center; color:#ccc; font-size:15px;">›</div>
-        </a>
-        <a class="u-list-item" href="/{$lang_seg}/privacy">
-            <div class="u-list-item__body"><div class="u-list-item__title">隐私政策</div></div>
-            <div style="display:flex; align-items:center; color:#ccc; font-size:15px;">›</div>
-        </a>
-    </div>
+    {if !empty($user.id)}
+    <a class="setting-logout-btn" href="javascript:void(0)" id="setQuickLogout">{$tt['me.Logout']|default='退出登录'}</a>
+    {/if}
 
-    <div style="text-align:center; padding:24px 0;">
-        <a href="/{$lang_seg}/logout" style="display:inline-block; padding:12px 45px; background:#fff; color:#EF5189; border-radius:24px; font-size:14px; text-decoration:none; border:1px solid #FD83AB;">退出登录</a>
-    </div>
     {include file="components/_tabbar" /}
 </div>
+
+<script>
+(function(){
+    // 注销账号(对齐 vue logout:uni.showModal 二次确认)
+    function doLogout(){
+        if(confirm('{$tt["showmodal.LogOut"]|default="确认注销当前账号?"}')){
+            location.href = '/{$lang_seg}/logout';
+        }
+    }
+    var btn1 = document.getElementById('setLogoutBtn');
+    var btn2 = document.getElementById('setQuickLogout');
+    if(btn1) btn1.addEventListener('click', doLogout);
+    if(btn2) btn2.addEventListener('click', doLogout);
+})();
+</script>
 {/block}

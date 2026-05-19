@@ -1,11 +1,69 @@
 {extend name="layout/base" /}
-{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">
-<style>.msg-page{padding:16px;background:#fff;min-height:100vh}.msg-title{font-size:14px;font-weight:600;margin:0 0 8px}.msg-time{color:#999;font-size:12px;margin-bottom:16px}.msg-content{font-size:12px;line-height:1.8;color:#333}.msg-content img{max-width:100% !important;height:auto !important}</style>{/block}
+
+{block name="extra_head"}
+<style>
+/* ============================================================
+ * news-detail 1:1 还原 subPackages_lightningRod/me/systemDetail.vue scoped scss
+ *   .message-container 12px padding 白底 / .message-header bottom border
+ *   .message-title 18px bold / .message-content 14px line-height 1.6
+ * ============================================================ */
+.msg-page{
+    min-height: 100vh; background: #fff;
+    box-sizing: border-box; padding-bottom: 30px;
+}
+.msg-head{
+    position: sticky; top: 0; z-index: 30; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+}
+.msg-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.msg-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+
+.message-container{
+    padding: 12px;
+    background: #fff;
+}
+.message-header{
+    margin-bottom: 16px;
+    border-bottom: 1px solid #f5f5f5;
+    padding-bottom: 12px;
+}
+.message-title{
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 6px;
+    line-height: 1.4;
+}
+.message-time{
+    color: #999; font-size: 12px;
+}
+.message-content{
+    font-size: 14px; line-height: 1.6; color: #666;
+    word-break: break-word;
+}
+.message-content img{ max-width: 100% !important; height: auto !important; display: block; margin: 8px 0; }
+.message-content p{ margin: 0 0 8px; }
+</style>
+{/block}
+
 {block name="content"}
-<section class="msg-page">
-    <div class="page-head"><a class="back-btn" href="/{$lang_seg}/me/news" aria-label="返回">‹</a><h1 class="page-title">{$tt['news.detail']|default='消息详情'}</h1></div>
-    <h2 class="msg-title">{$info.title|default='系统消息'}</h2>
-    {if !empty($info.create_time)}<div class="msg-time">{if is_numeric($info.create_time)}{:date('Y-m-d H:i', (int)$info.create_time)}{else/}{$info.create_time}{/if}</div>{/if}
-    <div class="msg-content">{$info.content|default=''|raw}</div>
-</section>
+<div class="msg-page">
+    <div class="msg-head">
+        <a class="back" href="/{$lang_seg}/me/news" aria-label="返回">‹</a>
+        <h1 class="title">{$tt['news.detail']|default='消息详情'}</h1>
+    </div>
+
+    <div class="message-container">
+        <div class="message-header">
+            <h2 class="message-title">{$info.title|default='系统消息'}</h2>
+            {if !empty($info.create_time)}
+            <div class="message-time">
+                {if is_numeric($info.create_time)}{:date('Y-m-d H:i', (int)$info.create_time)}{else/}{$info.create_time}{/if}
+            </div>
+            {/if}
+        </div>
+        <div class="message-content">{$info.content|default=''|raw}</div>
+    </div>
+</div>
 {/block}
