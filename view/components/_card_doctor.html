@@ -22,7 +22,9 @@
             <div class="hospital-pro-item">
                 {if !empty($p.cover_url)}<img src="{$p.cover_url}" alt="{$p.name|default=''}" loading="lazy">{/if}
                 <div class="hospital-pro-name">{$p.name|default=''}</div>
-                <div class="hospital-pro-price">₩ {$p.korean_won|default=''}{if !empty($p.unit)}/{$p.unit}{/if}</div>
+                {if !empty($p.korean_won) && $p.korean_won != '0' && $p.korean_won != 0}
+                <div class="hospital-pro-price">₩ {$p.korean_won}{if !empty($p.unit)}/{$p.unit}{/if}</div>
+                {/if}
             </div>
             {/foreach}
         </div>
