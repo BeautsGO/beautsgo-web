@@ -20,6 +20,9 @@
         <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
         <h1 class="page-title">{$heading}</h1>
     </div>
+    {if !empty($richHtml)}
+    <article class="static-page__body">{$richHtml|raw}</article>
+    {else/}
     <article class="static-page__body">
         <p>本服务条款("条款")适用于您访问和使用 BeautsGO(以下称"平台")。请仔细阅读以下内容,使用平台即表示您接受本条款。</p>
 
@@ -41,6 +44,7 @@
         <h2>6. 条款修订</h2>
         <p>BeautsGO 有权根据业务调整与法律变更修订本条款,修订后于平台公示。继续使用即视为接受新版本。</p>
     </article>
+    {/if}
     {include file="components/_tabbar" /}
 </div>
 {/block}

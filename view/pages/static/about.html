@@ -20,6 +20,14 @@
         <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
         <h1 class="page-title">{$heading}</h1>
     </div>
+    {if !empty($logoUrl)}
+    <div style="background:#fff;border-radius:7px;padding:24px;display:flex;align-items:center;justify-content:center;margin:10px 16px 12px;">
+        <img src="{$logoUrl}" alt="BeautsGO" style="width:80%;max-width:260px;height:auto;display:block;">
+    </div>
+    {/if}
+    {if !empty($richHtml)}
+    <article class="static-page__body">{$richHtml|raw}</article>
+    {else/}
     <article class="static-page__body">
         <h2>BeautsGO 是什么</h2>
         <p>BeautsGO(彼此美)是连接中国求美者与韩国顶尖医美机构的预约平台,主张<strong>中韩同价、价格透明</strong>。我们与首尔江南、狎鸥亭、清潭洞等核心商圈的 900+ 整形外科、皮肤科、抗衰中心建立长期合作。</p>
@@ -39,6 +47,7 @@
         <h2>联系我们</h2>
         <p>合作邮箱:business@beautsgo.com;客服请在 App / 网页右下角发起对话。</p>
     </article>
+    {/if}
     {include file="components/_tabbar" /}
 </div>
 {/block}

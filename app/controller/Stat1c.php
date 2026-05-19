@@ -19,12 +19,28 @@ class Stat1c extends BaseController
         $this->abort404('Page Not Found');
     }
 
-    public function about()           { return $this->renderStatic('about',  '关于我们 BeautsGO',     '关于 BeautsGO');     }
-    public function terms()           { return $this->renderStatic('terms',  '服务条款 - BeautsGO',   '服务条款');           }
-    public function privacy()         { return $this->renderStatic('privacy','隐私政策 - BeautsGO',   '隐私政策');           }
-    public function qualifications()  { return $this->renderStatic('qual',   '资质规则 - BeautsGO',   '资质规则');           }
+    public function about()           { return $this->renderStatic('about',  '关于我们 BeautsGO',     '关于 BeautsGO',  'AboutUs',         'about'); }
+    public function terms()           { return $this->renderStatic('terms',  '服务条款 - BeautsGO',   '服务条款',       'TermsOfService',  null);    }
+    public function privacy()         { return $this->renderStatic('privacy','隐私政策 - BeautsGO',   '隐私政策',       'PrivacyPolicy',   null);    }
+    public function qualifications()  { return $this->renderStatic('qual',   '资质规则 - BeautsGO',   '资质规则',       'aptitude_rule',   null);    }
 
-    private function renderStatic(string $page, string $title, string $heading)
+    /**
+     * 积分规则页(对齐 subPackages_lightningRod/point/pointInfo.vue)
+     *   读 platformConfig.point_rule[0] 富文本
+     */
+    public function pointInfo()
+    {
+        return $this->renderStatic('point-info', '积分规则 - BeautsGO', '积分规则', 'point_rule', null);
+    }
+
+    /**
+     * @param string      $page       view 模板名(pages/static/<page>)
+     * @param string      $title      SEO title
+     * @param string      $heading    顶栏标题
+     * @param string|null $configKey  platformConfig 中的字段名,取 [0] 作为 richHtml
+     * @param string|null $logoKey    platformConfig 中可选的 logo 字段名(取 [0] URL)
+     */
+    private function renderStatic(string $page, string $title, string $heading, ?string $configKey = null, ?string $logoKey = null)
     {
         $desc = $heading . ' - BeautsGO 韩国医美预约平台';
         $langSeg = (string) (config('seo.lang_path_map')[$this->lang] ?? 'cn');
@@ -33,7 +49,32 @@ class Stat1c extends BaseController
             ->setCanonical($canonical)
             ->buildOrganization()
             ->buildBreadcrumb([['name' => '首页', 'url' => '/'], ['name' => $heading, 'url' => '/' . $page]]);
-        return $this->render('pages/static/' . $page, ['heading' => $heading]);
+
+        // 对齐 vue 各页 fetchConfig:取 /getConfig 的 platformConfig 富文本
+        $richHtml = '';
+        $logoUrl  = '';
+        if ($configKey) {
+            try {
+                $resp = $this->api->get('/getConfig');
+                $pc = (array) ($resp['data']['platformConfig'] ?? []);
+                $field = $pc[$configKey] ?? [];
+                if (is_array($field) && !empty($field[0])) {
+                    $richHtml = htmlspecialchars_decode((string) $field[0]);
+                }
+                if ($logoKey) {
+                    $logoField = $pc[$logoKey] ?? [];
+                    if (is_array($logoField) && !empty($logoField[0])) {
+                        $logoUrl = (string) $logoField[0];
+                    }
+                }
+            } catch (\Throwable $e) { /* 兜底:richHtml 为空,view 走静态文案 */ }
+        }
+
+        return $this->render('pages/static/' . $page, [
+            'heading'  => $heading,
+            'richHtml' => $richHtml,
+            'logoUrl'  => $logoUrl,
+        ]);
     }
 
     /**

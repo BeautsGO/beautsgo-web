@@ -19,6 +19,9 @@
         <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
         <h1 class="page-title">{$heading}</h1>
     </div>
+    {if !empty($richHtml)}
+    <article class="static-page__body">{$richHtml|raw}</article>
+    {else/}
     <article class="static-page__body">
         <p>BeautsGO 已通过国际质量管理体系认证 ISO 9001。下列是平台对合作医院的资质审核要求与机构入驻规则。</p>
 
@@ -41,6 +44,7 @@
         <h2>申诉渠道</h2>
         <p>如对机构资质、价格、服务存在异议,可在医院详情页"用户反馈"或客服 IM 中提交,平台 7 个工作日内核实并公示处理结果。</p>
     </article>
+    {/if}
     {include file="components/_tabbar" /}
 </div>
 {/block}

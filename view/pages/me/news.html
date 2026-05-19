@@ -78,8 +78,8 @@
         <div class="title">{$tt['system.title']|default='消息中心'}</div>
     </div>
 
-    <!-- 顶部"系统消息"卡(toSystem)-->
-    <a class="news-top" href="/{$lang_seg}/me/news?type=system">
+    <!-- 顶部"系统消息"卡(对齐 news.vue toSystem → /me/system)-->
+    <a class="news-top" href="/{$lang_seg}/me/system">
         <div class="news-top__left">
             {if !empty($systemIcon)}<img src="{$systemIcon}" alt="">{else/}📢{/if}
         </div>

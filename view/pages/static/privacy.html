@@ -18,6 +18,9 @@
         <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
         <h1 class="page-title">{$heading}</h1>
     </div>
+    {if !empty($richHtml)}
+    <article class="static-page__body">{$richHtml|raw}</article>
+    {else/}
     <article class="static-page__body">
         <p>BeautsGO 重视用户隐私,本政策说明我们收集、使用与保护您信息的方式。</p>
 
@@ -42,6 +45,7 @@
         <h2>联系方式</h2>
         <p>隐私问题请发送邮件至 privacy@beautsgo.com。</p>
     </article>
+    {/if}
     {include file="components/_tabbar" /}
 </div>
 {/block}

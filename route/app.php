@@ -42,6 +42,7 @@ Route::group(':lang', function () {
     Route::get('me/collect',         'Me/collect');
     Route::get('me/order',           'Me/order');
     Route::get('me/news',            'Me/news');
+    Route::get('me/system',          'Me/system');
     Route::get('me/news/:id',        'Me/newsDetail')->pattern(['id' => '\d+']);
     Route::get('me/order/:id',       'Me/orderDetail')->pattern(['id' => '\d+']);
     Route::get('me/record',          'Me/record');
@@ -106,6 +107,7 @@ Route::group(':lang', function () use ($slugPattern) {
     Route::get('terms',          'Stat1c/terms');
     Route::get('privacy',        'Stat1c/privacy');
     Route::get('qualifications', 'Stat1c/qualifications');
+    Route::get('point/info',     'Stat1c/pointInfo');
     // 杂项页 (Misc)
     Route::get('contact',          'Misc/contact');
     Route::get('contact/detail',   'Misc/contactDetail');

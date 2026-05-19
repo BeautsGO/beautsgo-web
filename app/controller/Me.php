@@ -336,6 +336,27 @@ class Me extends BaseController
     }
 
     /**
+     * 系统消息列表(system.vue → GET /Message/getMessageList)
+     */
+    public function system()
+    {
+        $auth = new AuthService();
+        $page = max(1, (int) $this->request->param('page', 1));
+        $resp = $auth->call('GET', '/Message/getMessageList', ['page' => $page, 'limit' => 20]);
+        $list = (array) ($resp['data']['list'] ?? []);
+        $total = (int) ($resp['data']['count'] ?? count($list));
+
+        $this->seo->setTdk('系统消息 - BeautsGO', '查看 BeautsGO 系统通知与活动消息', '系统消息')->buildOrganization();
+        return $this->render('pages/me/system', [
+            'user'       => $auth->getCurrentUser(),
+            'list'       => $list,
+            'total'      => $total,
+            'page'       => $page,
+            'totalPages' => max(1, (int) ceil($total / 20)),
+        ]);
+    }
+
+    /**
      * 系统消息详情(Message/detail/:id)
      */
     public function newsDetail(int $id = 0)
