@@ -1,47 +1,202 @@
 {extend name="layout/base" /}
+
 {block name="extra_head"}
 <style>
-.act-page{background:#f7f7f9;min-height:100vh;padding-bottom:24px}
-.act-hosps{padding:14px;background:#fff;overflow-x:auto;white-space:nowrap}
-.act-hosps a{display:inline-block;margin-right:10px;padding:6px 12px;border-radius:999px;background:#f3f3f7;color:#444;font-size:12px;text-decoration:none}
-.act-hosps a.active{background:#fc6290;color:#fff}
-.act-list{padding:14px}
-.act-item{display:flex;gap:12px;background:#fff;border-radius:10px;padding:12px;margin-bottom:12px;text-decoration:none;color:inherit}
-.act-item .cover{flex:0 0 110px;height:110px;border-radius:6px;object-fit:cover;background:#f0f0f3}
-.act-item .meta{flex:1;display:flex;flex-direction:column;gap:6px;font-size:12px;color:#333}
-.act-item .name{font-size:14px;font-weight:600;color:#222;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.act-item .price{color:#fc6290;font-weight:600;font-size:12px}
-.empty{padding:60px 0;text-align:center;color:#999}
+/* ============================================================
+ * activity/list 1:1 还原 activity/activityList.vue scoped scss
+ *   .swiper-box 顶部医院横向 card 选择(头像+名称)
+ *   .package-list 套餐列表:标题 + desc + gift + 原价 + 折后价 + 已预约 N + 预约按钮
+ * ============================================================ */
+.act-page{
+    background: #f5f5f5; min-height: 100vh;
+    padding-bottom: 30px; box-sizing: border-box;
+}
+.act-head{
+    position: sticky; top: 0; z-index: 30; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+}
+.act-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.act-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+
+/* 顶部医院 card 横向滚动(对齐 .hospitals-container)*/
+.act-hosps{
+    display: flex; gap: 10px; overflow-x: auto;
+    padding: 12px; background: #fff;
+    scrollbar-width: none; white-space: nowrap;
+    border-bottom: 1px solid #f5f5f5;
+}
+.act-hosps::-webkit-scrollbar{ display: none; }
+.act-hosps .hospital-card{
+    flex-shrink: 0;
+    display: flex; flex-direction: column; align-items: center;
+    text-decoration: none; color: inherit;
+    padding: 4px;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    transition: border-color .2s;
+    min-width: 60px;
+}
+.act-hosps .hospital-card.selected{ border-color: #fc6290; }
+.act-hosps .hospital-logo{
+    width: 50px; height: 50px; border-radius: 50%;
+    object-fit: cover; background: #f3f3f7;
+    margin-bottom: 4px;
+}
+.act-hosps .hospital-card .hospital-name{
+    font-size: 11px; color: #555;
+    max-width: 60px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.act-hosps .hospital-card.selected .hospital-name{ color: #fc6290; font-weight: 600; }
+/* 全部 tag 简化 */
+.act-hosps .all-tag{
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    width: 50px; height: 50px; border-radius: 50%;
+    background: linear-gradient(135deg,#fe739d,#ff9ac3);
+    color: #fff; font-size: 12px; font-weight: 500;
+    text-decoration: none; margin-bottom: 4px;
+}
+
+/* 套餐列表 */
+.act-list{ padding: 10px 12px; }
+.act-item{
+    display: flex; gap: 12px;
+    background: #fff; border-radius: 10px;
+    padding: 12px; margin-bottom: 10px;
+    text-decoration: none; color: inherit;
+}
+.act-item .item-left{ flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.act-item .package-title{
+    font-size: 14px; font-weight: 600; color: #1B1B1B;
+    line-height: 1.4;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.act-item .package-desc{
+    font-size: 12px; color: #666; line-height: 1.5;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.act-item .gift{
+    display: inline-block;
+    background: rgba(254,115,157,.12);
+    color: #fc6290;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 11px;
+    margin-left: 4px;
+}
+.act-item .price-area{
+    display: flex; align-items: baseline; gap: 8px;
+    flex-wrap: wrap; margin-top: 4px;
+}
+.act-item .original-price{
+    color: #999; font-size: 11px;
+    text-decoration: line-through;
+}
+.act-item .discounted-price{
+    color: #fc6290; font-weight: 700; font-size: 15px;
+}
+.act-item .discounted-price text{ font-size: 11px; font-weight: 400; margin-right: 2px; }
+
+.act-item .booking-area{
+    flex-shrink: 0;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: space-between; gap: 8px;
+    min-width: 80px;
+}
+.act-item .booking-count{
+    font-size: 11px; color: #999;
+    text-align: center; line-height: 1.4;
+}
+.act-item .booking-count .num{
+    display: block;
+    color: #fc6290; font-weight: 600;
+    font-size: 14px;
+}
+.act-item .booking-btn{
+    padding: 6px 14px;
+    background: linear-gradient(135deg,#fe739d,#ff9ac3);
+    color: #fff; border-radius: 14px;
+    font-size: 12px; font-weight: 500;
+    box-shadow: 0 4px 12px rgba(254,115,157,.3);
+}
+
+.act-empty{ padding: 60px 0; text-align: center; color: #999; font-size: 13px; }
 </style>
 {/block}
+
 {block name="content"}
 <section class="act-page">
-    <div class="page-head"><a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a><h1 class="page-title">{$tt['activity.title']|default='优惠活动'}</h1></div>
+    <div class="act-head">
+        <a class="back" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="title">{$tt['activity.title']|default='优惠活动'}</h1>
+    </div>
+
     {if !empty($hospitals)}
     <div class="act-hosps">
-        <a href="?h=0" class="{if $currentHid == 0}active{/if}">{$tt['point.All']|default='全部'}</a>
+        <a class="hospital-card {if $currentHid == 0}selected{/if}" href="?h=0">
+            <div class="all-tag">{$tt['point.All']|default='全部'}</div>
+        </a>
         {foreach $hospitals as $h}
-        <a href="?h={$h.id|default=0}" class="{if $currentHid == $h.id}active{/if}">{$h.name|default=''}</a>
+        {php}
+            $hCover = '';
+            if (!empty($h['cover']) && is_array($h['cover'])) {
+                $first = $h['cover'][0] ?? $h['cover'];
+                $hCover = $first['url'] ?? ($first['cover'] ?? '');
+            } elseif (!empty($h['cover_url'])) {
+                $hCover = $h['cover_url'];
+            }
+        {/php}
+        <a class="hospital-card {if $currentHid == $h.id}selected{/if}" href="?h={$h.id|default=0}">
+            {if !empty($hCover)}
+            <img class="hospital-logo" src="{$hCover}" alt="" loading="lazy">
+            {else/}
+            <div class="hospital-logo"></div>
+            {/if}
+            <span class="hospital-name">{$h.name|default=''}</span>
+        </a>
         {/foreach}
     </div>
     {/if}
+
     <div class="act-list">
         {if empty($list)}
-        <div class="empty">{$tt['point.Empty']|default='暂无活动'}</div>
+        <div class="act-empty">{$tt['projectDetails.Empty']|default='暂无活动'}</div>
         {else/}
         {foreach $list as $a}
         <a class="act-item" href="/{$lang_seg}/activity/{$a.id|default=0}">
-            {if !empty($a.cover)}<img class="cover" src="{$a.cover}" alt="{$a.title|default=''}" loading="lazy">{else/}<div class="cover"></div>{/if}
-            <div class="meta">
-                <div class="name">{:!empty($a["title"])?$a["title"]:(!empty($a["name"])?$a["name"]:'')}</div>
-                {if !empty($a.desc)}<div>{$a.desc}</div>{/if}
-                {if !empty($a.pay_price_str)}<div class="price">{$a.pay_price_str}</div>{/if}
-                {if !empty($a.sale_num)}<div style="color:#999;font-size:12px">{$tt['activity.sold']|default='已售'} {$a.sale_num}</div>{/if}
+            <div class="item-left">
+                <div class="package-title">{!empty($a['title'])?$a['title']:(!empty($a['name'])?$a['name']:'')}</div>
+                {if !empty($a.desc)}
+                <div class="package-desc">
+                    {$a.desc}
+                    {if !empty($a.gift)}<span class="gift">{$tt['activity.Free']|default='赠送'}: {$a.gift}</span>{/if}
+                </div>
+                {/if}
+                <div class="price-area">
+                    {if !empty($a.original_price_str)}
+                    <span class="original-price">{$tt['activity.OriginalPrice']|default='原价'}: {$a.original_price_str}</span>
+                    {/if}
+                    {if !empty($a.pay_price_str)}
+                    <span class="discounted-price"><text>{$tt['activity.DiscountedPrice']|default='活动价'}:</text>{$a.pay_price_str}</span>
+                    {/if}
+                </div>
+            </div>
+            <div class="booking-area">
+                <div class="booking-count">
+                    <span>{$tt['index.common.AlreadyBooked']|default='已预约'}</span>
+                    <span class="num">{$a.sale_num|default=0}</span>
+                </div>
+                <div class="booking-btn">{$tt['index.common.BookNow']|default='立即预约'}</div>
             </div>
         </a>
         {/foreach}
         {/if}
     </div>
+
     {include file="components/_pagination" /}
 </section>
 {/block}
