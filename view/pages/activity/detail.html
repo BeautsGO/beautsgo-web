@@ -1,57 +1,313 @@
 {extend name="layout/base" /}
+
 {block name="extra_head"}
 <style>
-.adp{background:#fff;min-height:100vh}
-.adp .banner{width:100%;background:#f0f0f3}
-.adp .banner img{width:100%;display:block}
-.adp .hd{padding:16px}
-.adp .hd .name{font-size:16px;font-weight:600;color:#222;margin-bottom:8px}
-.adp .hd .sale{color:#fc6290;font-size:12px}
-.adp .price-bar{padding:14px 16px;background:#fff7fa;border-top:1px solid #ffe6ef;border-bottom:1px solid #ffe6ef;font-size:12px}
-.adp .price-bar .big{color:#fc6290;font-weight:700;font-size:18px;margin-right:8px}
-.adp .price-bar .ori{color:#999;font-size:12px;text-decoration:line-through;margin-left:6px}
-.adp .section{padding:16px}
-.adp .section h2{margin:0 0 10px;font-size:12px}
-.adp .content img{max-width:100% !important;height:auto !important}
-.adp-rel{padding:16px}
-.adp-rel .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.adp-rel .grid a{display:block;text-decoration:none;color:inherit;background:#f7f7f9;border-radius:8px;overflow:hidden}
-.adp-rel .grid a img{width:100%;height:120px;object-fit:cover;background:#eee}
-.adp-rel .grid a .t{padding:8px;font-size:12px;color:#222;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* ============================================================
+ * activity/projectDetail 1:1 还原 subPackages_sub/activity/projectDetail.vue
+ *   .swiper-body 顶部 banner 轮播
+ *   .project-price-box 标题 + 已预约
+ *   .institution 适用机构卡(cover + 名称 + 地址)
+ *   .project-body 活动详情富文本
+ *   .product-box 爆款产品瀑布
+ *   .btns 底部立即预约 + 客服咨询
+ * ============================================================ */
+.adp-body{
+    background: #f5f5f5; min-height: 100vh;
+    padding-bottom: 80px; box-sizing: border-box;
+}
+.adp-head{
+    position: sticky; top: 0; z-index: 30; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: rgba(255,255,255,.96); border-bottom: 1px solid #f1f1f1;
+    backdrop-filter: blur(6px);
+}
+.adp-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.adp-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 顶部 banner */
+.adp-swiper-body{ position: relative; width: 100%; padding-bottom: 100%; background: #eee; overflow: hidden; }
+.adp-swiper{ position: absolute; inset: 0; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.adp-swiper::-webkit-scrollbar{ display: none; }
+.adp-swiper-item{ flex: 0 0 100%; height: 100%; scroll-snap-align: start; }
+.adp-swiper-item img{ width: 100%; height: 100%; object-fit: cover; display: block; }
+.adp-swiper-dots{
+    position: absolute; right: 10px; bottom: 14px;
+    background: rgba(51,51,51,.5); color: #fff;
+    border-radius: 10px; padding: 3px 7px;
+    font-size: 12px; z-index: 5;
+}
+
+/* 价格 + 标题块 */
+.adp-price-box{
+    margin: 10px 12px; padding: 14px;
+    background: #fff; border-radius: 10px;
+}
+.adp-price-box .title{
+    font-size: 18px; font-weight: 700; color: #1B1B1B;
+    line-height: 1.4; margin-bottom: 10px;
+}
+.adp-price-box .price-row{
+    display: flex; align-items: baseline; gap: 8px;
+}
+.adp-price-box .price-row .big{
+    color: #fc6290; font-weight: 700; font-size: 22px;
+}
+.adp-price-box .price-row .ori{
+    color: #999; font-size: 12px;
+    text-decoration: line-through;
+}
+.adp-price-box .bottom-box{
+    margin-top: 8px; font-size: 12px; color: #999;
+}
+
+/* 适用机构卡 */
+.adp-institution{
+    margin: 10px 12px; padding: 14px;
+    background: #fff; border-radius: 10px;
+}
+.adp-institution .head-title{
+    font-size: 14px; color: #1B1B1B; font-weight: 600;
+    margin-bottom: 10px;
+}
+.adp-institution-box{
+    display: flex; gap: 10px;
+    text-decoration: none; color: inherit;
+}
+.adp-institution-left img{
+    width: 60px; height: 60px; border-radius: 6px;
+    object-fit: cover; background: #f3f3f7;
+}
+.adp-institution-info{ flex: 1; min-width: 0; }
+.adp-institution-info .name{
+    font-size: 14px; font-weight: 600; color: #1B1B1B;
+    display: flex; align-items: center; gap: 4px;
+}
+.adp-institution-info .name .arrow{ color: #ccc; font-size: 14px; }
+.adp-institution-info .address{
+    margin-top: 6px;
+    font-size: 11px; color: #666;
+    display: flex; align-items: center; gap: 4px;
+    overflow: hidden;
+}
+.adp-institution-info .address::before{
+    content: '📍'; font-size: 11px;
+}
+
+/* 富文本详情 */
+.adp-section{
+    margin: 10px 12px; background: #fff; border-radius: 10px;
+    padding: 14px;
+}
+.adp-section .help-title{
+    display: flex; align-items: center; gap: 6px;
+    font-size: 14px; color: #1B1B1B; font-weight: 600;
+    margin-bottom: 10px;
+}
+.adp-section .help-title::before{
+    content: ''; width: 3px; height: 14px;
+    background: #fe739d; border-radius: 2px;
+    display: inline-block;
+}
+.adp-content{
+    font-size: 13px; line-height: 1.7; color: #333;
+    word-break: break-word;
+}
+.adp-content img{ max-width: 100% !important; height: auto !important; display: block; }
+
+/* 爆款产品瀑布 */
+.adp-products{
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+}
+.adp-products a{
+    display: block; text-decoration: none; color: inherit;
+    background: #f7f7f9; border-radius: 8px; overflow: hidden;
+}
+.adp-products img{ width: 100%; height: 130px; object-fit: cover; background: #eee; }
+.adp-products .info{ padding: 8px; }
+.adp-products .info .t{
+    font-size: 12px; color: #1B1B1B;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden; line-height: 1.4;
+    margin-bottom: 4px;
+}
+.adp-products .info .h{
+    font-size: 10px; color: #888;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* 底部固定按钮 */
+.adp-btns{
+    position: fixed; left: 50%; transform: translateX(-50%); bottom: 0;
+    width: 100%; max-width: 640px; box-sizing: border-box;
+    background: #fff; padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+    z-index: 80; border-top: 1px solid #f1f1f1;
+    display: flex; gap: 10px;
+}
+.adp-btns .btn-right,
+.adp-btns .btn-consult{
+    flex: 1; height: 42px; border-radius: 21px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 14px; font-weight: 500;
+    text-decoration: none; position: relative;
+}
+.adp-btns .btn-right{ background: #FF9AC3; }
+.adp-btns .btn-right .orderpoint{
+    position: absolute; top: -10px; left: 46%;
+    transform: translateX(-50%);
+    min-width: 78px; height: 20px; padding: 0 6px; line-height: 20px;
+    background: linear-gradient(270deg,#fd6a69 0%,#fe2c39 100%);
+    color: #fff; font-size: 10px;
+    border-radius: 16px 16px 16px 1px;
+    white-space: nowrap; text-align: center;
+    box-shadow: 0 4px 12px rgba(254,44,57,.35);
+}
+.adp-btns .btn-consult{
+    background: #00c853;
+    animation: adp-breathe 2s ease-in-out infinite;
+    box-shadow: 0 0 10px rgba(0,200,83,.6);
+}
+@keyframes adp-breathe{
+    0%, 100% { box-shadow: 0 0 10px rgba(0,200,83,.6); transform: scale(1); }
+    50%      { box-shadow: 0 0 20px rgba(0,200,83,.9); transform: scale(1.02); }
+}
 </style>
 {/block}
+
 {block name="content"}
-<section class="adp">
-    {if !empty($cover)}<div class="banner"><img src="{$cover}" alt="{$info.name|default=''}"></div>{/if}
-    <div class="hd">
-        <div class="name">{:!empty($info["name"])?$info["name"]:(!empty($info["title"])?$info["title"]:'')}</div>
-        {if !empty($info.sale_nums)}<div class="sale">{$tt['activity.sold']|default='已售'} {$info.sale_nums}</div>{/if}
+{php}
+    $bannerList = [];
+    if (!empty($info['banner']) && is_array($info['banner'])) {
+        $bannerList = $info['banner'];
+    } elseif (!empty($cover)) {
+        $bannerList = [['url' => $cover, 'cover' => $cover]];
+    }
+{/php}
+<section class="adp-body">
+    <div class="adp-head">
+        <a class="back" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="title">{$info.name|default='活动详情'}</h1>
     </div>
-    {if !empty($info.korean_won) || !empty($info.price)}
-    <div class="price-bar">
-        {if !empty($info.korean_won)}<span class="big">₩{$info.korean_won}</span>{/if}
-        {if !empty($info.price)}<span class="big">¥{$info.price}</span>{/if}
-        {if !empty($info.original_price)}<span class="ori">¥{$info.original_price}</span>{/if}
+
+    <!-- 顶部 banner -->
+    {if !empty($bannerList)}
+    <div class="adp-swiper-body">
+        <div class="adp-swiper" id="adpSwiper">
+            {foreach $bannerList as $b}
+            <div class="adp-swiper-item">
+                <img src="{!empty($b.url)?$b.url:$b.cover}" alt="" loading="lazy">
+            </div>
+            {/foreach}
+        </div>
+        {if count($bannerList) > 1}
+        <div class="adp-swiper-dots"><span id="adpDotCur">1</span>/{count($bannerList)}</div>
+        {/if}
     </div>
     {/if}
+
+    <!-- 价格 + 标题 -->
+    <div class="adp-price-box">
+        <div class="title">{$info.name|default=''}</div>
+        {if !empty($info.korean_won) || !empty($info.price)}
+        <div class="price-row">
+            {if !empty($info.korean_won)}<span class="big">₩{$info.korean_won}</span>{/if}
+            {if !empty($info.price) && empty($info.korean_won)}<span class="big">¥{$info.price}</span>{/if}
+            {if !empty($info.original_price)}<span class="ori">¥{$info.original_price}</span>{/if}
+        </div>
+        {/if}
+        {if !empty($info.sale_nums)}
+        <div class="bottom-box">{$tt['index.common.AlreadyBooked']|default='已预约'}{$info.sale_nums}</div>
+        {/if}
+    </div>
+
+    <!-- 适用机构 -->
+    {if !empty($info.hospital) && !empty($info.hospital.id)}
+    {php}
+        $hosp = $info['hospital'];
+        $hCover = '';
+        if (!empty($hosp['cover']) && is_array($hosp['cover'])) {
+            $first = $hosp['cover'][0] ?? $hosp['cover'];
+            $hCover = $first['url'] ?? ($first['cover'] ?? '');
+        }
+        $hSlug = $hosp['slug'] ?? $hosp['id'];
+    {/php}
+    <div class="adp-institution">
+        <div class="head-title">{$tt['activity.institution']|default='适用机构'}</div>
+        <a class="adp-institution-box" href="/{$lang_seg}/hospital/{$hSlug}">
+            <div class="adp-institution-left">
+                {if !empty($hCover)}<img src="{$hCover}" alt="">{/if}
+            </div>
+            <div class="adp-institution-info">
+                <div class="name">
+                    <span>{$hosp.name|default=''}</span>
+                    <span class="arrow">›</span>
+                </div>
+                {if !empty($hosp.zh_cn_address)}
+                <div class="address"><span>{$hosp.zh_cn_address}</span></div>
+                {/if}
+            </div>
+        </a>
+    </div>
+    {/if}
+
+    <!-- 富文本详情 -->
     {if !empty($info.content)}
-    <div class="section content">
-        <h2>{$tt['activity.detail']|default='活动详情'}</h2>
-        <div>{$info.content|raw}</div>
+    <div class="adp-section">
+        <div class="help-title">{$tt['activity.detail']|default='活动详情'}</div>
+        <div class="adp-content">{$info.content|raw}</div>
     </div>
     {/if}
+
+    <!-- 爆款产品 -->
     {if !empty($related)}
-    <div class="adp-rel">
-        <h2 style="margin:0 0 10px;font-size:12px">{$tt['activity.related']|default='相关推荐'}</h2>
-        <div class="grid">
+    <div class="adp-section">
+        <div class="help-title">{$tt['activity.hotItems']|default='爆款产品'}</div>
+        <div class="adp-products">
             {foreach $related as $r}
+            {php}
+                $rCover = '';
+                if (!empty($r['banner']) && is_array($r['banner'])) {
+                    $rCover = $r['banner'][0]['url'] ?? ($r['banner'][0]['cover'] ?? '');
+                } elseif (!empty($r['cover'])) {
+                    $rCover = is_array($r['cover']) ? ($r['cover']['url'] ?? ($r['cover'][0]['url'] ?? '')) : $r['cover'];
+                }
+            {/php}
             <a href="/{$lang_seg}/activity/{$r.id|default=0}">
-                {if !empty($r.cover)}<img src="{$r.cover}" alt="" loading="lazy">{/if}
-                <div class="t">{:!empty($r["title"])?$r["title"]:(!empty($r["name"])?$r["name"]:'')}</div>
+                {if !empty($rCover)}<img src="{$rCover}" alt="" loading="lazy">{/if}
+                <div class="info">
+                    <div class="t">{!empty($r['name'])?$r['name']:(!empty($r['title'])?$r['title']:'')}</div>
+                    {if !empty($r.hospital.name)}<div class="h">{$r.hospital.name}</div>{/if}
+                </div>
             </a>
             {/foreach}
         </div>
     </div>
     {/if}
+
+    <!-- 底部按钮 -->
+    <div class="adp-btns">
+        {php}
+            $hidForAction = $info['hospital']['id'] ?? ($info['h_id'] ?? 0);
+        {/php}
+        <a class="btn-right" href="/{$lang_seg}/appointment?h_id={$hidForAction}">
+            <span>{$tt['index.common.BookNow']|default='立即预约'}</span>
+            <span class="orderpoint">{$tt['point.Orderpoint']|default='下单送积分'}</span>
+        </a>
+        <a class="btn-consult" href="/{$lang_seg}/chat/{$hidForAction}">
+            {$tt['index.common.chatNow']|default='立即咨询'}
+        </a>
+    </div>
 </section>
+
+<script>
+(function(){
+    var sw = document.getElementById('adpSwiper');
+    var dot = document.getElementById('adpDotCur');
+    if(sw && dot){
+        sw.addEventListener('scroll', function(){
+            var idx = Math.round(sw.scrollLeft / sw.clientWidth) + 1;
+            dot.textContent = String(idx);
+        }, {passive: true});
+    }
+})();
+</script>
 {/block}
