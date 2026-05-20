@@ -317,6 +317,89 @@ class Hospital extends BaseController
         ]);
     }
 
+    /**
+     * 医院/医生/项目案例列表(对齐 case/list.vue → /hospital/{slug}/caselist)
+     *   - hospital: type=1
+     *   - doctor: type=2
+     *   - project: type=3
+     */
+    public function caseList(string $slug = '')
+    {
+        if ($slug === '') $this->abort404('Missing hospital slug');
+        $repo = new HospitalRepository($this->lang);
+        $hospital = ctype_digit($slug) ? $repo->detailById((int) $slug) : $repo->detailBySlug($slug);
+        if (!$hospital) $this->abort404('Hospital not found');
+
+        $hid = (int) $hospital['id'];
+        $page = max(1, (int) $this->request->param('page', 1));
+        $offset = ($page - 1) * 20;
+
+        // 直读 compare_case 表(type=1 医院,with_id=$hid)
+        $rows = Db::name('compare_case')
+            ->field(['id', 'with_id', 'type', 'uid', 'uid_type', 'pictures',
+                     'content', 'en_content', 'zh_hant_content', 'ja_content', 'create_time'])
+            ->where('type', 1)->where('with_id', $hid)->where('status', 1)
+            ->order('create_time desc')
+            ->limit($offset, 20)
+            ->select()->toArray();
+        $total = (int) Db::name('compare_case')
+            ->where('type', 1)->where('with_id', $hid)->where('status', 1)->count();
+
+        $prefix = '';
+        switch ($this->lang) {
+            case 'zh-Hant': $prefix = 'zh_hant_'; break;
+            case 'en':      $prefix = 'en_';      break;
+            case 'ja':      $prefix = 'ja_';      break;
+        }
+
+        // 用户信息
+        $realUids   = array_column(array_filter($rows, function ($r) { return !empty($r['uid_type']); }), 'uid');
+        $virtualUids = array_column(array_filter($rows, function ($r) { return empty($r['uid_type']); }), 'uid');
+        $realUsers   = $realUids ? Db::name('user')->whereIn('id', $realUids)->column('nickname,avatar', 'id') : [];
+        $virtualUsers = $virtualUids ? Db::name('virtual_user')->whereIn('id', $virtualUids)->column('nickname,avatar', 'id') : [];
+        $defaultAvatar = '/static/icon/default-avatar.png';
+
+        foreach ($rows as &$r) {
+            $contentKey = $prefix . 'content';
+            $val = $r[$contentKey] ?? $r['content'] ?? '';
+            if (empty($val)) $val = $r['en_content'] ?? '';
+            $r['content'] = trim(html_entity_decode(strip_tags((string) $val), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            $pics = !empty($r['pictures']) ? json_decode((string) $r['pictures'], true) : [];
+            $r['pictures'] = is_array($pics) ? $pics : [];
+            $r['pic_url_0'] = $r['pictures'][0]['url'] ?? '';
+            $r['pic_url_1'] = $r['pictures'][1]['url'] ?? '';
+            $u = !empty($r['uid_type']) ? ($realUsers[$r['uid']] ?? null) : ($virtualUsers[$r['uid']] ?? null);
+            $r['user'] = [
+                'nickname' => $u['nickname'] ?? '',
+                'avatar'   => $u['avatar']   ?: $defaultAvatar,
+            ];
+        }
+        unset($r);
+
+        $title = $hospital['name'] . ' 真实案例 - BeautsGO';
+        $desc = $hospital['name'] . ' 真实就医案例汇总,前后对照,真实反馈。';
+        $langSeg = (string) (config('seo.lang_path_map')[$this->lang] ?? 'cn');
+        $canonical = config('seo.site_url') . '/' . $langSeg . '/hospital/' . ($hospital['slug_url'] ?? $hospital['id']) . '/caselist';
+
+        $this->seo->setTdk($title, $desc, $hospital['name'] . ',案例,医美前后对照')
+            ->setCanonical($canonical)
+            ->buildOrganization()
+            ->buildBreadcrumb([
+                ['name' => '首页', 'url' => '/'],
+                ['name' => $hospital['name'], 'url' => '/hospital/' . ($hospital['slug_url'] ?? $hospital['id'])],
+                ['name' => '案例', 'url' => '/hospital/' . ($hospital['slug_url'] ?? $hospital['id']) . '/caselist'],
+            ]);
+
+        return $this->render('pages/case/list', [
+            'list'        => $rows,
+            'total'       => $total,
+            'page'        => $page,
+            'totalPages'  => max(1, (int) ceil($total / 20)),
+            'tab'         => 0,
+            'filterParams'=> ['type' => 1, 'with_id' => $hid, 'area' => 0, 'level' => 0, 'category' => 0],
+        ]);
+    }
+
     private function langPrefixForPrice(): string
     {
         switch ($this->lang) {
