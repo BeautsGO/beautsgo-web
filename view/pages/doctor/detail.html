@@ -172,7 +172,7 @@
             <div></div>
             {$tt['index.common.FeaturedCases']|default='精选案例'}
         </div>
-        <a class="head-right" href="/{$lang_seg}/case?type=2&with_id={$doctor.id|default=0}" style="text-decoration:none;color:inherit">
+        <a class="head-right" href="/{$lang_seg}/doctor/{$doctor.slug|default=$doctor.id}/caselist" style="text-decoration:none;color:inherit">
             {$tt['index.common.ViewAll']|default='查看全部'}
             <img src="/static/icon/right.png" alt="more">
         </a>

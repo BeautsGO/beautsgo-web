@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace app\controller;
 
 use app\repository\ProjectRepository;
+use think\facade\Db;
 
 /**
  * 项目详情页 —— GET /{lang}/project/{slug}
@@ -40,6 +41,78 @@ class Project extends BaseController
             'cases'    => $cases,
             'comments' => $comments,
             'tags'     => $commentTags,
+        ]);
+    }
+
+    /**
+     * 项目案例列表(对齐 case/list.vue type=3)
+     */
+    public function caseList(string $slug = '')
+    {
+        if ($slug === '') $this->abort404('Missing project slug');
+        $repo = new ProjectRepository($this->lang);
+        $project = ctype_digit($slug) ? $repo->detailById((int) $slug) : $repo->detailBySlug($slug);
+        if (!$project) $this->abort404('Project not found');
+
+        $pid = (int) $project['id'];
+        $subjectName = (string) ($project['name'] ?? '');
+        $subjectUrl  = '/project/' . ($project['slug'] ?? $project['id']);
+
+        $page = max(1, (int) $this->request->param('page', 1));
+        $offset = ($page - 1) * 20;
+        $rows = Db::name('compare_case')
+            ->field(['id', 'with_id', 'type', 'uid', 'uid_type', 'pictures',
+                     'content', 'en_content', 'zh_hant_content', 'ja_content', 'create_time'])
+            ->where('type', 3)->where('with_id', $pid)->where('status', 1)
+            ->order('create_time desc')
+            ->limit($offset, 20)
+            ->select()->toArray();
+        $total = (int) Db::name('compare_case')
+            ->where('type', 3)->where('with_id', $pid)->where('status', 1)->count();
+
+        $prefix = '';
+        switch ($this->lang) {
+            case 'zh-Hant': $prefix = 'zh_hant_'; break;
+            case 'en':      $prefix = 'en_';      break;
+            case 'ja':      $prefix = 'ja_';      break;
+        }
+        $realUids = array_column(array_filter($rows, function ($r) { return !empty($r['uid_type']); }), 'uid');
+        $virtualUids = array_column(array_filter($rows, function ($r) { return empty($r['uid_type']); }), 'uid');
+        $realUsers   = $realUids ? Db::name('user')->whereIn('id', $realUids)->column('nickname,avatar', 'id') : [];
+        $virtualUsers = $virtualUids ? Db::name('virtual_user')->whereIn('id', $virtualUids)->column('nickname,avatar', 'id') : [];
+        $defaultAvatar = '/static/icon/default-avatar.png';
+
+        foreach ($rows as &$r) {
+            $val = $r[$prefix . 'content'] ?? $r['content'] ?? $r['en_content'] ?? '';
+            $r['content'] = trim(html_entity_decode(strip_tags((string) $val), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            $pics = !empty($r['pictures']) ? json_decode((string) $r['pictures'], true) : [];
+            $r['pictures'] = is_array($pics) ? $pics : [];
+            $r['pic_url_0'] = $r['pictures'][0]['url'] ?? '';
+            $r['pic_url_1'] = $r['pictures'][1]['url'] ?? '';
+            $u = !empty($r['uid_type']) ? ($realUsers[$r['uid']] ?? null) : ($virtualUsers[$r['uid']] ?? null);
+            $r['user'] = ['nickname' => $u['nickname'] ?? '', 'avatar' => $u['avatar'] ?: $defaultAvatar];
+        }
+        unset($r);
+
+        $title = $subjectName . ' 真实案例 - BeautsGO';
+        $langSeg = (string) (config('seo.lang_path_map')[$this->lang] ?? 'cn');
+        $canonical = config('seo.site_url') . '/' . $langSeg . $subjectUrl . '/caselist';
+        $this->seo->setTdk($title, $subjectName . ' 真实案例汇总,前后对照', '案例,医美前后对照')
+            ->setCanonical($canonical)
+            ->buildOrganization()
+            ->buildBreadcrumb([
+                ['name' => '首页', 'url' => '/'],
+                ['name' => $subjectName, 'url' => $subjectUrl],
+                ['name' => '案例', 'url' => $subjectUrl . '/caselist'],
+            ]);
+
+        return $this->render('pages/case/list', [
+            'list'         => $rows,
+            'total'        => $total,
+            'page'         => $page,
+            'totalPages'   => max(1, (int) ceil($total / 20)),
+            'tab'          => 0,
+            'filterParams' => ['type' => 3, 'with_id' => $pid, 'area' => 0, 'level' => 0, 'category' => 0],
         ]);
     }
 

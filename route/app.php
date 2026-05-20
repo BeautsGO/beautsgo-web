@@ -124,6 +124,8 @@ Route::group(':lang', function () use ($slugPattern) {
     Route::get('hospital/:slug/price',      'Hospital/price')->pattern($slugPattern);
     Route::get('hospital/:slug/allproject', 'Hospital/allProject')->pattern($slugPattern);
     Route::get('hospital/:slug/caselist',   'Hospital/caseList')->pattern($slugPattern);
+    Route::get('doctor/:slug/caselist',     'Doctor/caseList')->pattern($slugPattern);
+    Route::get('project/:slug/caselist',    'Project/caseList')->pattern($slugPattern);
     // 详情页
     Route::get('hospital/:slug', 'Hospital/detail')->pattern($slugPattern);
     Route::get('project/:slug',  'Project/detail')->pattern($slugPattern);
