@@ -1,25 +1,119 @@
 {extend name="layout/base" /}
-{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}"><link rel="stylesheet" href="/static/css/pages/case.css?v={$assets.css_ver}">{/block}
+
+{block name="extra_head"}
+<style>
+/* ============================================================
+ * me/cases 我的案例 - 瀑布流(对齐 case/list.vue + userCase.vue)
+ *   2 列 CSS column-count,卡片图 + 内容 2 行 + 时间 + 审核状态
+ *   顶部 "+ 写案例" 入口
+ * ============================================================ */
+.uc-page{ background: #f6f6f6; min-height: 100vh; padding-bottom: 70px; box-sizing: border-box; }
+.uc-head{
+    position: sticky; top: 0; z-index: 30; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+}
+.uc-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.uc-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+.uc-head .write-btn{
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    color: #FE739D; font-size: 12px; text-decoration: none;
+    padding: 5px 10px; border-radius: 14px;
+    background: rgba(254,115,157,.1);
+}
+
+.uc-grid{
+    column-count: 2; column-gap: 8px;
+    padding: 10px 8px;
+}
+.uc-card{
+    display: inline-block; width: 100%; break-inside: avoid;
+    margin-bottom: 8px;
+    background: #fff; border-radius: 10px; overflow: hidden;
+    text-decoration: none; color: inherit;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.uc-card__imgs{ display: flex; gap: 1px; }
+.uc-card__imgs img{
+    flex: 1; min-width: 0; width: 100%; height: auto; display: block;
+    object-fit: cover; background: #f5f5f5;
+}
+.uc-card__text{ padding: 8px 10px 10px; }
+.uc-card__content{
+    font-size: 12px; color: #333; line-height: 1.5;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+    overflow: hidden; margin-bottom: 6px;
+}
+.uc-card__meta{
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 10px; color: #999;
+}
+.uc-card__status{ color: #FD83AB; font-weight: 500; }
+.uc-card__status.pending{ color: #fa8c16; }
+.uc-card__status.rejected{ color: #ef5189; }
+
+.uc-empty{
+    text-align: center; padding: 80px 16px;
+    color: #999; font-size: 13px;
+}
+.uc-empty .write-now{
+    display: inline-block; margin-top: 16px;
+    padding: 10px 24px;
+    background: linear-gradient(135deg,#fe739d,#ff9ac3);
+    color: #fff; border-radius: 22px;
+    font-size: 14px; text-decoration: none;
+    box-shadow: 0 6px 16px rgba(254,115,157,.35);
+}
+</style>
+{/block}
+
 {block name="content"}
-<div class="user-page case-page">
-    <div class="page-head">
-        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
-        <h1 class="page-title">我的案例</h1>
+<div class="uc-page">
+    <div class="uc-head">
+        <a class="back" href="/{$lang_seg}/me" aria-label="返回">‹</a>
+        <h1 class="title">{$tt['me.MyCases']|default='我的案例'}</h1>
+        <a class="write-btn" href="/{$lang_seg}/me/cases/new">+ {$tt['case.publish']|default='写案例'}</a>
     </div>
-    <div style="text-align:right; padding:10px 16px;">
-        <a href="/{$lang_seg}/me/cases/new" style="color:#FE739D; font-size:13px; text-decoration:none;">+ 写案例</a>
+
+    {if empty($list)}
+    <div class="uc-empty">
+        <div>{$tt['point.Empty']|default='暂无案例'}</div>
+        <a class="write-now" href="/{$lang_seg}/me/cases/new">{$tt['case.publishFirst']|default='发布第一篇案例'}</a>
     </div>
-    {if empty($list)}<div class="empty">{$tt['point.Empty']|default='暂无案例'}</div>{/if}
-    <div class="case-grid">
+    {else/}
+    <div class="uc-grid">
         {foreach $list as $cs}
-        <a class="case-card" href="/{$lang_seg}/case/{$cs.id}">
-            <div class="case-card__imgs">{if !empty($cs.pic_url_0)}<img src="{$cs.pic_url_0}" alt="case" loading="lazy">{/if}</div>
-            <div class="case-card__text">
-                <div class="case-card__content">{$cs.content|default=''}</div>
+        {php}
+            // status: 0 待审核 / 1 通过 / -1 拒绝
+            $st = (int) ($cs['status'] ?? 1);
+            $stCls = $st === 1 ? '' : ($st === -1 ? 'rejected' : 'pending');
+            $stText = $st === 1 ? (!empty($tt['case.approved']) ? $tt['case.approved'] : '已发布')
+                  : ($st === -1 ? (!empty($tt['case.rejected']) ? $tt['case.rejected'] : '审核未通过')
+                              : (!empty($tt['case.pending']) ? $tt['case.pending'] : '审核中'));
+        {/php}
+        <a class="uc-card" href="/{$lang_seg}/case/{$cs.id|default=0}">
+            <div class="uc-card__imgs">
+                {if !empty($cs.pic_url_0)}<img src="{$cs.pic_url_0}" alt="case" loading="lazy">{/if}
+                {if !empty($cs.pic_url_1)}<img src="{$cs.pic_url_1}" alt="case" loading="lazy">{/if}
+            </div>
+            <div class="uc-card__text">
+                {if !empty($cs.content)}
+                <div class="uc-card__content">{$cs.content}</div>
+                {/if}
+                <div class="uc-card__meta">
+                    <span>
+                        {if !empty($cs.create_time)}
+                            {if is_numeric($cs.create_time)}{:date('m-d', (int)$cs['create_time'])}{else/}{$cs.create_time}{/if}
+                        {/if}
+                    </span>
+                    <span class="uc-card__status {$stCls}">{$stText}</span>
+                </div>
             </div>
         </a>
         {/foreach}
     </div>
+    {/if}
+
     {include file="components/_pagination" /}
     {include file="components/_tabbar" /}
 </div>
