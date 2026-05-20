@@ -243,6 +243,80 @@ class Hospital extends BaseController
         ]);
     }
 
+    /**
+     * 医院全部项目页(对齐 pages/project/project.vue + /hospital/{slug}/allproject)
+     */
+    public function allProject(string $slug = '')
+    {
+        if ($slug === '') $this->abort404('Missing hospital slug');
+        $repo = new HospitalRepository($this->lang);
+        $hospital = ctype_digit($slug) ? $repo->detailById((int) $slug) : $repo->detailBySlug($slug);
+        if (!$hospital) $this->abort404('Hospital not found');
+
+        $hid = (int) $hospital['id'];
+        $page = max(1, (int) $this->request->param('page', 1));
+
+        $repoIdx = new \app\repository\IndexRepository($this->lang);
+        // 用 fetchProjectList 但限定为本医院的项目
+        // 直接查 project 表更直接
+        $offset = ($page - 1) * 20;
+        $rows = Db::name('project')->alias('p')
+            ->leftJoin('hospital h', 'h.id=p.h_id')
+            ->where(['p.status' => 1, 'p.h_id' => $hid])
+            ->field([
+                'p.id', 'p.cover_detail', 'p.korean_won', 'p.price',
+                'p.sale_nums', 'p.service_fee',
+                'p.name AS zh_name', 'p.en_name',
+                'p.unit AS zh_unit', 'p.en_unit',
+                'p.is_recommend', 'p.sort', 'p.create_time',
+            ])
+            ->order('p.is_recommend desc, p.sort desc, p.create_time desc')
+            ->limit($offset, 20)
+            ->select()
+            ->toArray();
+        $total = (int) Db::name('project')->where(['status' => 1, 'h_id' => $hid])->count();
+
+        // 归一化
+        foreach ($rows as &$r) {
+            $cov = json_decode((string) ($r['cover_detail'] ?? ''), true) ?: [];
+            $r['cover'] = is_array($cov) ? $cov : [];
+            $r['cover_url'] = $r['cover'][0]['url'] ?? '';
+            $r['name'] = $r['zh_name'] ?: $r['en_name'];
+            $r['unit'] = $r['zh_unit'] ?: $r['en_unit'];
+            $r['hospital_name'] = $hospital['name'] ?? '';
+            $r['service_fee'] = [(int) ($r['service_fee'] ?: 30000), '₩'];
+            $r['slug'] = !empty($r['en_name'])
+                ? preg_replace('/[^a-z0-9-]/', '', strtolower(preg_replace('/\s+/', '-', $r['en_name'])))
+                : (string) $r['id'];
+            unset($r['cover_detail'], $r['zh_name'], $r['zh_unit'], $r['en_unit']);
+        }
+        unset($r);
+
+        $title = $hospital['name'] . ' 全部项目 - BeautsGO';
+        $desc  = $hospital['name'] . ' 全部医美项目目录,涵盖整形 / 皮肤 / 抗衰 / 注射等品类。';
+        $langSeg = (string) (config('seo.lang_path_map')[$this->lang] ?? 'cn');
+        $canonical = config('seo.site_url') . '/' . $langSeg . '/hospital/' . ($hospital['slug_url'] ?? $hospital['id']) . '/allproject';
+
+        $this->seo->setTdk($title, $desc, $hospital['name'] . ',项目,医美')
+            ->setCanonical($canonical)
+            ->buildOrganization()
+            ->buildBreadcrumb([
+                ['name' => '首页', 'url' => '/'],
+                ['name' => $hospital['name'], 'url' => '/hospital/' . ($hospital['slug_url'] ?? $hospital['id'])],
+                ['name' => '全部项目', 'url' => '/hospital/' . ($hospital['slug_url'] ?? $hospital['id']) . '/allproject'],
+            ]);
+
+        return $this->render('pages/hospital/all-project', [
+            'hospital'    => $hospital,
+            'list'        => $rows,
+            'total'       => $total,
+            'page'        => $page,
+            'totalPages'  => max(1, (int) ceil($total / 20)),
+            'filterParams'=> ['area' => 0, 'level' => 0, 'category' => 0],
+            'tab'         => 1,
+        ]);
+    }
+
     private function langPrefixForPrice(): string
     {
         switch ($this->lang) {

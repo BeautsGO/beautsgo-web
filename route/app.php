@@ -121,7 +121,8 @@ Route::group(':lang', function () use ($slugPattern) {
     Route::get('doc',              'Misc/doc');
     Route::get('sms-code',         'Misc/smsCode');
     // 医院价目表
-    Route::get('hospital/:slug/price', 'Hospital/price')->pattern($slugPattern);
+    Route::get('hospital/:slug/price',      'Hospital/price')->pattern($slugPattern);
+    Route::get('hospital/:slug/allproject', 'Hospital/allProject')->pattern($slugPattern);
     // 详情页
     Route::get('hospital/:slug', 'Hospital/detail')->pattern($slugPattern);
     Route::get('project/:slug',  'Project/detail')->pattern($slugPattern);

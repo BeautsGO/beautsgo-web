@@ -1,0 +1,92 @@
+{extend name="layout/base" /}
+
+{block name="extra_head"}
+<link rel="stylesheet" href="/static/css/pages/index.css?v={$assets.css_ver}">
+<style>
+/* ============================================================
+ * 医院全部项目 1:1 还原 pages/project/project.vue
+ *   .detail-list 2 列网格(对齐 vue .list-item)
+ *   每项:cover 1:1 + 名称 1 行 ellipsis
+ * ============================================================ */
+.ap-body{
+    background: #f5f5f5; min-height: 100vh;
+    padding-bottom: 30px; box-sizing: border-box;
+}
+.ap-head{
+    position: sticky; top: 0; z-index: 30; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+}
+.ap-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.ap-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.ap-list{
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+    padding: 10px 12px;
+}
+.ap-item{
+    display: block; background: #fff; border-radius: 8px;
+    overflow: hidden; text-decoration: none; color: inherit;
+    box-shadow: 0 2px 6px rgba(0,0,0,.04);
+}
+.ap-item .cover{
+    width: 100%; aspect-ratio: 1/1;
+    object-fit: cover; background: #f3f3f7;
+    display: block;
+}
+.ap-item .info{ padding: 8px; }
+.ap-item .name{
+    font-size: 13px; color: #1B1B1B; font-weight: 500;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    margin-bottom: 4px;
+}
+.ap-item .price{
+    color: #fc6290; font-weight: 700; font-size: 14px;
+}
+.ap-item .price .unit{
+    font-size: 10px; font-weight: 400; color: #999;
+}
+.ap-item .sale{
+    font-size: 11px; color: #999;
+    margin-top: 2px;
+}
+
+.ap-empty{ padding: 60px 0; text-align: center; color: #999; font-size: 13px; }
+</style>
+{/block}
+
+{block name="content"}
+<section class="ap-body">
+    <div class="ap-head">
+        <a class="back" href="/{$lang_seg}/hospital/{$hospital.slug_url|default=$hospital.id}" aria-label="返回">‹</a>
+        <h1 class="title">{$hospital.name|default=''} - {$tt['hospital.allProjects']|default='全部项目'}</h1>
+    </div>
+
+    {if empty($list)}
+    <div class="ap-empty">{$tt['projectDetails.Empty']|default='暂无项目'}</div>
+    {else/}
+    <div class="ap-list">
+        {foreach $list as $p}
+        <a class="ap-item" href="/{$lang_seg}/project/{$p.slug|default=$p.id}">
+            {if !empty($p.cover_url)}
+            <img class="cover" src="{$p.cover_url}" alt="{$p.name|default=''}" loading="lazy">
+            {else/}
+            <div class="cover"></div>
+            {/if}
+            <div class="info">
+                <div class="name">{$p.name|default=''}</div>
+                {if !empty($p.korean_won)}
+                <div class="price">₩{$p.korean_won}{if !empty($p.unit)}<span class="unit">/{$p.unit}</span>{/if}</div>
+                {/if}
+                {if !empty($p.sale_nums)}
+                <div class="sale">{$tt['index.common.AlreadyBooked']|default='已预约'}{$p.sale_nums}</div>
+                {/if}
+            </div>
+        </a>
+        {/foreach}
+    </div>
+    {/if}
+
+    {include file="components/_pagination" /}
+</section>
+{/block}

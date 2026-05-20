@@ -296,7 +296,7 @@
             {$hospital.tag_project|default='特色项目'}
         </div>
         {if !empty($projects)}
-        <a class="head-right" href="/{$lang_seg}/project" style="text-decoration:none;color:inherit">
+        <a class="head-right" href="/{$lang_seg}/hospital/{$hospital.slug_url|default=$hospital.id}/allproject" style="text-decoration:none;color:inherit">
             {$tt['index.common.ViewAll']|default='查看全部'}
             <img src="/static/icon/right.png" alt="more">
         </a>
