@@ -1,42 +1,268 @@
 {extend name="layout/base" /}
+
 {block name="extra_head"}
 <style>
-.od-page{padding:0 0 24px;background:#f7f7f9;min-height:100vh}
-.od-top{padding:24px 16px;background:linear-gradient(135deg,#fc6290,#ff8aac);color:#fff}
-.od-top .st{font-size:16px;font-weight:600}
-.od-top .tip{margin-top:6px;font-size:12px;opacity:.85}
-.od-card{margin:14px;padding:16px;background:#fff;border-radius:10px}
-.od-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed #eee;font-size:12px;color:#333;gap:14px}
-.od-row:last-child{border-bottom:0}
-.od-row .l{color:#999;white-space:nowrap}
-.od-row .r{text-align:right;flex:1;word-break:break-all}
-.od-kf{text-align:center;padding:18px 0}
-.od-kf img{width:160px;height:160px;border-radius:6px}
-.od-kf .t{margin-top:10px;font-size:12px;color:#888;line-height:1.6}
+/* ============================================================
+ * order/detail 1:1 还原 subPackages_sub/order/detail.vue scoped scss
+ *   .box-top 顶部粉色状态条
+ *   .order 卡:客服 QR / 字段表 / 底部支付栏
+ *   字段:机构/医生/项目/订单号(复制)/下单时间/支付时间/金额/预约时间/到店/退款/激活/备注
+ *   底部固定栏:status==1(待支付)显示金额 + 立即支付按钮
+ * ============================================================ */
+.od-page{
+    background: #f5f5f5; min-height: 100vh;
+    padding-bottom: 90px; box-sizing: border-box;
+}
+.od-head{
+    position: sticky; top: 0; z-index: 30; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: rgba(255,255,255,.96); border-bottom: 1px solid #f1f1f1;
+    backdrop-filter: blur(6px);
+}
+.od-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.od-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+
+.od-box-top{
+    background: linear-gradient(135deg,#FC6290,#FF8AAC);
+    color: #fff; padding: 20px 16px;
+}
+.od-status-title{ font-size: 18px; font-weight: 700; }
+.od-status-tip{ font-size: 12px; opacity: .9; margin-top: 6px; line-height: 1.5; }
+
+.od-kf{
+    background: #fff; border-radius: 10px;
+    margin: 12px; padding: 16px;
+    display: flex; flex-direction: column; align-items: center;
+}
+.od-kf .wx-code img{
+    width: 140px; height: 140px;
+    object-fit: contain; background: #f5f5f5; border-radius: 6px;
+}
+.od-kf .kf-tip{
+    margin-top: 10px;
+    font-size: 12px; color: #888;
+    text-align: center; line-height: 1.6;
+}
+
+.od-card{
+    background: #fff; border-radius: 10px;
+    margin: 0 12px 12px; padding: 14px 16px;
+}
+.od-item{
+    display: flex; padding: 9px 0;
+    border-bottom: 1px dashed #eee;
+    font-size: 13px; color: #333; gap: 12px; line-height: 1.5;
+}
+.od-item:last-child{ border-bottom: 0; }
+.od-item .label{ color: #999; white-space: nowrap; flex-shrink: 0; }
+.od-item .value{
+    flex: 1; text-align: right;
+    word-break: break-all;
+}
+.od-item .value.danger{ color: #ff3b30; }
+.od-item .value .copy-btn{
+    margin-left: 6px;
+    display: inline-block;
+    padding: 1px 6px; border-radius: 3px;
+    background: rgba(254,115,157,.12); color: #fe739d;
+    font-size: 11px; cursor: pointer;
+}
+.od-project-detail{
+    display: flex; flex-wrap: wrap; gap: 4px;
+    justify-content: flex-end; margin-top: 4px;
+}
+.od-project-detail span{
+    background: #f5f5f5; color: #666;
+    padding: 2px 6px; border-radius: 3px;
+    font-size: 11px;
+}
+
+.od-pay-bar{
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 640px;
+    background: #fff; padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    border-top: 1px solid #f0f0f0;
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 80; gap: 10px; box-sizing: border-box;
+}
+.od-pay-bar .left .row{ font-size: 13px; color: #666; margin-bottom: 2px; }
+.od-pay-bar .left .row .price{ color: #fe2c39; font-weight: 700; }
+.od-pay-bar .left .row .price .yen{ font-size: 11px; font-weight: 400; }
+.od-pay-bar .btn{
+    flex-shrink: 0;
+    padding: 10px 22px;
+    background: linear-gradient(135deg,#fe739d,#ff8aac);
+    color: #fff; border: 0; border-radius: 22px;
+    font-size: 14px; font-weight: 600; text-decoration: none;
+    box-shadow: 0 6px 16px rgba(254,115,157,.35); cursor: pointer;
+}
 </style>
 {/block}
+
 {block name="content"}
-{$st = $info.status|default=0}
 <section class="od-page">
-    <div class="page-head" style="background:transparent;color:#fff"><a class="back-btn" href="/{$lang_seg}/me/order" aria-label="返回" style="color:#fff">‹</a></div>
-    <div class="od-top">
-        <div class="st">{$info.status_text|default=''}</div>
-        <div class="tip">{$tt['order.tipBelow']|default='请添加专属客服跟进后续服务'}</div>
+    <div class="od-head">
+        <a class="back" href="/{$lang_seg}/me/order" aria-label="返回">‹</a>
+        <h1 class="title">{$tt['detail.title']|default='订单详情'}</h1>
     </div>
+
+    {php}
+        $status = (int) ($info['status'] ?? 0);
+        // 对齐 vue statusTips()
+        $statusTipsMap = [
+            -1 => '请尽快完成支付!',
+            1  => '请尽快完成支付!',
+            2  => '您已支付成功,请扫码添加客服完成预约!',
+            3  => '您已预约成功!请携带护照按时到店!',
+            6  => '订单已完成',
+            7  => '订单已完成',
+            8  => '您已改签成功!',
+        ];
+        $statusTip = $statusTipsMap[$status] ?? '';
+    {/php}
+
+    <!-- 顶部状态 -->
+    <div class="od-box-top">
+        <div class="od-status-title">{$info.status_text|default='订单详情'}</div>
+        <div class="od-status-tip">{!empty($statusTip)?$statusTip:(!empty($tt['order.tipBelow'])?$tt['order.tipBelow']:'请添加专属客服跟进后续服务')}</div>
+    </div>
+
+    <!-- 客服 QR -->
     {if !empty($wxCode)}
-    <div class="od-card od-kf">
-        <img src="{$wxCode}" alt="客服二维码">
-        <div class="t">{$tt['order.Addcustomerservice']|default='请添加您的专属客服'}</div>
+    <div class="od-kf">
+        <div class="wx-code"><img src="{$wxCode}" alt="客服二维码"></div>
+        <div class="kf-tip">
+            {$tt['order.kfTip1']|default='为更好的为您提供后续服务'}<br>
+            {$tt['order.kfTip2']|default='请您尽快添加您的专属客服'}
+        </div>
     </div>
     {/if}
+
+    <!-- 订单字段 -->
     <div class="od-card">
-        <div class="od-row"><span class="l">{$tt['make.Bookhospital']|default='预约机构'}</span><span class="r">{$info.hospital_name|default=''}</span></div>
-        {if !empty($info.d_id)}<div class="od-row"><span class="l">{$tt['index.common.doctor']|default='医生'}</span><span class="r">{$info.doctor_name|default=''}</span></div>{/if}
-        {if !empty($info.p_id)}<div class="od-row"><span class="l">{$tt['make.Bookitem']|default='预约项目'}</span><span class="r">{$info.project_name|default=''}</span></div>{/if}
-        {if !empty($info.refer_no)}<div class="od-row"><span class="l">{$tt['order.Ordernum']|default='订单号'}</span><span class="r">{$info.refer_no}</span></div>{/if}
-        {if !empty($info.create_time)}<div class="od-row"><span class="l">{$tt['order.Ordertime']|default='下单时间'}</span><span class="r">{$info.create_time}</span></div>{/if}
-        {if !empty($info.callback_time)}<div class="od-row"><span class="l">{$tt['order.Paytime']|default='支付时间'}</span><span class="r">{$info.callback_time}</span></div>{/if}
-        {if !empty($info.price)}<div class="od-row"><span class="l">{$tt['order.price']|default='金额'}</span><span class="r">¥{$info.price}</span></div>{/if}
+        {if !empty($info.hospital_name)}
+        <div class="od-item">
+            <span class="label">{$tt['make.Bookhospital']|default='预约机构'}</span>
+            <span class="value">{$info.hospital_name}</span>
+        </div>
+        {/if}
+        {if !empty($info.d_id) && !empty($info.doctor_name)}
+        <div class="od-item">
+            <span class="label">{$tt['make.Booktext']|default='预约'}{$tt['index.common.doctor']|default='医生'}</span>
+            <span class="value">{$info.doctor_name}</span>
+        </div>
+        {/if}
+        {if !empty($info.p_id) && !empty($info.project_name)}
+        <div class="od-item">
+            <span class="label">{$tt['make.Bookitem']|default='预约项目'}</span>
+            <span class="value">
+                {$info.project_name}
+                {if !empty($info.project_type) && $info.project_type == '3' && !empty($info.project_detail)}
+                <div class="od-project-detail">
+                    {foreach $info.project_detail as $d}
+                    <span>{$d.name|default=''}</span>
+                    {/foreach}
+                </div>
+                {/if}
+            </span>
+        </div>
+        {/if}
+        {if !empty($info.refer_no)}
+        <div class="od-item">
+            <span class="label">{$tt['order.Ordernum']|default='订单号'}</span>
+            <span class="value">
+                <span>{$info.refer_no}</span>
+                <span class="copy-btn" data-copy="{$info.refer_no}">{$tt['point.copy']|default='复制'}</span>
+            </span>
+        </div>
+        {/if}
+        {if !empty($info.create_time)}
+        <div class="od-item">
+            <span class="label">{$tt['order.Ordertime']|default='下单时间'}</span>
+            <span class="value">{if is_numeric($info.create_time)}{:date('Y-m-d H:i:s', (int)$info['create_time'])}{else/}{$info.create_time}{/if}</span>
+        </div>
+        {/if}
+        {if !empty($info.callback_time)}
+        <div class="od-item">
+            <span class="label">{$tt['order.Paytime']|default='支付时间'}</span>
+            <span class="value">{if is_numeric($info.callback_time)}{:date('Y-m-d H:i:s', (int)$info['callback_time'])}{else/}{$info.callback_time}{/if}</span>
+        </div>
+        {/if}
+        {if !empty($info.price)}
+        <div class="od-item">
+            <span class="label">{if $status == 1}{$tt['order.Unpaidnum']|default='待支付金额'}{else/}{$tt['order.Paidnum']|default='已支付金额'}{/if}</span>
+            <span class="value">₩{$info.price}</span>
+        </div>
+        {/if}
+        {if !empty($info.expected_time)}
+        <div class="od-item">
+            <span class="label">{$tt['order.Hopebooktime']|default='期望预约时间'}</span>
+            <span class="value">{$info.expected_time}</span>
+        </div>
+        {/if}
+        {if !empty($info.confirm_expected_time)}
+        <div class="od-item">
+            <span class="label">{$tt['order.Arrivaltime']|default='到店时间'}</span>
+            <span class="value">{$info.confirm_expected_time}</span>
+        </div>
+        {/if}
+        {if !empty($info.refund_time)}
+        <div class="od-item">
+            <span class="label">{$tt['order.Refundtime']|default='退款时间'}</span>
+            <span class="value">{if is_numeric($info.refund_time)}{:date('Y-m-d H:i:s', (int)$info['refund_time'])}{else/}{$info.refund_time}{/if}</span>
+        </div>
+        {/if}
+        {if !empty($info.refund_price) && $info.refund_price != '0.00'}
+        <div class="od-item">
+            <span class="label">{$tt['order.Refundnum']|default='退款金额'}</span>
+            <span class="value">₩{$info.refund_price}</span>
+        </div>
+        {/if}
+        {if !empty($info.remark)}
+        <div class="od-item">
+            <span class="label">{$tt['order.Refundcheck']|default='备注'}</span>
+            <span class="value danger">{$info.remark}</span>
+        </div>
+        {/if}
     </div>
+
+    <!-- 底部支付栏(对齐 .bottom-order v-if status == 1)-->
+    {if $status == 1}
+    <div class="od-pay-bar">
+        <div class="left">
+            <div class="row">
+                {$tt['order.Servicefee']|default='服务费'}:
+                <span class="price"><span class="yen">₩</span>{$info.service_fee|default=0}</span>
+            </div>
+            {if !empty($info.clinic_fee) && $info.clinic_fee > 0}
+            <div class="row">
+                {$tt['index.common.ConsultationFee']|default='面诊费'}:
+                <span class="price"><span class="yen">₩</span>{$info.clinic_fee}</span>
+            </div>
+            {/if}
+        </div>
+        <a class="btn" href="/{$lang_seg}/me/order/{$info.id|default=0}?action=pay">
+            {$tt['order.Gotopay']|default='立即支付'}
+        </a>
+    </div>
+    {/if}
 </section>
+
+<script>
+(function(){
+    /* 复制订单号(对齐 vue getCopy)*/
+    document.querySelectorAll('[data-copy]').forEach(function(el){
+        el.addEventListener('click', function(){
+            var text = el.dataset.copy;
+            (window.BG && BG.copy ? BG.copy(text) : function(){
+                var ta = document.createElement('textarea');
+                ta.value = text; document.body.appendChild(ta);
+                ta.select(); try { document.execCommand('copy'); } catch(e){}
+                ta.remove();
+            }());
+            BG.toast && BG.toast('{$tt["showToast.Clipboard"]|default="已复制"}', 'success');
+        });
+    });
+})();
+</script>
 {/block}
