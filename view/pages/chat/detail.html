@@ -2,116 +2,462 @@
 
 {block name="extra_head"}
 <style>
-.chat-page{
+/* ============================================================
+ * chat.vue 1:1 还原(subPackages_sub/chat/chat.vue):
+ *   .app-header 医院名 + 官方对话/加密信息徽章 + 预约进度按钮
+ *   .chat 滚动区:头像 + 气泡(文本/图片/文件/视频)
+ *   .composer 表情 + textarea + 发送
+ *   底部 footnote 平台免责声明
+ * ============================================================ */
+.ch-page{
     min-height: 100vh; background: #ebebec;
     display: flex; flex-direction: column;
-    padding-bottom: 70px;
+    padding-bottom: 110px; box-sizing: border-box;
 }
-.chat-page .page-head{
-    position: sticky; top: 0; z-index: 20; height: 44px;
-    display: flex; align-items: center; padding: 0 15px;
+.ch-header{
+    position: sticky; top: 0; z-index: 30;
     background: #fff; border-bottom: 1px solid #e0e0e0;
 }
-.chat-page .back-btn{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 20px; }
-.chat-page .page-title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
-
-.chat-history{
-    flex: 1; padding: 14px 12px 80px;
-    display: flex; flex-direction: column; gap: 12px;
+.ch-h-row{
+    display: flex; align-items: center;
+    padding: 8px 12px; min-height: 44px; gap: 10px;
 }
-.chat-bubble{
-    display: flex; gap: 8px; align-items: flex-end;
+.ch-back{
+    width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+    color: #1B1B1B; text-decoration: none; font-size: 22px; flex-shrink: 0;
+}
+.ch-header-left{
+    flex: 1; display: flex; align-items: center; gap: 10px;
+    text-decoration: none; color: inherit; min-width: 0;
+}
+.ch-logo{
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #f3f3f7; overflow: hidden; flex-shrink: 0;
+}
+.ch-logo img{ width: 100%; height: 100%; object-fit: cover; }
+.ch-titles{ min-width: 0; flex: 1; }
+.ch-name{
+    font-size: 14px; font-weight: 600; color: #1B1B1B;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ch-meta{ display: flex; gap: 5px; margin-top: 2px; }
+.ch-meta .badge{
+    font-size: 10px; color: #888;
+    background: #f3f3f7;
+    padding: 1px 5px; border-radius: 3px;
+}
+.ch-progress-btn{
+    flex-shrink: 0; padding: 5px 10px;
+    background: linear-gradient(135deg,#fe739d,#ff9ac3);
+    color: #fff; border: 0; border-radius: 14px;
+    font-size: 12px; cursor: pointer;
+}
+
+/* 聊天滚动区 */
+.ch-chat{
+    flex: 1; padding: 14px 12px;
+    display: flex; flex-direction: column; gap: 14px;
+    overflow-y: auto;
+}
+.ch-row{
+    display: flex; gap: 8px; align-items: flex-start;
     max-width: 100%;
 }
-.chat-bubble .ava{
+.ch-row.user{ flex-direction: row-reverse; }
+.ch-row .avatar{
     width: 32px; height: 32px; border-radius: 50%;
-    background: #ddd; flex-shrink: 0; overflow: hidden;
+    background: #f3f3f7; flex-shrink: 0; overflow: hidden;
 }
-.chat-bubble .ava img{ width: 100%; height: 100%; object-fit: cover; }
-.chat-bubble .body{
-    max-width: 70%; padding: 10px 12px;
-    border-radius: 12px; word-break: break-word; font-size: 14px;
-    line-height: 1.5;
+.ch-row .avatar img{ width: 100%; height: 100%; object-fit: cover; }
+.ch-row .msg-body{
+    max-width: 68%; min-width: 0;
+    display: flex; flex-direction: column; gap: 4px;
 }
-
-.chat-bubble--kf{ justify-content: flex-start; }
-.chat-bubble--kf .body{
+.ch-row.user .msg-body{ align-items: flex-end; }
+.ch-row .label{
+    font-size: 10px; color: #999;
+    padding: 0 4px;
+}
+.ch-row .bubble{
+    padding: 10px 12px;
+    border-radius: 12px; font-size: 14px; line-height: 1.5;
+    word-break: break-word; word-wrap: break-word;
+}
+.ch-row.hospital .bubble{
     background: #fff; color: #333;
     border-top-left-radius: 4px;
 }
-
-.chat-bubble--me{ flex-direction: row-reverse; }
-.chat-bubble--me .body{
+.ch-row.user .bubble{
     background: #fe739d; color: #fff;
     border-top-right-radius: 4px;
 }
-
-.chat-bubble__time{
-    text-align: center; font-size: 11px; color: #999;
-    padding: 6px 0;
+/* 图片气泡 */
+.ch-row .bubble.image{
+    padding: 4px; max-width: 200px; cursor: zoom-in;
 }
+.ch-row .bubble.image img{ width: 100%; height: auto; display: block; border-radius: 8px; }
+/* 文件气泡 */
+.ch-row .bubble.file{
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer;
+}
+.ch-row .bubble.file .file-icon{ font-size: 18px; }
+.ch-row .bubble.file .file-name{ flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px; }
+.ch-row .bubble.file .file-download{
+    font-size: 11px; padding: 2px 6px;
+    background: rgba(254,115,157,.12); color: #fe739d;
+    border-radius: 4px;
+}
+.ch-row.user .bubble.file{ background: #fff5fa; color: #333; }
 
-.chat-input-bar{
+/* 平台免责 */
+.ch-footnote{
+    text-align: center;
+    font-size: 11px; color: #999;
+    padding: 16px 30px;
+    line-height: 1.5;
+}
+.ch-footnote b{ font-weight: 600; color: #666; }
+
+/* 输入区 */
+.ch-composer{
     position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
     width: 100%; max-width: 640px;
-    display: flex; gap: 8px; padding: 10px 12px;
     background: #fff; border-top: 1px solid #e0e0e0;
     box-sizing: border-box;
+    z-index: 90;
 }
-.chat-input-bar input{
-    flex: 1; height: 38px; padding: 0 14px;
-    border-radius: 19px; border: 0; background: #f3f3f7;
-    font-size: 14px; outline: none;
+.ch-quick-reply{
+    display: flex; overflow-x: auto; gap: 6px;
+    padding: 8px 12px;
+    border-bottom: 1px solid #f0f0f3;
+    scrollbar-width: none;
 }
-.chat-input-bar input:focus{ background: #fff; box-shadow: 0 0 0 1px #fe739d; }
-.chat-input-bar button{
+.ch-quick-reply::-webkit-scrollbar{ display: none; }
+.ch-quick-reply .q-btn{
+    flex-shrink: 0; padding: 6px 12px;
+    background: #f5f5f5; color: #555;
+    border: 0; border-radius: 14px; font-size: 12px;
+    cursor: pointer; white-space: nowrap;
+}
+.ch-box{
+    display: flex; gap: 8px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    align-items: flex-end;
+}
+.ch-emoji-btn, .ch-attach-btn{
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; cursor: pointer;
+    flex-shrink: 0; line-height: 1;
+}
+.ch-textarea-box{
+    flex: 1; background: #f3f3f7; border-radius: 19px;
+    padding: 9px 14px; min-height: 38px; box-sizing: border-box;
+}
+.ch-textarea-box textarea{
+    width: 100%; border: 0; outline: none; background: transparent;
+    font-size: 14px; resize: none; min-height: 20px; max-height: 100px;
+    line-height: 1.4; box-sizing: border-box;
+    font-family: inherit;
+}
+.ch-send-btn{
     padding: 0 18px; height: 38px; border: 0; border-radius: 19px;
-    background: #fe739d; color: #fff; font-size: 14px; cursor: pointer;
+    background: #fe739d; color: #fff; font-size: 14px;
+    cursor: pointer; flex-shrink: 0;
 }
-.chat-input-bar button:disabled{ background: #ccc; }
+.ch-send-btn:disabled{ background: #ccc; cursor: not-allowed; }
+.ch-hint{
+    text-align: center; font-size: 10px; color: #bbb;
+    padding: 0 12px 6px;
+}
 
-.chat-msg.err{ margin: 8px 12px; padding: 8px; border-radius: 6px; background: #fff5fa; color: #ef5189; font-size: 12px; text-align: center; }
-.empty{ text-align: center; padding: 60px 0; color: #999; font-size: 13px; }
+/* 表情面板 */
+.ch-emoji-panel{
+    display: none; flex-wrap: wrap; gap: 4px;
+    padding: 10px 12px;
+    border-top: 1px solid #f0f0f3;
+    max-height: 180px; overflow-y: auto;
+}
+.ch-emoji-panel.open{ display: flex; }
+.ch-emoji-panel .emoji{
+    width: 36px; height: 36px; line-height: 36px;
+    text-align: center; font-size: 20px;
+    cursor: pointer;
+}
+
+/* 预约进度弹窗 */
+.ch-mask{
+    position: fixed; inset: 0; background: rgba(0,0,0,.5);
+    z-index: 999; display: none;
+    align-items: center; justify-content: center; padding: 30px;
+}
+.ch-mask.open{ display: flex; }
+.ch-popup{
+    background: #fff; border-radius: 12px;
+    width: 100%; max-width: 360px;
+    overflow: hidden;
+}
+.ch-popup-header{
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px; border-bottom: 1px solid #f0f0f3;
+}
+.ch-popup-title{ font-size: 15px; font-weight: 600; color: #1B1B1B; }
+.ch-popup-close{ color: #999; font-size: 18px; cursor: pointer; }
+.ch-popup-content{ padding: 18px 16px; }
+
+.ch-progress-steps{
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+}
+.ch-step-item{ display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.ch-step-icon{
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: #f3f3f7; color: #999; font-size: 14px;
+}
+.ch-step-icon.status-success{ background: #4CD964; color: #fff; }
+.ch-step-icon.status-error{ background: #EF5189; color: #fff; }
+.ch-step-label{ font-size: 11px; color: #666; text-align: center; }
+.ch-step-connector{ flex: 1; text-align: center; color: #ccc; }
+.ch-progress-status{ text-align: center; font-size: 13px; color: #666; padding: 8px 0; }
+
+.ch-err{ margin: 8px 12px; padding: 8px; border-radius: 6px; background: #fff5fa; color: #ef5189; font-size: 12px; text-align: center; }
+.ch-empty{ text-align: center; padding: 60px 0; color: #999; font-size: 13px; }
 </style>
 {/block}
 
 {block name="content"}
-<div class="chat-page">
-    <div class="page-head">
-        <a class="back-btn" href="/{$lang_seg}/chat" aria-label="返回">‹</a>
-        <h1 class="page-title">{$hospital.name|default='在线咨询'}</h1>
+<div class="ch-page">
+    <!-- 顶部医院信息(对齐 .app-header)-->
+    <div class="ch-header">
+        <div class="ch-h-row">
+            <a class="ch-back" href="/{$lang_seg}/chat" aria-label="返回">‹</a>
+            <a class="ch-header-left" href="/{$lang_seg}/hospital/{$hospital.slug|default=$hospital.id|default=0}">
+                <div class="ch-logo">
+                    {if !empty($hospital.cover_url)}<img src="{$hospital.cover_url}" alt="" loading="lazy">{/if}
+                </div>
+                <div class="ch-titles">
+                    <div class="ch-name">{$hospital.name|default='在线咨询'}</div>
+                    <div class="ch-meta">
+                        <span class="badge">{$tt['index.common.OfficialChat']|default='官方对话'}</span>
+                        <span class="badge">{$tt['index.common.EncryptedInfo']|default='加密信息'}</span>
+                    </div>
+                </div>
+            </a>
+            {if !empty($progressSteps)}
+            <button class="ch-progress-btn" type="button" id="chProgressBtn">{$tt['index.common.ProgressTitle']|default='预约进度'}</button>
+            {/if}
+        </div>
     </div>
 
-    {if !empty($error)}<div class="chat-msg err">{$error}</div>{/if}
+    {if !empty($error)}<div class="ch-err">{$error}</div>{/if}
 
-    <div class="chat-history" id="chatHistory">
+    <!-- 聊天消息 -->
+    <div class="ch-chat" id="chChat">
         {if empty($history)}
-        <div class="empty">{$tt['chat.welcome']|default='开始对话吧,有任何疑问都可以咨询客服'}</div>
+        <div class="ch-empty">{$tt['chat.welcome']|default='开始对话吧,有任何疑问都可以咨询客服'}</div>
         {else/}
             {foreach $history as $msg}
-            {php}$isMe = !empty($msg['is_self']) || (!empty($msg['send_type']) && $msg['send_type'] == 1);{/php}
-            <div class="chat-bubble{if $isMe} chat-bubble--me{else/} chat-bubble--kf{/if}">
-                <div class="ava">
-                    {if $isMe && !empty($user.avatar)}<img src="{$user.avatar}" alt="">{elseif !$isMe && !empty($hospital.cover_url)}<img src="{$hospital.cover_url}" alt="">{/if}
+            {php}
+                // vue:user_type == '11' 是用户(右),否则是医院/官方客服(左)
+                $isMe = (isset($msg['user_type']) && (string) $msg['user_type'] === '11')
+                     || !empty($msg['is_self'])
+                     || (isset($msg['send_type']) && (int) $msg['send_type'] === 1);
+                $content = (string) ($msg['content'] ?? $msg['message'] ?? '');
+
+                // 检测图片 ![](url) markdown
+                $isImage = (bool) preg_match('/^\s*!\[.*?\]\(([^)]+)\)\s*$/i', $content, $imgM);
+                $imageUrl = $isImage ? $imgM[1] : '';
+
+                // 检测文件:形如 [文件](url) 或纯 url 结尾常见扩展
+                $isFile = false;
+                $isVideo = false;
+                $fileName = '';
+                $fileUrl = '';
+                if (!$isImage && preg_match('/^\s*\[(.+?)\]\(([^)]+)\)\s*$/i', $content, $fileM)) {
+                    $fileUrl = $fileM[2];
+                    $fileName = $fileM[1];
+                    $isFile = true;
+                    $isVideo = (bool) preg_match('/\.(mp4|mov|webm|m4v)(\?|$)/i', $fileUrl);
+                }
+            {/php}
+            <div class="ch-row {if $isMe}user{else/}hospital{/if}">
+                <div class="avatar">
+                    {if $isMe}
+                        <img src="https://beautsgoimg.59w.net/20260107170023/695e20a7c7c34.png" alt="me">
+                    {elseif !empty($hospital.cover_url)/}
+                        <img src="{$hospital.cover_url}" alt="">
+                    {else/}
+                        <img src="https://beautsgoimg.59w.net/20250521110631/682d4337b58f5.png" alt="">
+                    {/if}
                 </div>
-                <div class="body">{:!empty($msg["content"])?$msg["content"]:(!empty($msg["message"])?$msg["message"]:'')}</div>
+                <div class="msg-body">
+                    {if !$isMe}
+                    <div class="label">{$hospital.name|default=$tt['index.common.OfficialService']|default='官方客服'}</div>
+                    {/if}
+                    {if $isImage}
+                        <div class="bubble image" data-preview="{$imageUrl}"><img src="{$imageUrl}" alt="" loading="lazy"></div>
+                    {elseif $isVideo/}
+                        <div class="bubble">
+                            <video src="{$fileUrl}" controls preload="none" style="width:200px;max-width:100%;border-radius:8px;display:block"></video>
+                        </div>
+                    {elseif $isFile/}
+                        <a class="bubble file" href="{$fileUrl}" target="_blank" rel="noopener" download>
+                            <span class="file-icon">📄</span>
+                            <span class="file-name">{$fileName}</span>
+                            <span class="file-download">{$tt['index.common.OpenFile']|default='打开'}</span>
+                        </a>
+                    {else/}
+                        <div class="bubble">{$content|raw}</div>
+                    {/if}
+                </div>
             </div>
             {/foreach}
         {/if}
+
+        <!-- 平台免责声明(对齐 .footnote)-->
+        <div class="ch-footnote">
+            {$tt['index.common.FooterText']|default='本对话由'} <b>{$hospital.name|default=''}</b> {$tt['index.common.FooterPlatform']|default='提供,平台仅做信息传递'}
+        </div>
     </div>
 
-    <form class="chat-input-bar" method="post" action="/{$lang_seg}/chat/{$hospital.id|default=0}" autocomplete="off">
-        <input type="text" name="content" placeholder="{$tt['chat.placeholder']|default='输入消息…'}" required maxlength="200">
-        <button type="submit">{$tt['chat.send']|default='发送'}</button>
+    <!-- 输入区域 -->
+    <form class="ch-composer" method="post" action="/{$lang_seg}/chat/{$hospital.id|default=0}" autocomplete="off" id="chForm">
+        {if !empty($quickReplyList)}
+        <div class="ch-quick-reply">
+            {foreach $quickReplyList as $q}
+            <button class="q-btn" type="button" data-content="{$q.content|default=''}">{$q.button_name|default=''}</button>
+            {/foreach}
+        </div>
+        {/if}
+
+        <div class="ch-box">
+            <div class="ch-emoji-btn" id="chEmojiBtn" title="表情">😊</div>
+            <div class="ch-textarea-box">
+                <textarea name="content" id="chInput" placeholder="{$tt['index.common.InputPlaceholder']|default='输入消息…'}" maxlength="1000" rows="1"></textarea>
+            </div>
+            <button class="ch-send-btn" id="chSendBtn" type="submit" disabled>{$tt['index.common.Send']|default='发送'}</button>
+        </div>
+
+        <!-- 表情面板 -->
+        <div class="ch-emoji-panel" id="chEmojiPanel">
+            {php}
+                $emojis = ['😀','😄','😆','😂','😇','😉','😊','🙂','😋','😌','😍','😘','😗','😝','🤑','😎',
+                           '🤓','🤗','😶','😑','🙄','🤔','😳','😡','🙁','😬','😣','😩','😤','😱','😰','😢',
+                           '😓','😭','😵','🤐','😷','😴','💤','😈','💩','👻','💀','🤖','🎃','😹','🙀','👏',
+                           '🙏','👍','👎','👊','✊','👌','👉','👈','👆','👇','💪','⚽','🏀','🎂','🍎','🐶',
+                           '🐮','🍔','🎉','🎁','💊','🔑','⏱','💰','💍','🚀','🚘','🚲','🖥'];
+            {/php}
+            {foreach $emojis as $e}<span class="emoji">{$e}</span>{/foreach}
+        </div>
+
+        <div class="ch-hint">{$tt['index.chat.Hint']|default='平台仅做信息传递,请勿透露敏感信息'}</div>
     </form>
+
+    {if !empty($progressSteps)}
+    <!-- 预约进度弹窗 -->
+    <div class="ch-mask" id="chMask">
+        <div class="ch-popup">
+            <div class="ch-popup-header">
+                <span class="ch-popup-title">{$tt['index.common.ProgressTitle']|default='预约进度'}</span>
+                <span class="ch-popup-close" id="chMaskClose">✕</span>
+            </div>
+            <div class="ch-popup-content">
+                <div class="ch-progress-steps">
+                    {foreach $progressSteps as $idx => $step}
+                    {php}
+                        $st = (int) ($step['status'] ?? 0);
+                        $cls = $st === 1 ? 'status-success' : ($st === -1 ? 'status-error' : 'status-pending');
+                        $icon = $st === 1 ? '✓' : ($st === -1 ? '✕' : '·');
+                    {/php}
+                    <div class="ch-step-item">
+                        <div class="ch-step-icon {$cls}">{$icon}</div>
+                        <div class="ch-step-label">{$step.title|default=''}</div>
+                    </div>
+                    {if $idx < count($progressSteps) - 1}
+                    <div class="ch-step-connector">···</div>
+                    {/if}
+                    {/foreach}
+                </div>
+                {if !empty($progressDesc)}
+                <div class="ch-progress-status">{$progressDesc}</div>
+                {/if}
+            </div>
+        </div>
+    </div>
+    {/if}
 </div>
 
 <script>
-// 进入后滚到底部
 (function(){
-    var h = document.getElementById('chatHistory');
-    if(h) h.scrollTop = h.scrollHeight;
-    window.scrollTo(0, document.body.scrollHeight);
+    /* 滚到底部 */
+    var chat = document.getElementById('chChat');
+    function scrollBottom(){ if(chat) chat.scrollTop = chat.scrollHeight; window.scrollTo(0, document.body.scrollHeight); }
+    scrollBottom();
+    setTimeout(scrollBottom, 50);
+
+    /* 输入框 → 发送按钮启用 */
+    var input = document.getElementById('chInput');
+    var sendBtn = document.getElementById('chSendBtn');
+    var form = document.getElementById('chForm');
+    function refreshSend(){ sendBtn.disabled = !input.value.trim(); }
+    input.addEventListener('input', refreshSend);
+    refreshSend();
+    /* textarea auto-height */
+    input.addEventListener('input', function(){
+        input.style.height = 'auto';
+        input.style.height = Math.min(input.scrollHeight, 100) + 'px';
+    });
+    form.addEventListener('submit', function(e){
+        if(!input.value.trim()){ e.preventDefault(); }
+    });
+
+    /* 表情面板切换 */
+    var emojiBtn = document.getElementById('chEmojiBtn');
+    var emojiPanel = document.getElementById('chEmojiPanel');
+    emojiBtn.addEventListener('click', function(){
+        emojiPanel.classList.toggle('open');
+    });
+    emojiPanel.querySelectorAll('.emoji').forEach(function(el){
+        el.addEventListener('click', function(){
+            var start = input.selectionStart || 0;
+            var end = input.selectionEnd || 0;
+            input.value = input.value.slice(0, start) + el.textContent + input.value.slice(end);
+            input.focus();
+            var pos = start + el.textContent.length;
+            input.setSelectionRange(pos, pos);
+            refreshSend();
+        });
+    });
+
+    /* 快捷回复:点击 → 填入输入框(对齐 vue sendQuickReply 但 SSR 不直接发送)*/
+    document.querySelectorAll('.q-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            input.value = btn.dataset.content || '';
+            input.focus();
+            refreshSend();
+            input.dispatchEvent(new Event('input'));
+        });
+    });
+
+    /* 进度弹窗 */
+    var mask = document.getElementById('chMask');
+    var maskBtn = document.getElementById('chProgressBtn');
+    var maskClose = document.getElementById('chMaskClose');
+    if(mask && maskBtn){
+        maskBtn.addEventListener('click', function(){ mask.classList.add('open'); });
+        maskClose.addEventListener('click', function(){ mask.classList.remove('open'); });
+        mask.addEventListener('click', function(e){ if(e.target === mask) mask.classList.remove('open'); });
+    }
+
+    /* 图片点击预览(对齐 vue previewImage)*/
+    document.querySelectorAll('[data-preview]').forEach(function(el){
+        el.addEventListener('click', function(){
+            var url = el.dataset.preview;
+            if(window.BG && BG.previewImage) BG.previewImage([url], 0);
+            else window.open(url, '_blank');
+        });
+    });
 })();
 </script>
 {/block}

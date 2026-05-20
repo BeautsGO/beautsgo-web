@@ -77,11 +77,14 @@ class Chat extends BaseController
         if (!$hid) $this->abort404('Missing hospital id');
         $auth = new AuthService();
 
-        // 初始化会话 / 拿 chat_gid + chat_uid
+        // 初始化会话 / 拿 chat_gid + chat_uid + 进度状态 + 快捷回复
         $start = $auth->call('GET', '/Chat/start/' . $hid, []);
         $chat  = (array) ($start['data'] ?? []);
         $chatGid = (string) ($chat['chat_gid'] ?? '');
         $chatUid = (string) ($chat['chat_uid'] ?? '');
+        $progressSteps = (array) ($chat['lockAptCrmStatus'] ?? []);
+        $progressDesc  = (string) ($chat['lockAptCrmDesc'] ?? '');
+        $quickReplyList = (array) ($chat['quickReplyList'] ?? []);
 
         $error = '';
         $sent  = false;
@@ -115,13 +118,16 @@ class Chat extends BaseController
 
         $this->seo->setTdk(($hospital['name'] ?? '客服') . ' 在线咨询', '客服咨询', '客服')->buildOrganization();
         return $this->render('pages/chat/detail', [
-            'user'     => $auth->getCurrentUser(),
-            'hospital' => $hospital,
-            'history'  => $history,
-            'chat_gid' => $chatGid,
-            'chat_uid' => $chatUid,
-            'error'    => $error,
-            'sent'     => $sent,
+            'user'           => $auth->getCurrentUser(),
+            'hospital'       => $hospital,
+            'history'        => $history,
+            'chat_gid'       => $chatGid,
+            'chat_uid'       => $chatUid,
+            'error'          => $error,
+            'sent'           => $sent,
+            'progressSteps'  => $progressSteps,
+            'progressDesc'   => $progressDesc,
+            'quickReplyList' => $quickReplyList,
         ]);
     }
 }
