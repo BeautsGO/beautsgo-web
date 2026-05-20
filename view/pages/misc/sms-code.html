@@ -1,31 +1,147 @@
 {extend name="layout/base" /}
+
 {block name="extra_head"}
 <style>
-.sms-page{padding:0 0 24px;background:#fff;min-height:100vh}
-.sms-search{padding:12px 16px;background:#f7f7f9;position:sticky;top:0;z-index:2}
-.sms-search input{width:100%;height:40px;padding:0 14px;border:0;border-radius:999px;background:#fff;font-size:12px}
-.sms-list .item{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #f0f0f3}
-.sms-list .name{font-size:12px;color:#222}
-.sms-list .code{font-size:12px;color:#888}
+/* ============================================================
+ * smsCodeList 1:1 还原 subPackages_lightningRod/smsCodeList/smsCodeList.vue scoped scss
+ *   .search-bar sticky 顶栏
+ *   .country-item 推荐国 + 字母分组
+ *   .country-type-txt A/B/C 字母锚点
+ * ============================================================ */
+.sc-page{
+    background: #fff; min-height: 100vh;
+    padding-bottom: 30px; box-sizing: border-box;
+}
+.sc-head{
+    position: sticky; top: 0; z-index: 30; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+}
+.sc-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.sc-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+
+.sc-search{
+    position: sticky; top: 44px; z-index: 20;
+    padding: 8px 12px; background: #f5f5f5;
+}
+.sc-search input{
+    width: 100%; height: 32px; padding: 0 14px;
+    border: 0; border-radius: 16px; background: #fff;
+    font-size: 13px; outline: none; box-sizing: border-box;
+}
+
+.sc-section-title{
+    padding: 8px 16px;
+    background: #f5f5f5;
+    color: #888; font-size: 12px;
+    font-weight: 500;
+}
+.sc-section-title.letter{
+    padding: 6px 16px;
+    color: #999; font-size: 12px;
+}
+
+.sc-list .item{
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 16px; border-bottom: 1px solid #f0f0f3;
+    text-decoration: none; color: inherit; cursor: pointer;
+}
+.sc-list .item:last-child{ border-bottom: 0; }
+.sc-list .info{ display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+.sc-list .name{
+    font-size: 14px; color: #222;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    max-width: 60%;
+}
+.sc-list .en-name{
+    font-size: 12px; color: #888;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    max-width: 30%;
+}
+.sc-list .dial{ font-size: 14px; color: #666; flex-shrink: 0; }
+
+.sc-empty{ text-align: center; padding: 40px 0; color: #999; font-size: 13px; }
 </style>
 {/block}
+
 {block name="content"}
-<section class="sms-page">
-    <form class="sms-search" method="get" action="">
-        <input type="search" name="q" value="{$Request.param.q|default=''}" placeholder="{$tt['phone.code.plcTxt']|default='搜索国家或地区'}">
-    </form>
-    <div class="sms-list">
-        {foreach $list as $item}
-        {if !empty($item.name_cn) || !empty($item.name_en)}
-        <a class="item" href="?dial={$item.dial|default=''}">
-            <div>
-                <span class="name">{:!empty($item["name_cn"])?$item["name_cn"]:(!empty($item["name"])?$item["name"]:'')}</span>
-                <span class="code">({$item.name_en|default=''})</span>
+<section class="sc-page">
+    <div class="sc-head">
+        <a class="back" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="title">{$tt['phone.code.title']|default='选择国家区号'}</h1>
+    </div>
+
+    <div class="sc-search">
+        <input type="search" id="scSearchInput" placeholder="{$tt['phone.code.plcTxt']|default='搜索国家或地区'}" autocomplete="off">
+    </div>
+
+    <!-- 推荐 -->
+    {if !empty($recommend)}
+    <div class="sc-section-title">{$tt['phone.code.recommend']|default='推荐'}</div>
+    <div class="sc-list" id="scRecommend">
+        {foreach $recommend as $c}
+        <a class="item"
+           href="?dial={$c.dial|default=''}"
+           data-name="{$c.name_cn|default=''}{:!empty($c['native_language'])?' '.$c['native_language']:''} {$c.name_en|default=''}"
+           data-dial="{$c.dial|default=''}">
+            <div class="info">
+                <span class="name">{$c.name_cn|default=''}</span>
+                <span class="en-name">({$c.name_en|default=''})</span>
             </div>
-            <span class="code">+{$item.dial|default=''}</span>
+            <span class="dial">+{$c.dial|default=''}</span>
         </a>
-        {/if}
         {/foreach}
     </div>
+    {/if}
+
+    <!-- 字母分组 -->
+    {if !empty($others)}
+    {foreach $others as $letter => $items}
+    <div class="sc-section-title letter" data-letter="{$letter}">{$letter}</div>
+    <div class="sc-list sc-group" data-letter="{$letter}">
+        {foreach $items as $c}
+        <a class="item"
+           href="?dial={$c.dial|default=''}"
+           data-name="{$c.name_cn|default=''}{:!empty($c['native_language'])?' '.$c['native_language']:''} {$c.name_en|default=''}"
+           data-dial="{$c.dial|default=''}">
+            <div class="info">
+                <span class="name">{$c.name_cn|default=''}</span>
+                <span class="en-name">({$c.name_en|default=''})</span>
+            </div>
+            <span class="dial">+{$c.dial|default=''}</span>
+        </a>
+        {/foreach}
+    </div>
+    {/foreach}
+    {/if}
+
+    {if empty($recommend) && empty($others)}
+    <div class="sc-empty">{$tt['projectDetails.Empty']|default='暂无数据'}</div>
+    {/if}
 </section>
+
+<script>
+(function(){
+    /* 搜索过滤(对齐 vue filteredRecommend + filteredOther computed)*/
+    var input = document.getElementById('scSearchInput');
+    if(!input) return;
+    input.addEventListener('input', function(){
+        var kw = input.value.trim().toLowerCase();
+        document.querySelectorAll('.sc-list .item').forEach(function(it){
+            var match = !kw || (it.dataset.name || '').toLowerCase().indexOf(kw) >= 0
+                            || (it.dataset.dial || '').indexOf(kw) >= 0;
+            it.style.display = match ? '' : 'none';
+        });
+        // 隐藏空分组标题
+        document.querySelectorAll('.sc-group').forEach(function(grp){
+            var visible = grp.querySelectorAll('.item:not([style*="display: none"])').length;
+            var title = grp.previousElementSibling;
+            if(title && title.classList.contains('letter')){
+                title.style.display = (visible === 0 && kw) ? 'none' : '';
+            }
+            grp.style.display = (visible === 0 && kw) ? 'none' : '';
+        });
+    });
+})();
+</script>
 {/block}

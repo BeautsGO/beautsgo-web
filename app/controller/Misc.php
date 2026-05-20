@@ -85,12 +85,34 @@ class Misc extends BaseController
 
     public function smsCode()
     {
+        // 1:1 对齐 smsCodeList.vue:filteredRecommend + filteredOther 按字母分组
         $resp = $this->api->get('/Common/countryList');
-        $list = (array) ($resp['data'] ?? []);
+        $data = (array) ($resp['data'] ?? []);
+
+        // API 返回 {recommend, others, all}
+        $recommend = (array) ($data['recommend'] ?? []);
+        $others    = (array) ($data['others'] ?? []);
+
+        // 兜底:如果 API 不分类,从 all 自己按 first_letter 分组
+        if (empty($recommend) && empty($others) && !empty($data['all'])) {
+            foreach ($data['all'] as $c) {
+                if (!empty($c['is_recommend'])) $recommend[] = $c;
+                else {
+                    $letter = strtoupper((string) ($c['first_letter'] ?? '#'));
+                    $others[$letter][] = $c;
+                }
+            }
+        }
+        // 字母分组排序
+        if (is_array($others)) ksort($others);
+
         $this->seo->setTdk('选择国家区号 - BeautsGO', '选择国际电话区号', '区号,国际电话')
             ->setCanonical($this->canonical('sms-code'))
             ->buildOrganization();
-        return $this->render('pages/misc/sms-code', ['list' => $list]);
+        return $this->render('pages/misc/sms-code', [
+            'recommend' => $recommend,
+            'others'    => $others,
+        ]);
     }
 
     private function canonical(string $path): string
