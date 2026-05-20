@@ -116,6 +116,19 @@ class Project extends BaseController
         ]);
     }
 
+    /**
+     * 项目评论列表语义化别名 → 301 redirect /comment/3/{id}
+     */
+    public function commentList(string $slug = '')
+    {
+        if ($slug === '') $this->abort404('Missing project slug');
+        $repo = new ProjectRepository($this->lang);
+        $project = ctype_digit($slug) ? $repo->detailById((int) $slug) : $repo->detailBySlug($slug);
+        if (!$project) $this->abort404('Project not found');
+        $langSeg = (string) (config('seo.lang_path_map')[$this->lang] ?? 'cn');
+        return redirect('/' . $langSeg . '/comment/3/' . (int) $project['id'], 301);
+    }
+
     private function injectSeo(array $p): void
     {
         $name    = (string) ($p['name'] ?? '');

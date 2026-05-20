@@ -400,6 +400,19 @@ class Hospital extends BaseController
         ]);
     }
 
+    /**
+     * 医院评论列表语义化别名 → 301 redirect /comment/1/{id}
+     */
+    public function commentList(string $slug = '')
+    {
+        if ($slug === '') $this->abort404('Missing hospital slug');
+        $repo = new HospitalRepository($this->lang);
+        $hospital = ctype_digit($slug) ? $repo->detailById((int) $slug) : $repo->detailBySlug($slug);
+        if (!$hospital) $this->abort404('Hospital not found');
+        $langSeg = (string) (config('seo.lang_path_map')[$this->lang] ?? 'cn');
+        return redirect('/' . $langSeg . '/comment/1/' . (int) $hospital['id'], 301);
+    }
+
     private function langPrefixForPrice(): string
     {
         switch ($this->lang) {

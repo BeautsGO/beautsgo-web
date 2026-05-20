@@ -184,7 +184,7 @@
     <div class="feedback-list-component">
         <div class="head">
             <div class="head-left"><div></div>{$tt['hospitalDetails.Userfeedback']|default='用户反馈'}</div>
-            <a class="head-right" href="/{$lang_seg}/comment/3/{$project.id|default=0}" style="text-decoration:none;color:inherit">{$tt['index.common.ViewAll']|default='查看全部'}<img src="/static/icon/right.png" alt="more"></a>
+            <a class="head-right" href="/{$lang_seg}/project/{$project.slug|default=$project.id}/commentlist" style="text-decoration:none;color:inherit">{$tt['index.common.ViewAll']|default='查看全部'}<img src="/static/icon/right.png" alt="more"></a>
         </div>
         <div class="user-feedback">
             {if !empty($tags)}

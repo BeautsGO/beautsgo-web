@@ -224,7 +224,7 @@
                 <div></div>
                 {$tt['hospitalDetails.Userfeedback']|default='用户反馈'}
             </div>
-            <a class="head-right" href="/{$lang_seg}/comment/1/{$hospital.id|default=0}" style="text-decoration:none;color:inherit">
+            <a class="head-right" href="/{$lang_seg}/hospital/{$hospital.slug_url|default=$hospital.id}/commentlist" style="text-decoration:none;color:inherit">
                 {$tt['index.common.ViewAll']|default='查看全部'}
                 <img src="/static/icon/right.png" alt="more">
             </a>

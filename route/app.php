@@ -121,11 +121,15 @@ Route::group(':lang', function () use ($slugPattern) {
     Route::get('doc',              'Misc/doc');
     Route::get('sms-code',         'Misc/smsCode');
     // 医院价目表
-    Route::get('hospital/:slug/price',      'Hospital/price')->pattern($slugPattern);
-    Route::get('hospital/:slug/allproject', 'Hospital/allProject')->pattern($slugPattern);
-    Route::get('hospital/:slug/caselist',   'Hospital/caseList')->pattern($slugPattern);
-    Route::get('doctor/:slug/caselist',     'Doctor/caseList')->pattern($slugPattern);
-    Route::get('project/:slug/caselist',    'Project/caseList')->pattern($slugPattern);
+    Route::get('hospital/:slug/price',       'Hospital/price')->pattern($slugPattern);
+    Route::get('hospital/:slug/allproject',  'Hospital/allProject')->pattern($slugPattern);
+    Route::get('hospital/:slug/caselist',    'Hospital/caseList')->pattern($slugPattern);
+    Route::get('doctor/:slug/caselist',      'Doctor/caseList')->pattern($slugPattern);
+    Route::get('project/:slug/caselist',     'Project/caseList')->pattern($slugPattern);
+    // 评论列表(语义化别名,对齐 commentList.vue /hospital/{slug}/commentlist)
+    Route::get('hospital/:slug/commentlist', 'Hospital/commentList')->pattern($slugPattern);
+    Route::get('doctor/:slug/commentlist',   'Doctor/commentList')->pattern($slugPattern);
+    Route::get('project/:slug/commentlist',  'Project/commentList')->pattern($slugPattern);
     // 详情页
     Route::get('hospital/:slug', 'Hospital/detail')->pattern($slugPattern);
     Route::get('project/:slug',  'Project/detail')->pattern($slugPattern);

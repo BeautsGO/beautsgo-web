@@ -121,6 +121,19 @@ class Doctor extends BaseController
     }
 
     /**
+     * 医生评论列表语义化别名 → 301 redirect /comment/2/{id}
+     */
+    public function commentList(string $slug = '')
+    {
+        if ($slug === '') $this->abort404('Missing doctor slug');
+        $repo = new DoctorRepository($this->lang);
+        $doctor = ctype_digit($slug) ? $repo->detailById((int) $slug) : $repo->detailBySlug($slug);
+        if (!$doctor) $this->abort404('Doctor not found');
+        $langSeg = (string) (config('seo.lang_path_map')[$this->lang] ?? 'cn');
+        return redirect('/' . $langSeg . '/comment/2/' . (int) $doctor['id'], 301);
+    }
+
+    /**
      * 拼装 SEO 元数据
      */
     private function injectSeo(array $d): void
