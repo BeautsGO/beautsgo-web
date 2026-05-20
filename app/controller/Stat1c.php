@@ -25,6 +25,19 @@ class Stat1c extends BaseController
     public function qualifications()  { return $this->renderStatic('qual',   '资质规则 - BeautsGO',   '资质规则',       'aptitude_rule',   null);    }
 
     /**
+     * 用户协议(对齐 pages/login/user.vue → UserAgreement[0])
+     */
+    public function userAgreement()   { return $this->renderStatic('terms',  '用户协议 - BeautsGO',   '用户协议',       'UserAgreement',   null);    }
+    /**
+     * 隐私政策(对齐 pages/login/conceal.vue,链接 /login/conceal → PrivacyPolicy[0])
+     */
+    public function conceal()         { return $this->renderStatic('privacy','隐私政策 - BeautsGO',   '隐私政策',       'PrivacyPolicy',   null);    }
+    /**
+     * 注销须知(platformConfig.CancellationNotice[0])
+     */
+    public function cancellation()    { return $this->renderStatic('terms',  '注销须知 - BeautsGO',   '注销须知',       'CancellationNotice', null); }
+
+    /**
      * 积分规则页(对齐 subPackages_lightningRod/point/pointInfo.vue)
      *   读 platformConfig.point_rule[0] 富文本
      */

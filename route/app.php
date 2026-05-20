@@ -110,6 +110,9 @@ Route::group(':lang', function () use ($slugPattern) {
     Route::get('privacy',        'Stat1c/privacy');
     Route::get('qualifications', 'Stat1c/qualifications');
     Route::get('point/info',     'Stat1c/pointInfo');
+    Route::get('login/user',     'Stat1c/userAgreement');
+    Route::get('login/conceal',  'Stat1c/conceal');
+    Route::get('cancellation',   'Stat1c/cancellation');
     // 杂项页 (Misc)
     Route::get('contact',          'Misc/contact');
     Route::get('contact/detail',   'Misc/contactDetail');

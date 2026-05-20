@@ -155,10 +155,10 @@
                         <div class="checkbox" id="termsCbIcon"></div>
                     </div>
                     <div class="terms-text">
-                        我已阅读并同意
-                        <a class="terms-link" href="/{$lang_seg}/terms">{$tt['comment.UserAgreement']|default='用户协议'}</a>
-                        和
-                        <a class="terms-link" href="/{$lang_seg}/privacy">{$tt['common.PrivacyPolicy']|default='隐私政策'}</a>
+                        {$tt['login.agreePrefix']|default='我已阅读并同意'}
+                        <a class="terms-link" href="/{$lang_seg}/login/user">{$tt['comment.UserAgreement']|default='用户协议'}</a>
+                        {$tt['login.and']|default='和'}
+                        <a class="terms-link" href="/{$lang_seg}/login/conceal">{$tt['common.PrivacyPolicy']|default='隐私政策'}</a>
                     </div>
                 </div>
             </div>
