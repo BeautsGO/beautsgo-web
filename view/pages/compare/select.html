@@ -1,33 +1,206 @@
 {extend name="layout/base" /}
-{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+
+{block name="extra_head"}
+<style>
+/* ============================================================
+ * compare/select(对比池)1:1 还原 contrast/list.vue
+ *   localStorage 'compare_pool_{type}' 维护对比项数组
+ *   .add 卡:+ 添加 → /compare/add
+ *   .list 卡:item.cover + name + 地址 + 右上删除
+ *   底部.sub 立即对比按钮(>=2 项)
+ * ============================================================ */
+.cs-body{
+    min-height: 100vh; background: #f5f5f5;
+    padding: 10px 12px 90px; box-sizing: border-box;
+}
+.cs-head{
+    position: sticky; top: 0; z-index: 30; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+    margin: -10px -12px 10px;
+}
+.cs-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.cs-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+
+.cs-types{
+    display: flex; gap: 8px; margin-bottom: 10px;
+    background: #fff; padding: 10px 12px; border-radius: 8px;
+}
+.cs-types a{
+    flex: 1; text-align: center; padding: 6px 0;
+    font-size: 13px; color: #666; text-decoration: none;
+    border-radius: 4px;
+}
+.cs-types a.active{
+    background: linear-gradient(135deg,#fe739d,#ff9ac3); color: #fff; font-weight: 500;
+}
+
+.cs-add{
+    display: flex; align-items: center; justify-content: center;
+    background: #fff; border: 1px dashed #ddd; border-radius: 10px;
+    padding: 22px; margin-bottom: 12px;
+    color: #999; font-size: 14px;
+    cursor: pointer; text-decoration: none;
+    transition: border-color .2s;
+}
+.cs-add:hover{ border-color: #fe739d; color: #fe739d; }
+.cs-add .icon{
+    width: 24px; height: 24px;
+    margin-right: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid #ccc; border-radius: 50%; color: #ccc;
+    font-size: 18px;
+}
+
+.cs-list{
+    display: flex; align-items: center; gap: 12px;
+    background: #fff; border-radius: 10px;
+    padding: 12px; margin-bottom: 8px;
+    position: relative;
+}
+.cs-list .list-img{
+    width: 60px; height: 60px; border-radius: 6px;
+    overflow: hidden; background: #f3f3f7; flex-shrink: 0;
+}
+.cs-list .list-img img{ width: 100%; height: 100%; object-fit: cover; }
+.cs-list .list-right{ flex: 1; min-width: 0; }
+.cs-list .list-title{
+    font-size: 14px; font-weight: 600; color: #1B1B1B;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    margin-bottom: 4px;
+}
+.cs-list .list-detail{
+    font-size: 11px; color: #999;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.cs-list .list-del{
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,.05); color: #999;
+    border-radius: 50%; cursor: pointer;
+    font-size: 14px; flex-shrink: 0;
+}
+
+.cs-sub{
+    position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+    width: calc(100% - 30px); max-width: 360px;
+    height: 48px; border-radius: 24px;
+    background: linear-gradient(135deg,#fe739d,#ff8aac);
+    color: #fff; font-size: 16px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; border: 0; text-decoration: none;
+    box-shadow: 0 8px 20px rgba(254,115,157,.4);
+    z-index: 90;
+}
+.cs-sub:disabled,
+.cs-sub.disabled{ background: #ccc; box-shadow: none; cursor: not-allowed; }
+
+.cs-empty{
+    text-align: center; padding: 40px 16px;
+    color: #999; font-size: 13px;
+}
+
+.cs-tip{
+    text-align: center; font-size: 11px; color: #bbb;
+    padding: 12px 0;
+}
+</style>
+{/block}
+
 {block name="content"}
-<div class="user-page">
-    <div class="page-head">
-        <a class="back-btn" href="javascript:history.back()" aria-label="返回">‹</a>
-        <h1 class="page-title">选择对比项</h1>
-    </div>
-    <div class="u-tabs-bar">
-        <a class="{if $type == 1}active{/if}" href="?type=1">机构</a>
-        <a class="{if $type == 2}active{/if}" href="?type=2">医生</a>
-        <a class="{if $type == 3}active{/if}" href="?type=3">项目</a>
+<section class="cs-body">
+    <div class="cs-head">
+        <a class="back" href="javascript:history.back()" aria-label="返回">‹</a>
+        <h1 class="title">{$tt['contrasttwice.title']|default='对比池'}</h1>
     </div>
 
-    <form method="get" action="/{$lang_seg}/compare">
-        <input type="hidden" name="type" value="{$type}">
-        <div class="u-form-card">
-            <div class="u-form-row">
-                <div class="u-form-row__label">ID 列表</div>
-                <div class="u-form-row__field">
-                    <input type="text" name="ids" placeholder="多个 id 用逗号分隔,例: 254,349,978" required>
-                </div>
-            </div>
-        </div>
-        <button class="u-btn-primary" type="submit">开始对比</button>
-    </form>
-
-    <div style="padding:0 16px; color:#999; font-size:12px;">
-        提示:可以在{:$type == 1?'机构':$type == 2?'医生':'项目'}列表页点击卡片右上角的对比按钮添加,本页面是 SSR 简化版直接输入 ID。
+    <div class="cs-types">
+        <a class="{if $type == 1}active{/if}" href="?type=1">{$tt['index.tabbar.hospital']|default='机构'}</a>
+        <a class="{if $type == 2}active{/if}" href="?type=2">{$tt['index.common.doctor']|default='医生'}</a>
+        <a class="{if $type == 3}active{/if}" href="?type=3">{$tt['index.common.project']|default='项目'}</a>
     </div>
-    {include file="components/_tabbar" /}
-</div>
+
+    <a class="cs-add" href="/{$lang_seg}/compare/add?type={$type}" id="csAddBtn">
+        <span class="icon">+</span>
+        <span>{$tt['setTitle.Addinstitution']|default='添加对比项(最多 3 个)'}</span>
+    </a>
+
+    <div id="csList"></div>
+
+    <div class="cs-empty" id="csEmpty">{$tt['point.Empty']|default='对比池为空,先去添加'}</div>
+
+    <button class="cs-sub disabled" type="button" id="csCompareBtn" disabled>
+        <span id="csCompareLabel">{$tt['doctorDetails.Comparison']|default='立即对比'} (0)</span>
+    </button>
+
+    <div class="cs-tip">{$tt['compare.tip']|default='对比池数据本地存储,只在当前浏览器有效'}</div>
+</section>
+
+<script>
+(function(){
+    var type = {$type};
+    var KEY = 'compare_pool_' + type;
+    var list = document.getElementById('csList');
+    var empty = document.getElementById('csEmpty');
+    var subBtn = document.getElementById('csCompareBtn');
+    var subLbl = document.getElementById('csCompareLabel');
+    var addBtn = document.getElementById('csAddBtn');
+    var langSeg = '{$lang_seg}';
+
+    function load(){
+        try { return JSON.parse(localStorage.getItem(KEY)) || []; }
+        catch(e){ return []; }
+    }
+    function save(arr){ localStorage.setItem(KEY, JSON.stringify(arr.slice(0, 3))); }
+
+    function escape(s){ return (s || '').replace(/[<>&"]/g, function(c){
+        return { '<':'&lt;', '>':'&gt;', '&':'&amp;', '"':'&quot;' }[c];
+    }); }
+
+    function render(){
+        var arr = load();
+        list.innerHTML = '';
+        if(arr.length === 0){
+            empty.style.display = '';
+            subBtn.classList.add('disabled');
+            subBtn.disabled = true;
+            subLbl.textContent = '{$tt["doctorDetails.Comparison"]|default="立即对比"} (0)';
+            addBtn.style.display = '';
+            return;
+        }
+        empty.style.display = 'none';
+        addBtn.style.display = arr.length >= 3 ? 'none' : '';
+        arr.forEach(function(item, idx){
+            var div = document.createElement('div');
+            div.className = 'cs-list';
+            div.innerHTML =
+                '<div class="list-img">' + (item.cover_url ? '<img src="' + escape(item.cover_url) + '" alt="" loading="lazy">' : '') + '</div>' +
+                '<div class="list-right">' +
+                    '<div class="list-title">' + escape(item.name) + '</div>' +
+                    '<div class="list-detail">' + escape(item.address || '') + '</div>' +
+                '</div>' +
+                '<div class="list-del" title="移除">✕</div>';
+            div.querySelector('.list-del').addEventListener('click', function(){
+                var cur = load();
+                cur.splice(idx, 1);
+                save(cur);
+                render();
+            });
+            list.appendChild(div);
+        });
+        subBtn.disabled = arr.length < 2;
+        subBtn.classList.toggle('disabled', arr.length < 2);
+        subLbl.textContent = '{$tt["doctorDetails.Comparison"]|default="立即对比"} (' + arr.length + ')';
+    }
+
+    subBtn.addEventListener('click', function(){
+        if(subBtn.disabled) return;
+        var arr = load();
+        var ids = arr.map(function(x){ return x.id; }).join(',');
+        location.href = '/' + langSeg + '/compare?type=' + type + '&ids=' + ids;
+    });
+
+    render();
+})();
+</script>
 {/block}
