@@ -1,40 +1,341 @@
 {extend name="layout/base" /}
-{block name="extra_head"}<link rel="stylesheet" href="/static/css/pages/user.css?v={$assets.css_ver}">{/block}
+
+{block name="extra_head"}
+<style>
+/* ============================================================
+ * pointDetail 1:1 还原 subPackages_lightningRod/point/pointDetail.vue scoped scss
+ *   .my-points 顶部粉紫卡(我的积分 + 去兑换 ›)
+ *   .header tabs 积分明细 / 兑换明细 切换
+ *   .filter-tabs 全部 / 获取 / 消耗 (仅 points tab)
+ *   .point-item 收入绿 / 支出粉 + 更多展开
+ *   .exchange-list 商品卡 + 状态 + 物流 + 复制单号 + 右侧按钮
+ * ============================================================ */
+.pl-page{
+    padding: 10px; background: #fff;
+    min-height: 100vh; padding-bottom: 30px;
+    box-sizing: border-box;
+}
+.pl-head{
+    position: sticky; top: 0; z-index: 30; height: 44px;
+    display: flex; align-items: center; padding: 0 15px;
+    background: #fff; border-bottom: 1px solid #f1f1f1;
+    margin: -10px -10px 10px;
+}
+.pl-head .back{ width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1B1B1B; text-decoration: none; font-size: 22px; }
+.pl-head .title{ flex: 1; margin: 0 30px 0 0; text-align: center; font-size: 16px; font-weight: 600; color: #1B1B1B; }
+
+/* 顶部我的积分卡(对齐 .my-points)*/
+.pl-my-points{
+    margin: 0 0 12px;
+    padding: 16px 18px;
+    background: linear-gradient(135deg,#afa7ef,#FE739D);
+    color: #fff; border-radius: 10px;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 8px 24px rgba(254,115,157,.2);
+}
+.pl-my-points .points-title{ font-size: 13px; opacity: .85; }
+.pl-my-points .points-value{
+    font-size: 30px; font-weight: 700;
+    letter-spacing: .5px; margin-top: 4px;
+}
+.pl-my-points .exchange-button{
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(255,255,255,.22);
+    padding: 8px 14px;
+    border-radius: 999px; font-size: 13px;
+    text-decoration: none; color: #fff;
+    backdrop-filter: blur(6px);
+}
+
+/* tabs */
+.pl-tabs{
+    display: flex; align-items: center;
+    border-bottom: 1px solid #f0f0f0;
+    background: #fff;
+    margin-bottom: 10px;
+}
+.pl-tabs > a{
+    position: relative;
+    flex: 1; text-align: center;
+    padding: 12px 0;
+    color: #888; font-size: 14px;
+    text-decoration: none;
+}
+.pl-tabs > a.active{ color: #1B1B1B; font-weight: 600; }
+.pl-tabs > a.active::after{
+    content: ''; position: absolute;
+    left: 50%; bottom: 0; transform: translateX(-50%);
+    width: 24px; height: 3px;
+    background: #FD83AB; border-radius: 2px;
+}
+
+/* filter-tabs */
+.pl-filter-tabs{
+    display: flex; gap: 8px;
+    padding: 0 0 12px;
+}
+.pl-filter-tabs > a{
+    flex-shrink: 0;
+    padding: 5px 14px; font-size: 12px;
+    background: #f5f5f5; color: #555;
+    border-radius: 14px; text-decoration: none;
+}
+.pl-filter-tabs > a.active{
+    background: #fff5fa; color: #fe739d;
+    border: 1px solid #fe739d;
+    padding: 4px 13px;
+}
+
+/* point-item 积分明细行 */
+.pl-point-list{ background: #fff; }
+.pl-point-item{
+    padding: 12px 0;
+    border-bottom: 1px solid #f5f5f5;
+}
+.pl-point-item .item-row{
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 10px;
+}
+.pl-point-item .item-left{ flex: 1; min-width: 0; }
+.pl-point-item .description{
+    font-size: 14px; color: #1B1B1B; font-weight: 500;
+    display: block;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pl-point-item .date{
+    font-size: 11px; color: #999;
+    margin-top: 4px;
+    display: block;
+}
+.pl-point-item .item-right{ text-align: right; flex-shrink: 0; }
+.pl-point-item .item-right .amount{
+    font-size: 16px; font-weight: 700;
+}
+.pl-point-item .item-right .positive{ color: #4CD964; }
+.pl-point-item .item-right .negative{ color: #EF5189; }
+.pl-point-item .more-info{
+    margin-top: 4px;
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 11px; color: #999; cursor: pointer;
+}
+.pl-point-item .more-info .arrow{ transition: transform .2s; }
+.pl-point-item.expanded .more-info .arrow{ transform: rotate(180deg); }
+.pl-point-item .item-more{
+    display: none;
+    margin-top: 8px; padding: 8px 10px;
+    background: #fafafa; border-radius: 6px;
+    font-size: 12px; color: #666;
+}
+.pl-point-item.expanded .item-more{ display: flex; justify-content: space-between; gap: 10px; }
+.pl-point-item .item-more .check-link{ color: #FE5B8D; text-decoration: none; }
+
+/* exchange-list */
+.pl-exchange-list .ex-item{
+    display: flex; gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f5f5f5;
+}
+.pl-exchange-list .ex-item:last-child{ border-bottom: 0; }
+.pl-exchange-list .left-content{ display: flex; gap: 10px; flex: 1; min-width: 0; }
+.pl-exchange-list .item-image{
+    width: 80px; height: 80px; border-radius: 6px;
+    object-fit: cover; background: #f3f3f7; flex-shrink: 0;
+}
+.pl-exchange-list .item-info{ flex: 1; min-width: 0; font-size: 12px; }
+.pl-exchange-list .item-name{
+    color: #1B1B1B; font-size: 14px; font-weight: 500;
+    display: block; line-height: 1.4;
+    overflow: hidden; text-overflow: ellipsis;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.pl-exchange-list .item-point{
+    color: #FC6290; font-size: 13px; font-weight: 600;
+    display: block; margin: 5px 0;
+}
+.pl-exchange-list .item-status{
+    color: #999; font-size: 11px;
+    display: flex; gap: 4px; margin-top: 3px;
+}
+.pl-exchange-list .item-status-color{ color: #FE5B8D; }
+.pl-exchange-list .right-button-box{
+    display: flex; flex-direction: column;
+    gap: 6px; align-items: flex-end;
+    flex-shrink: 0; padding-top: 4px;
+}
+.pl-exchange-list .right-button{
+    padding: 6px 12px;
+    font-size: 11px; border-radius: 14px;
+    text-decoration: none; text-align: center;
+    white-space: nowrap;
+}
+.pl-exchange-list .active-button{
+    background: #FD83AB; color: #fff;
+}
+.pl-exchange-list .disabled-button{
+    background: #fff; color: #999;
+    border: 1px solid #ddd;
+}
+
+.pl-empty{ text-align: center; padding: 60px 0; color: #999; font-size: 13px; }
+</style>
+{/block}
+
 {block name="content"}
-<div class="user-page">
-    <div class="page-head">
-        <a class="back-btn" href="/{$lang_seg}/me" aria-label="返回">‹</a>
-        <h1 class="page-title">积分明细</h1>
+<div class="pl-page">
+    <div class="pl-head">
+        <a class="back" href="/{$lang_seg}/me" aria-label="返回">‹</a>
+        <h1 class="title">{$tt['pointDetail.title']|default='积分明细'}</h1>
     </div>
 
-    <div style="background:linear-gradient(135deg,#afa7ef,#FE739D); color:#fff; padding:30px 20px; margin:12px 16px; border-radius:15px;">
-        <div style="font-size:13px; opacity:.85; margin-bottom:6px;">我的积分</div>
-        <div style="font-size:40px; font-weight:700;">{$point}</div>
-        <a href="/{$lang_seg}/point/shop" style="display:inline-block; margin-top:10px; padding:6px 15px; background:rgba(255,255,255,0.2); color:#fff; border-radius:20px; font-size:12px; text-decoration:none;">去兑换 ›</a>
-    </div>
-
-    <div class="u-tabs-bar">
-        <a class="{if $type == 0}active{/if}" href="?type=0">全部</a>
-        <a class="{if $type == 1}active{/if}" href="?type=1">收入</a>
-        <a class="{if $type == 2}active{/if}" href="?type=2">支出</a>
-    </div>
-
-    {if empty($list)}<div class="empty">{$tt['point.Empty']|default='暂无积分流水'}</div>{/if}
-
-    <div class="u-list">
-    {foreach $list as $r}
-        <div class="u-list-item">
-            <div class="u-list-item__body">
-                <div class="u-list-item__title">{:!empty($r["title"])?$r["title"]:(!empty($r["name"])?$r["name"]:'积分变动')}</div>
-                <div class="u-list-item__time">{if !empty($r.create_time)}{:is_numeric($r.create_time)?date('Y-m-d H:i',$r.create_time):$r.create_time}{/if}</div>
-            </div>
-            <div style="display:flex; align-items:center; font-size:15px; font-weight:700; color:{:$r['point']>0?'#4CD964':'#EF5189'};">
-                {if $r['point']>0}+{/if}{$r.point|default='0'}
-            </div>
+    <!-- 顶部我的积分卡(对齐 .my-points)-->
+    <div class="pl-my-points">
+        <div>
+            <div class="points-title">{$tt['point.MyPoints']|default='我的积分'}</div>
+            <div class="points-value">{$point}</div>
         </div>
-    {/foreach}
+        <a class="exchange-button" href="/{$lang_seg}/point/shop">
+            <span>{$tt['point.GoToExchange']|default='去兑换'}</span>
+            <span>›</span>
+        </a>
     </div>
+
+    <!-- tabs(对齐 .header .tabs)-->
+    <div class="pl-tabs">
+        <a class="{if $tab == 'points'}active{/if}" href="?tab=points">{$tt['point.PointsDetails']|default='积分明细'}</a>
+        <a class="{if $tab == 'exchange'}active{/if}" href="?tab=exchange">{$tt['point.ExchangeDetails']|default='兑换明细'}</a>
+    </div>
+
+    {if $tab == 'points'}
+        <!-- 全部 / 获取 / 消耗(对齐 .filter-tabs)-->
+        <div class="pl-filter-tabs">
+            <a class="{if $type == 0}active{/if}" href="?tab=points&type=0">{$tt['point.All']|default='全部'}</a>
+            <a class="{if $type == 1}active{/if}" href="?tab=points&type=1">{$tt['point.Obtained']|default='获取'}</a>
+            <a class="{if $type == 2}active{/if}" href="?tab=points&type=2">{$tt['point.Consumed']|default='消耗'}</a>
+        </div>
+
+        {if empty($list)}
+        <div class="pl-empty">{$tt['projectDetails.Empty']|default='暂无积分流水'}</div>
+        {else/}
+        <div class="pl-point-list">
+            {foreach $list as $idx => $r}
+            {php}
+                // vue:item.value_type 1=收入(+绿) 2=消耗(-粉)
+                // 兼容旧字段 point > 0 也算收入
+                $vt = (int) ($r['value_type'] ?? 0);
+                if ($vt === 0) $vt = ((int) ($r['point'] ?? 0)) > 0 ? 1 : 2;
+                $val = (int) ($r['value'] ?? abs((int) ($r['point'] ?? 0)));
+                $hasDetail = !empty($r['detail']);
+            {/php}
+            <div class="pl-point-item" id="pl-it-{$idx}">
+                <div class="item-row">
+                    <div class="item-left">
+                        <span class="description">{$r.source_title|default=$r.title|default='积分变动'}</span>
+                        <span class="date">
+                            {if !empty($r.create_time)}{if is_numeric($r.create_time)}{:date('Y-m-d H:i', (int)$r['create_time'])}{else/}{$r.create_time}{/if}{/if}
+                        </span>
+                    </div>
+                    <div class="item-right">
+                        <span class="amount {if $vt == 1}positive{else/}negative{/if}">
+                            {if $vt == 1}+{else/}-{/if}{$val}
+                        </span>
+                        {if $hasDetail}
+                        <div class="more-info" onclick="document.getElementById('pl-it-{$idx}').classList.toggle('expanded')">
+                            <span>{$tt['pointDetails.Morecontent']|default='详情'}</span>
+                            <span class="arrow">↓</span>
+                        </div>
+                        {/if}
+                    </div>
+                </div>
+                {if $hasDetail}
+                <div class="item-more">
+                    <span>{$r.detail.refer_no|default=''}</span>
+                    {if !empty($r.detail.id)}
+                    <a class="check-link" href="/{$lang_seg}/me/order/{$r.detail.id}">{$tt['point.Check']|default='查看'} ›</a>
+                    {/if}
+                </div>
+                {/if}
+            </div>
+            {/foreach}
+        </div>
+        {/if}
+
+    {else/}
+        <!-- 兑换明细 -->
+        {if empty($list)}
+        <div class="pl-empty">{$tt['projectDetails.Empty']|default='暂无兑换记录'}</div>
+        {else/}
+        <div class="pl-exchange-list">
+            {foreach $list as $it}
+            <div class="ex-item">
+                <div class="left-content">
+                    {if !empty($it.cover_url)}
+                    <img class="item-image" src="{$it.cover_url}" alt="" loading="lazy">
+                    {else/}
+                    <div class="item-image"></div>
+                    {/if}
+                    <div class="item-info">
+                        <span class="item-name">{$it.integral_title|default=''}</span>
+                        <span class="item-point">{$it.point|default=0}{$tt['index.common.point']|default='积分'}{if !empty($it.price) && $it.price != '0.00'}+{$it.price}₩{/if}</span>
+                        {if !empty($it.form_status_desc)}
+                        <div class="item-status">
+                            <span>{$tt['point.ProductStatus']|default='商品状态'}:</span>
+                            <span class="item-status-color">{$it.form_status_desc}</span>
+                        </div>
+                        {/if}
+                        {if !empty($it.express)}
+                        <a class="item-status" href="/{$lang_seg}/me/express/{$it.id|default=0}" style="text-decoration:none">
+                            <span>{$tt['point.Logisticsinfo']|default='物流'}:</span>
+                            <span class="item-status-color">{$tt['point.ViewDetails']|default='查看详情'}</span>
+                        </a>
+                        {/if}
+                        {if !empty($it.express_order_no)}
+                        <div class="item-status" data-copy="{$it.express_order_no}">
+                            <span>{$tt['point.TrackingNumber']|default='单号'}:{$it.express_order_no}</span>
+                            <span class="item-status-color">{$tt['point.copy']|default='复制'}</span>
+                        </div>
+                        {/if}
+                    </div>
+                </div>
+                <div class="right-button-box">
+                    {if !empty($it.can_use)}
+                    <a class="right-button active-button" href="/{$lang_seg}/point/order/{$it.id|default=0}">{$tt['point.UseImmediately']|default='立即使用'}</a>
+                    {/if}
+                    {if !empty($it.can_activate)}
+                    <a class="right-button active-button" href="/{$lang_seg}/point/order/{$it.id|default=0}">{$tt['point.ActivateImmediately']|default='立即激活'}</a>
+                    {/if}
+                    {if isset($it.status) && $it.status == 0}
+                    <a class="right-button disabled-button" href="/{$lang_seg}/point/order/{$it.id|default=0}">{$tt['point.unsubscribe']|default='退订'}</a>
+                    {/if}
+                    {if !empty($it.card_use_desc) && strlen($it.card_use_desc) > 1}
+                    <a class="right-button active-button" href="/{$lang_seg}/point/order/{$it.id|default=0}">{$tt['point.HowToUse']|default='如何使用'}</a>
+                    {/if}
+                    <a class="right-button active-button" href="/{$lang_seg}/point/order/{$it.id|default=0}">{$tt['point.ViewDetails']|default='查看详情'}</a>
+                </div>
+            </div>
+            {/foreach}
+        </div>
+        {/if}
+    {/if}
+
     {include file="components/_pagination" /}
     {include file="components/_tabbar" /}
 </div>
+
+<script>
+(function(){
+    /* 复制单号(对齐 vue getCopy)*/
+    document.querySelectorAll('[data-copy]').forEach(function(el){
+        el.addEventListener('click', function(){
+            var text = el.dataset.copy.replace(/^.*?:/,'').trim();
+            (window.BG && BG.copy ? BG.copy(text) : function(){
+                var ta = document.createElement('textarea');
+                ta.value = text; document.body.appendChild(ta);
+                ta.select(); try { document.execCommand('copy'); } catch(e){}
+                ta.remove();
+            }());
+            BG.toast && BG.toast('{$tt["showToast.Clipboard"]|default="已复制"}', 'success');
+        });
+    });
+})();
+</script>
 {/block}

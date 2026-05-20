@@ -314,24 +314,54 @@ class Me extends BaseController
     public function pointsLog()
     {
         $auth = new AuthService();
-        $type = max(0, min(2, (int) $this->request->param('type', 0)));
+        $tab  = (string) $this->request->param('tab', 'points'); // points / exchange
+        if (!in_array($tab, ['points', 'exchange'], true)) $tab = 'points';
+        $type = max(0, min(2, (int) $this->request->param('type', 0))); // 0全部 1获取 2消耗
         $page = max(1, (int) $this->request->param('page', 1));
-        $log = $auth->call('GET', '/user/pointList/' . $type, ['page' => $page, 'limit' => 20]);
-        $list  = (array) ($log['data']['list'] ?? $log['data'] ?? []);
-        $total = (int) ($log['data']['count'] ?? count($list));
-        $point = $auth->call('GET', '/user/getPoint', []);
 
-        $this->seo->setTdk('积分明细 - BeautsGO', '积分流水', '积分明细')->buildOrganization();
+        // 1:1 对齐 pointDetail.vue:
+        //   points tab → GET /user/pointList/{type} {page, limit}
+        //   exchange tab → GET /integral_exchange_detail {page, limit}
+        $list = [];
+        $total = 0;
+        if ($tab === 'points') {
+            $resp = $auth->call('GET', '/user/pointList/' . $type, ['page' => $page, 'limit' => 20]);
+            $data = (array) ($resp['data'] ?? []);
+            $list = (array) ($data['data'] ?? $data['list'] ?? []);
+            $total = (int) ($data['count'] ?? count($list));
+        } else {
+            $resp = $auth->call('GET', '/integral_exchange_detail', ['page' => $page, 'limit' => 10]);
+            $data = (array) ($resp['data'] ?? []);
+            $list = (array) ($data['list'] ?? []);
+            $total = (int) ($data['count'] ?? count($list));
+            // 归一化 cover_url 给视图
+            foreach ($list as &$it) {
+                $cov = $it['integralProject']['cover'] ?? null;
+                if (is_array($cov)) {
+                    $first = $cov[0] ?? $cov;
+                    $it['cover_url'] = $first['url'] ?? ($first['cover'] ?? '');
+                } else {
+                    $it['cover_url'] = (string) ($it['cover'] ?? '');
+                }
+            }
+            unset($it);
+        }
+
+        $pointResp = $auth->call('GET', '/user/getPoint', []);
+        $pData = (array) ($pointResp['data'] ?? []);
+        $point = (int) ($pData['user_point'] ?? $pData['point'] ?? 0);
+
+        $this->seo->setTdk('积分明细 - BeautsGO', '积分流水 + 兑换明细', '积分明细,兑换记录')->buildOrganization();
         return $this->render('pages/me/points-log', [
             'user'         => $auth->getCurrentUser(),
-            'point'        => (int) ($point['data']['point'] ?? $point['data'] ?? 0),
+            'point'        => $point,
+            'tab'          => $tab,
             'type'         => $type,
             'list'         => $list,
             'total'        => $total,
             'page'         => $page,
             'totalPages'   => max(1, (int) ceil($total / 20)),
             'filterParams' => ['type' => $type, 'area' => 0, 'level' => 0, 'category' => 0],
-            'tab'          => 0,
         ]);
     }
 
