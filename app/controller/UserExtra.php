@@ -56,12 +56,27 @@ class UserExtra extends BaseController
                 : $p;
         }
 
+        // 1:1 对齐 changePhone.vue 国家选择列表(同 login)
+        $countryList = [];
+        $defaultCountry = ['id' => 1, 'dial' => '86', 'name_cn' => '中国', 'native_language' => '中国', 'national_flag' => 'https://beautsgoimg.59w.net/country_ico/cn.svg'];
+        try {
+            $r = $auth->call('GET', '/Common/countryList');
+            if (!empty($r['ok'])) {
+                $countryList = (array) ($r['data']['all'] ?? []);
+                foreach ($countryList as $c) {
+                    if ((int) ($c['id'] ?? 0) === 1) { $defaultCountry = $c; break; }
+                }
+            }
+        } catch (\Throwable $e) {}
+
         $this->seo->setTdk('更换手机号 - BeautsGO', '更换手机号', '更换手机号')->buildOrganization();
         return $this->render('pages/me/change-phone', [
-            'user'        => $user,
-            'maskedPhone' => $maskedPhone,
-            'error'       => $error,
-            'saved'       => $saved,
+            'user'           => $user,
+            'maskedPhone'    => $maskedPhone,
+            'error'          => $error,
+            'saved'          => $saved,
+            'countryList'    => $countryList,
+            'defaultCountry' => $defaultCountry,
         ]);
     }
 
