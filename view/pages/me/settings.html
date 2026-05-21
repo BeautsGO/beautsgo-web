@@ -69,7 +69,7 @@
         </a>
         {if !empty($user.id)}
         <!-- 注销账号 / 退出登录(对齐 vue logout uni.showModal LogOut)-->
-        <a class="setting-item" href="javascript:void(0)" id="setLogoutBtn">
+        <a class="setting-item" href="/{$lang_seg}/cancellation">
             <span>{$tt['me.Closeaccount']|default='注销账号'}</span>
             <span class="arrow">›</span>
         </a>
@@ -85,16 +85,13 @@
 
 <script>
 (function(){
-    // 注销账号(对齐 vue logout:uni.showModal 二次确认)
-    function doLogout(){
-        if(confirm('{$tt["showmodal.LogOut"]|default="确认注销当前账号?"}')){
+    // 退出登录(底部独立按钮 confirm)
+    var btn2 = document.getElementById('setQuickLogout');
+    btn2 && btn2.addEventListener('click', function(){
+        if(confirm('{$tt["showmodal.LogOut"]|default="确认退出登录?"}')){
             location.href = '/{$lang_seg}/logout';
         }
-    }
-    var btn1 = document.getElementById('setLogoutBtn');
-    var btn2 = document.getElementById('setQuickLogout');
-    if(btn1) btn1.addEventListener('click', doLogout);
-    if(btn2) btn2.addEventListener('click', doLogout);
+    });
 })();
 </script>
 {/block}
