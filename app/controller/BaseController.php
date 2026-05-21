@@ -182,7 +182,25 @@ abstract class BaseController
             'tracking'        => $tracking,
             'apiBaseUrl'      => rtrim((string) config('api.base_url'), '/'),
             'tabbar_active'   => $this->resolveTabbarActive(),
+            'recentSearchKeywords' => $this->fetchRecentSearchKeywords(),
         ];
+    }
+
+    /**
+     * 拉取最近热搜关键词,用于搜索栏 placeholder 轮播(对齐 searchBar.vue:74)
+     */
+    private function fetchRecentSearchKeywords(): array
+    {
+        static $cache = null;
+        if ($cache !== null) return $cache;
+        try {
+            $resp = $this->api->get('/getRecentSearch');
+            $kw = (array) ($resp['data']['keywords'] ?? []);
+            $cache = array_slice(array_values(array_filter($kw, 'is_string')), 0, 8);
+        } catch (\Throwable $e) {
+            $cache = [];
+        }
+        return $cache;
     }
 
     /**

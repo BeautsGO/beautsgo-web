@@ -1,9 +1,20 @@
 <div class="search-bar">
     <div class="top">
         <div class="search">
-            <a class="search-box" href="/{$lang_seg}/search{if !empty($filterParams.kw)}?q={$filterParams.kw|raw}{/if}" aria-label="搜索">
+            {php}
+                // 对齐 searchBar.vue:74 — 首词作为 placeholder,其它轮播
+                $rsk = $recentSearchKeywords ?? [];
+                $placeholderHot = !empty($rsk) ? (string) $rsk[0] : '';
+                $defaultPlaceholder = !empty($tt['index.search.placeholder']) ? $tt['index.search.placeholder'] : '搜索机构、项目、医生';
+                $searchPlaceholder = !empty($filterParams['kw'])
+                    ? (string) $filterParams['kw']
+                    : ($placeholderHot !== '' ? $placeholderHot : $defaultPlaceholder);
+                $searchHref = '/' . ($lang_seg ?? 'cn') . '/search'
+                    . (!empty($filterParams['kw']) ? '?q=' . urlencode((string) $filterParams['kw']) : '');
+            {/php}
+            <a class="search-box" href="{$searchHref}" aria-label="搜索">
                 <img class="search-icon" src="/static/search.png" alt="">
-                <span class="search-text">{$filterParams.kw|default=$tt['index.search.placeholder']|default='搜索机构、项目、医生'}</span>
+                <span class="search-text" id="searchPlaceholder">{$searchPlaceholder}</span>
             </a>
             <details class="contact-box lang-switch">
                 <summary aria-label="切换语言">
@@ -20,3 +31,22 @@
         </div>
     </div>
 </div>
+{if count($recentSearchKeywords ?? []) > 1 && empty($filterParams['kw'])}
+<script>
+(function(){
+    /* 热搜关键词轮播(对齐 searchBar.vue placeholder 字段)*/
+    var el = document.getElementById('searchPlaceholder');
+    if(!el) return;
+    var kws = {:json_encode($recentSearchKeywords, JSON_UNESCAPED_UNICODE)};
+    var idx = 0;
+    setInterval(function(){
+        idx = (idx + 1) % kws.length;
+        el.style.opacity = '0.3';
+        setTimeout(function(){
+            el.textContent = kws[idx];
+            el.style.opacity = '';
+        }, 200);
+    }, 3000);
+})();
+</script>
+{/if}
