@@ -68,7 +68,21 @@
         </div>
     </section>
 
-    <!-- 热门搜索 -->
+    <!-- 最近热搜(自动聚合,对齐 searchBar.vue getRecentSearch)-->
+    {if !empty($recentList)}
+    <section class="ss-section">
+        <div class="ss-section__head">
+            <div class="ss-section__title">{$tt['search.RecentHot']|default='最近热搜'}</div>
+        </div>
+        <div class="ss-tags">
+            {foreach $recentList as $kw}
+            <a class="ss-tag" href="?q={$kw|urlencode|raw}">{$kw}</a>
+            {/foreach}
+        </div>
+    </section>
+    {/if}
+
+    <!-- 热门搜索(管理员配置)-->
     {if !empty($hotList)}
     <section class="ss-section">
         <div class="ss-section__head">

@@ -49,17 +49,26 @@ class Listing extends BaseController
 
         // 无 q → 搜索建议页(对齐 pages/search/search.vue:历史 + 热门)
         if ($kw === '') {
-            // 热门搜索:后端 getConfig.platformConfig.searchConfig
+            // 热门搜索:后端 getConfig.platformConfig.searchConfig(管理员配置)
             $cfg = $this->api->get('/getConfig');
             $hot = (array) ($cfg['data']['platformConfig']['searchConfig'] ?? []);
             $hot = array_values(array_filter(array_map('strval', $hot)));
+
+            // 最近热搜词(自动聚合,对齐 searchBar.vue:74 getRecentSearch)
+            $recent = [];
+            try {
+                $r = $this->api->get('/getRecentSearch');
+                $recent = array_slice((array) ($r['data']['keywords'] ?? []), 0, 12);
+                $recent = array_values(array_filter($recent, 'is_string'));
+            } catch (\Throwable $e) {}
 
             $this->trackPage('搜索建议页', 0, '搜索');
             $this->seo->setTdk(($this->tt('search.title', '搜索') . ' - BeautsGO'), '搜索韩国医美机构/医生/项目', '搜索')
                 ->setCanonical((string) config('seo.site_url') . '/' . (string) (config('seo.lang_path_map')[$this->lang] ?? 'cn') . '/search')
                 ->buildOrganization();
             return $this->render('pages/search/suggest', [
-                'hotList' => $hot,
+                'hotList'    => $hot,
+                'recentList' => $recent,
             ]);
         }
 
