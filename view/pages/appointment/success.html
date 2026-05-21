@@ -13,8 +13,11 @@
 {block name="content"}
 <div class="appt-success">
     <div class="appt-success__icon">✓</div>
-    <h1>预约提交成功</h1>
-    <p>{$message|default='工作人员会尽快与您取得联系'}</p>
-    <a class="btn" href="/{$lang_seg}/me/order">查看我的预约</a>
+    <h1>{$tt['order.successTitle']|default='预约提交成功'}</h1>
+    <p>{$message|default=$tt['order.successTip']|default='工作人员会尽快与您取得联系'}</p>
+    <div style="display:flex;gap:12px">
+        <a class="btn" href="/{$lang_seg}/me/order">{$tt['order.viewMyOrder']|default='查看我的预约'}</a>
+        <a class="btn" href="/{$lang_seg}/" style="background:#fff;color:#666;border:1px solid #ddd">{$tt['order.backHome']|default='返回首页'}</a>
+    </div>
 </div>
 {/block}
