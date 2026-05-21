@@ -2,14 +2,23 @@
 
 {block name="extra_head"}
 <style>
-.ps-body{
+/* ============================================================
+ * pointSuccess 1:1 还原 subPackages_lightningRod/point/pointSuccess.vue
+ *   .my-points 顶部成功 icon + 标题 + 返回首页/查看订单
+ *   .shop-box 底部推荐积分商品瀑布(对齐 pointProduct 组件)
+ * ============================================================ */
+.ps-page{
     min-height: 100vh;
-    background: linear-gradient(180deg,#afa7ef 0%,#fff 320px);
-    display: flex; flex-direction: column; align-items: center;
-    padding: 60px 30px 30px; text-align: center; box-sizing: border-box;
+    background: linear-gradient(180deg,#afa7ef 0%,#fff 280px);
+    box-sizing: border-box;
+}
+.ps-hero{
+    padding: 60px 30px 30px;
+    text-align: center;
 }
 .ps-icon{
     width: 84px; height: 84px; border-radius: 50%;
+    margin: 0 auto;
     background: linear-gradient(135deg,#fe739d,#ffabc7);
     display: flex; align-items: center; justify-content: center;
     color: #fff; font-size: 48px; font-weight: 700;
@@ -20,30 +29,94 @@
 @keyframes ps-pop{ from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @keyframes ps-pulse{ 0%,100%{ transform: scale(1); } 50%{ transform: scale(1.05); } }
 .ps-title{ font-size: 22px; color: #1B1B1B; margin: 20px 0 8px; font-weight: 700; animation: ps-fade .5s .3s both; }
-.ps-tip{ font-size: 13px; color: #666; line-height: 1.6; margin: 0 0 30px; animation: ps-fade .5s .5s both; }
+.ps-tip{ font-size: 13px; color: #666; line-height: 1.6; margin: 0 0 24px; animation: ps-fade .5s .5s both; }
 .ps-tip b{ color: #fe739d; }
 @keyframes ps-fade{ from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-.ps-actions{ display: flex; gap: 12px; animation: ps-fade .5s .7s both; }
+.ps-actions{ display: flex; gap: 12px; justify-content: center; animation: ps-fade .5s .7s both; }
 .ps-btn{
     display: inline-block; padding: 11px 26px;
     border-radius: 22px; font-size: 14px; text-decoration: none;
 }
 .ps-btn--primary{ background: #fe739d; color: #fff; box-shadow: 0 6px 16px rgba(254,115,157,.35); }
 .ps-btn--ghost{ background: rgba(255,255,255,.7); color: #555; border: 1px solid #ddd; }
+
+/* 底部推荐商品(对齐 pointSuccess.vue .shop-box pointProduct)*/
+.ps-rec-section{
+    margin-top: 30px;
+    padding: 0 12px 30px;
+}
+.ps-rec-title{
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; color: #1B1B1B; font-weight: 600;
+    margin-bottom: 10px;
+}
+.ps-rec-title::before,
+.ps-rec-title::after{
+    content: ''; flex: 1; height: 1px; background: #e5e5e5;
+}
+.ps-rec-grid{
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+}
+.ps-rec-card{
+    background: #fff; border-radius: 10px;
+    overflow: hidden; text-decoration: none; color: inherit;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+}
+.ps-rec-card img{
+    width: 100%; aspect-ratio: 1/1;
+    object-fit: cover; background: #f5f5f5; display: block;
+}
+.ps-rec-card .info{ padding: 8px 10px; }
+.ps-rec-card .name{
+    font-size: 12px; color: #1B1B1B;
+    line-height: 1.4;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+.ps-rec-card .price{
+    color: #FC6290; font-weight: 700; font-size: 13px;
+}
+.ps-rec-card .price .pt{
+    font-size: 10px; font-weight: 400; color: #999;
+}
 </style>
 {/block}
 
 {block name="content"}
-<div class="ps-body">
-    <div class="ps-icon">✓</div>
-    <h1 class="ps-title">{$tt['point.successTitle']|default='兑换成功'}</h1>
-    <p class="ps-tip">
-        {if !empty($orderNo)}{$tt['order.Ordernum']|default='订单号'}:<b>{$orderNo}</b><br>{/if}
-        {$tt['point.successTip']|default='请耐心等待物流配送'}
-    </p>
-    <div class="ps-actions">
-        <a href="/{$lang_seg}/me/order" class="ps-btn ps-btn--primary">{$tt['point.viewOrder']|default='查看订单'}</a>
-        <a href="/{$lang_seg}/point/shop" class="ps-btn ps-btn--ghost">{$tt['point.keepShop']|default='继续逛逛'}</a>
+<div class="ps-page">
+    <div class="ps-hero">
+        <div class="ps-icon">✓</div>
+        <h1 class="ps-title">{$tt['point.ExchangeSuccessful']|default='兑换成功'}</h1>
+        <p class="ps-tip">
+            {if !empty($orderNo)}{$tt['order.Ordernum']|default='订单号'}:<b>{$orderNo}</b><br>{/if}
+            {$tt['point.successTip']|default='请耐心等待物流配送'}
+        </p>
+        <div class="ps-actions">
+            <a href="/{$lang_seg}/me/points-log?tab=exchange" class="ps-btn ps-btn--primary">{$tt['point.ViewExchangeOrders']|default='查看兑换订单'}</a>
+            <a href="/{$lang_seg}/" class="ps-btn ps-btn--ghost">{$tt['point.ReturnToHomePage']|default='返回首页'}</a>
+        </div>
     </div>
+
+    <!-- 底部推荐商品(对齐 pointSuccess.vue .shop-box)-->
+    {if !empty($recList)}
+    <div class="ps-rec-section">
+        <div class="ps-rec-title">{$tt['point.RecommendForYou']|default='为你推荐'}</div>
+        <div class="ps-rec-grid">
+            {foreach $recList as $r}
+            <a class="ps-rec-card" href="/{$lang_seg}/point/{$r.id|default=0}">
+                {if !empty($r.cover_url)}<img src="{$r.cover_url}" alt="{$r.title|default=''}" loading="lazy">{/if}
+                <div class="info">
+                    <div class="name">{$r.title|default=$r.name|default=''}</div>
+                    <div class="price">
+                        {$r.point|default=0}<span class="pt">{$tt['index.common.point']|default='积分'}</span>
+                        {if !empty($r.price) && $r.price > 0}+₩{$r.price}{/if}
+                    </div>
+                </div>
+            </a>
+            {/foreach}
+        </div>
+    </div>
+    {/if}
 </div>
 {/block}

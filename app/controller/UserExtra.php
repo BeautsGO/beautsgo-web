@@ -230,8 +230,25 @@ class UserExtra extends BaseController
         ];
         $resp = $auth->call('POST', '/integral/exchange', $payload);
         if ($resp['ok']) {
+            // 兑换成功页:对齐 pointSuccess.vue 底部推荐商品(GET Integral_list)
+            $recList = [];
+            try {
+                $r = $this->api->get('/Integral_list', ['page' => 1, 'limit' => 10]);
+                $recList = (array) ($r['data']['list'] ?? []);
+                foreach ($recList as &$it) {
+                    $cov = $it['cover_detail'] ?? ($it['cover'] ?? null);
+                    if (is_string($cov)) $cov = json_decode($cov, true) ?: [];
+                    if (is_array($cov)) {
+                        $first = $cov[0] ?? $cov;
+                        $it['cover_url'] = $first['url'] ?? ($first['cover'] ?? '');
+                    }
+                }
+                unset($it);
+            } catch (\Throwable $e) {}
+
             return $this->render('pages/point/success', [
                 'orderNo' => (string) ($resp['data']['order_no'] ?? ''),
+                'recList' => $recList,
             ]);
         }
         return $this->render('pages/point/redeem', [
