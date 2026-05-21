@@ -103,7 +103,8 @@ Route::group(':lang', function () use ($slugPattern) {
     Route::get('point/shop',   'Points/shop');
     Route::get('point/:id',    'Points/detail')->pattern(['id' => '\d+']);
     // 专题
-    Route::get('topics',       'Topics/listing');
+    Route::get('topics',          'Topics/listing');
+    Route::get('topics/:slug',    'Topics/area');
     // 静态页
     Route::get('about',          'Stat1c/about');
     Route::get('terms',          'Stat1c/terms');

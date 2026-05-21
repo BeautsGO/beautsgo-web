@@ -6,11 +6,47 @@ namespace app\controller;
 use think\facade\Db;
 
 /**
- * 专题集合页 —— /{lang}/topics
- *   展示活动专题(activity / marketing_project)
+ * 专题集合页 —— /{lang}/topics(marketing 活动专题)
+ * 商圈页 —— /{lang}/topics/{area-slug}(对齐 topics/index.vue 商圈下医院列表)
  */
 class Topics extends BaseController
 {
+    /**
+     * 商圈页:slug → trading_area_id → 301 redirect 到 /hospital?area=N
+     * 对齐 topics/index.vue 的 /topics/{area-slug} 语义化 URL
+     */
+    public function area(string $slug = '')
+    {
+        if ($slug === '') $this->abort404('Missing area slug');
+        $prefix = '';
+        switch ($this->lang) {
+            case 'zh-Hant': $prefix = 'zh_hant_'; break;
+            case 'en':      $prefix = 'en_';      break;
+            case 'ja':      $prefix = 'ja_';      break;
+            case 'th':      $prefix = 'th_';      break;
+        }
+        $list = Db::name('hospital_trading_area')
+            ->where('status', 1)
+            ->field(['id', $prefix . 'name AS name', 'en_name', 'name AS zh_name'])
+            ->select()->toArray();
+        $areaId = 0;
+        if (ctype_digit($slug)) {
+            foreach ($list as $a) {
+                if ((int) $a['id'] === (int) $slug) { $areaId = (int) $a['id']; break; }
+            }
+        } else {
+            $targetSlug = strtolower($slug);
+            foreach ($list as $a) {
+                $s = strtolower(preg_replace('/[^a-z0-9-]/', '', preg_replace('/\s+/', '-', strtolower((string) $a['en_name']))));
+                if ($s === $targetSlug) { $areaId = (int) $a['id']; break; }
+            }
+        }
+        if (!$areaId) $this->abort404('Area not found');
+
+        $langSeg = (string) (config('seo.lang_path_map')[$this->lang] ?? 'cn');
+        return redirect('/' . $langSeg . '/hospital?area=' . $areaId, 301);
+    }
+
     public function listing()
     {
         $now = time();
