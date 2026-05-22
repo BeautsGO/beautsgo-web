@@ -102,6 +102,19 @@ class Listing extends BaseController
             default: $data = ['list' => [], 'total' => 0];
         }
 
+        // 搜索无结果时,fallback 拉同 tab 的推荐列表(对齐 vue isRecommend 提示 + 推荐内容)
+        $isRecommend = false;
+        if ($kind === 'search' && empty($data['list']) && $kw !== '') {
+            $isRecommend = true;
+            $recFilters = ['area' => 0, 'level' => 0, 'service' => '', 'kw' => '', 'category' => 0];
+            switch ($tab) {
+                case 0: $data = $repo->fetchHospitalList($recFilters, 1, self::PAGE_SIZE); break;
+                case 1: $data = $repo->fetchProjectList($recFilters,  1, self::PAGE_SIZE); break;
+                case 2: $data = $repo->fetchDoctorList($recFilters,   1, self::PAGE_SIZE); break;
+                case 3: $data = $repo->fetchPointList($recFilters,    1, self::PAGE_SIZE); break;
+            }
+        }
+
         // 渐进增强:?_partial=1 出列表片段
         if ($this->request->param('_partial', 0)) {
             $headers = ['X-Has-More' => ($page * self::PAGE_SIZE < $data['total']) ? '1' : '0'];
@@ -142,6 +155,7 @@ class Listing extends BaseController
             'total'        => $data['total'],
             'tabLabels'    => $tabLabels,
             'isSearch'     => $kind === 'search',
+            'isRecommend'  => $isRecommend ?? false,
             'keyword'      => $kw,
         ]);
     }

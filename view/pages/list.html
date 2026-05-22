@@ -35,7 +35,7 @@
 
     <!-- 列表区 -->
     <div class="view-list">
-        {if $isSearch && empty($list) && !empty($keyword)}
+        {if !empty($isRecommend)}
         <!-- 无结果推荐提示(对齐 index.vue:98 .recommend-tip)-->
         <div class="recommend-tip">
             <div class="recommend-tip-line1">{$tt['index.common.NoResults']|default='抱歉,未找到相关结果'}</div>
