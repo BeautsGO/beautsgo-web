@@ -81,6 +81,29 @@
     cursor: pointer; box-shadow: 0 6px 16px rgba(255,154,195,.45);
 }
 .appt-msg.err{ color: #fff; background: rgba(239,81,137,.85); border-radius: 6px; padding: 8px 12px; margin: 10px 32px; font-size: 12px; }
+
+/* 协议勾选(对齐 make.vue text .agreement-text)*/
+.appt-agree{
+    display: flex; align-items: center; gap: 6px;
+    padding: 10px 32px 2px;
+    font-size: 12px; color: #fff;
+    cursor: pointer;
+}
+.appt-agree input{ flex-shrink: 0; accent-color: #fff; transform: scale(1.1); }
+.appt-agree .agree-text{ flex: 1; line-height: 1.5; }
+.appt-agree a{ color: #fff; text-decoration: underline; }
+.appt-agree.warn .agree-text{ color: #ffe; animation: appt-shake .4s ease-in-out 3; }
+@keyframes appt-shake{
+    0%, 100%{ transform: translateX(0); }
+    25%{ transform: translateX(-3px); }
+    75%{ transform: translateX(3px); }
+}
+
+.appt-warn{
+    padding: 6px 32px 14px;
+    font-size: 11px; color: rgba(255,255,255,.85);
+    line-height: 1.5;
+}
 </style>
 {/block}
 
@@ -175,6 +198,16 @@
             <input type="text" name="remark" placeholder="{$tt['order.remarkPlc']|default='可填写诉求/需求'}">
         </div>
 
+        <!-- 协议勾选(对齐 make.vue:223 .text agreement-text)-->
+        <label class="appt-agree" id="apptAgreeLabel">
+            <input type="checkbox" name="agree" value="1" id="apptAgree" checked>
+            <span class="agree-text">
+                {$tt['make.Readagree']|default='我已阅读并同意'}
+                <a href="/{$lang_seg}/terms" target="_blank">{$tt['make.Appointmentterms']|default='《BeautsGO 预约条款》'}</a>
+            </span>
+        </label>
+        <div class="appt-warn">{$tt['make.paybefore.txt']|default='请确保填写信息真实有效,工作人员会在 24 小时内与您取得联系'}</div>
+
         {if !empty($error)}<div class="appt-msg err">{$error}</div>{/if}
 
         <button class="appt-submit" type="submit">{$tt['order.Requesturgentscheduling']|default='立即预约·插队提速'}</button>
@@ -193,8 +226,17 @@
         form.addEventListener('submit', function(e){
             var name = form.querySelector('input[name=name]').value.trim();
             var phone = form.querySelector('input[name=phone]').value.trim();
+            var agree = document.getElementById('apptAgree');
             if(!name){ e.preventDefault(); BG.toast('请填写姓名', 'error'); return; }
             if(!phone || !/^\d{6,15}$/.test(phone)){ e.preventDefault(); BG.toast('请填写正确的手机号', 'error'); return; }
+            if(agree && !agree.checked){
+                e.preventDefault();
+                var label = document.getElementById('apptAgreeLabel');
+                label && label.classList.add('warn');
+                setTimeout(function(){ label && label.classList.remove('warn'); }, 1500);
+                BG.toast('{$tt["make.Readagree"]|default="请先勾选预约条款"}', 'error');
+                return;
+            }
         });
     }
 })();
