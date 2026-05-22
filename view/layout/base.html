@@ -2,10 +2,17 @@
 <html lang="{$seo.og.locale|default='zh-CN'}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="format-detection" content="telephone=no">
     <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <!-- ===== Mobile / PWA hints ===== -->
+    <meta name="theme-color" content="#fe739d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="BeautsGO">
+    <meta name="mobile-web-app-capable" content="yes">
 
     <!-- ===== TDK：100% 由后端 API 数据动态组装 ===== -->
     <title>{$seo.title|default='BeautsGO'}</title>
@@ -38,6 +45,7 @@
     {/foreach}
 
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/static/logo.png">
 
     {block name="extra_head"}{/block}
 </head>
