@@ -411,3 +411,47 @@ body { background: #fff; }
     /* 桌面态下挂靠在 page-main 容器右侧 */
     .bg-scroll-top{ right: max(12px, calc((100% - 640px) / 2 + 12px)); }
 }
+
+/* ============================================================
+ * Footer 站点底部(对齐 web 站点 footer 通用样式)
+ * ============================================================ */
+.site-footer{
+    background: #f8f8fa; color: #888;
+    padding: 24px 16px 28px;
+    margin-top: 30px;
+    border-top: 1px solid #eee;
+    font-size: 12px;
+}
+.site-footer__inner{
+    max-width: 640px; margin: 0 auto;
+    text-align: center;
+}
+.site-footer__copy{
+    margin: 0 0 12px;
+    color: #999; font-size: 11px;
+}
+.site-footer__links,
+.site-footer__lang{
+    display: flex; flex-wrap: wrap;
+    justify-content: center; gap: 12px;
+    margin: 6px 0;
+}
+.site-footer__links a,
+.site-footer__lang a{
+    color: #666; text-decoration: none;
+    padding: 2px 0;
+}
+.site-footer__links a:hover,
+.site-footer__lang a:hover{ color: #fe739d; }
+.site-footer__lang a{
+    color: #888; font-size: 11px;
+}
+.site-footer__lang a[aria-current="true"]{
+    color: #fe739d; font-weight: 600;
+}
+
+/* 底部 tabbar 存在时,footer 顶上去避免遮挡 */
+.tabbar ~ .site-footer,
+nav.tabbar + .site-footer{
+    margin-bottom: 60px;
+}
